@@ -457,6 +457,7 @@ public partial class Player : CharacterBody2D
     {
         _health = Math.Min(_health + amount, GameManager.Instance.MaxPlayerHealth);
         GameManager.Instance.PlayerHealth = _health;
+        GD.Print($"Healing player by {amount}, new health: {_health}");
         EmitSignal(SignalName.HealthChanged, _health, GameManager.Instance.MaxPlayerHealth);
     }
 

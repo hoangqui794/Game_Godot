@@ -289,6 +289,7 @@ public partial class BaseEnemy : CharacterBody2D
         if (IsDead) return;
 
         Health -= damage;
+        GD.Print($"Enemy took {damage} damage, health now: {Health}");
         IsHurt = true;
         CurrentState = EnemyState.Hurt;
         HurtTimer.Start();
@@ -307,6 +308,7 @@ public partial class BaseEnemy : CharacterBody2D
 
         if (Health <= 0)
         {
+            GD.Print("Enemy health <=0, calling Die()");
             Die();
         }
     }
@@ -324,6 +326,15 @@ public partial class BaseEnemy : CharacterBody2D
         CurrentState = EnemyState.Dead;
         AnimSprite.Play("die");
         GameManager.Instance.AddScore(ScoreValue);
+
+        // Hồi máu cho player khi giết quái
+        var player = GetTree().GetFirstNodeInGroup("player") as Player;
+        if (player != null && !player.IsQueuedForDeletion())
+        {
+            GD.Print("Enemy died, healing player");
+            int healAmount = (int)(GameManager.Instance.MaxPlayerHealth * 0.25f);
+            player.Heal(healAmount);
+        }
 
         // Disable collisions
         GetNode<CollisionShape2D>("CollisionShape2D").SetDeferred("disabled", true);

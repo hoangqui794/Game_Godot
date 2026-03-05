@@ -51,6 +51,23 @@ public partial class HUD : CanvasLayer
         {
             _healthBar.MaxValue = GameManager.Instance.MaxPlayerHealth;
             _healthBar.Value = GameManager.Instance.PlayerHealth;
+
+            // Set màu cho thanh máu
+            float percent = (float)GameManager.Instance.PlayerHealth / GameManager.Instance.MaxPlayerHealth;
+            Color color;
+            if (percent > 0.66f)
+            {
+                color = Colors.Green;
+            }
+            else if (percent > 0.33f)
+            {
+                color = Colors.Yellow;
+            }
+            else
+            {
+                color = Colors.Red;
+            }
+            _healthBar.Modulate = color;
         }
 
         if (_scoreLabel != null)
@@ -77,6 +94,23 @@ public partial class HUD : CanvasLayer
         {
             _healthBar.MaxValue = maxHealth;
             _healthBar.Value = newHealth;
+
+            // Chia thành 3 tầng màu dựa trên ngưỡng máu
+            float percent = (float)newHealth / maxHealth;
+            Color color;
+            if (percent > 0.66f)
+            {
+                color = Colors.Green; // Xanh lá khi >66%
+            }
+            else if (percent > 0.33f)
+            {
+                color = Colors.Yellow; // Vàng khi 33-66%
+            }
+            else
+            {
+                color = Colors.Red; // Đỏ khi <33%
+            }
+            _healthBar.Modulate = color;
         }
     }
 }
