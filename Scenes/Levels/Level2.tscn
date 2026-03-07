@@ -27,7 +27,7 @@ size = Vector2(1500, 100)
 size = Vector2(800, 150)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_plat"]
-size = Vector2(120, 20)
+size = Vector2(160, 20)
 
 [node name="Level2" type="Node2D" unique_id=268302130]
 script = ExtResource("1")
@@ -42,8 +42,10 @@ MaxX = 4500.0
 
 [node name="Background" type="ColorRect" parent="." unique_id=674989415]
 z_index = -10
-offset_right = 4500.0
-offset_bottom = 800.0
+offset_left = 5.0
+offset_top = 2.0
+offset_right = 4505.0
+offset_bottom = 802.0
 color = Color(0.12, 0.1, 0.15, 1)
 
 [node name="CaveTop" type="ColorRect" parent="." unique_id=513254125]
@@ -112,7 +114,7 @@ shape = SubResource("RectangleShape2D_plat")
 texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
-region_rect = Rect2(0, 0, 120, 32)
+region_rect = Rect2(0, 0, 160, 32)
 
 [node name="Platform2" type="StaticBody2D" parent="." unique_id=2001823482]
 position = Vector2(1500, 400)
@@ -125,7 +127,7 @@ shape = SubResource("RectangleShape2D_plat")
 texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
-region_rect = Rect2(0, 0, 120, 32)
+region_rect = Rect2(0, 0, 160, 32)
 
 [node name="Platform3" type="StaticBody2D" parent="." unique_id=1967094073]
 position = Vector2(1700, 500)
@@ -138,7 +140,7 @@ shape = SubResource("RectangleShape2D_plat")
 texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
-region_rect = Rect2(0, 0, 120, 32)
+region_rect = Rect2(0, 0, 160, 32)
 
 [node name="Snake1" parent="." unique_id=1290029545 instance=ExtResource("6")]
 position = Vector2(400, 590)
@@ -146,17 +148,11 @@ position = Vector2(400, 590)
 [node name="Snake2" parent="." unique_id=798871362 instance=ExtResource("6")]
 position = Vector2(600, 590)
 
-[node name="Snake3" parent="." unique_id=219032978 instance=ExtResource("6")]
-position = Vector2(800, 590)
-
 [node name="Snake_Bridge1" parent="." unique_id=522074953 instance=ExtResource("6")]
 position = Vector2(1300, 450)
 
-[node name="Snake_Bridge2" parent="." unique_id=1087020973 instance=ExtResource("6")]
-position = Vector2(1700, 450)
-
 [node name="Eagle1" parent="." unique_id=1725835823 instance=ExtResource("7")]
-position = Vector2(500, 250)
+position = Vector2(700, 250)
 
 [node name="Eagle_Abyss1" parent="." unique_id=1236954744 instance=ExtResource("7")]
 position = Vector2(1300, 150)
@@ -230,5 +226,11 @@ position = Vector2(4300, 577)
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=121341788]
 position = Vector2(150, 580)
+
+[node name="Checkpoint1" type="Marker2D" parent="." unique_id=1494939200]
+position = Vector2(2000, 580)
+
+[node name="Checkpoint2" type="Marker2D" parent="." unique_id=552739414]
+position = Vector2(3000, 580)
 
 [node name="HUD" parent="." unique_id=1867016541 instance=ExtResource("2")]
