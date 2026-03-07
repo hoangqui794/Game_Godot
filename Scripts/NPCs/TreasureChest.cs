@@ -50,9 +50,9 @@ public partial class TreasureChest : Area2D
                 { "rescued", new Texture2D[] { chestOpened } }
             };
             _animSprite.SpriteFrames = SpriteHelper.BuildSpriteFrames(animations);
-            
+
             // Chỉnh Scale nhỏ lại vì hình tải trên mạng độ phân giải cao, tăng lên theo yêu cầu
-            _animSprite.Scale = new Vector2(0.12f, 0.12f); 
+            _animSprite.Scale = new Vector2(0.12f, 0.12f);
             _animSprite.Position = new Godot.Vector2(0, -40); // Đẩy nhẹ lên trên vì rương to ra
         }
         else
@@ -68,49 +68,102 @@ public partial class TreasureChest : Area2D
             };
             _animSprite.SpriteFrames = SpriteHelper.BuildSpriteFrames(animations);
         }
-        
+
         _animSprite.Play("idle");
+    }
+
+    public override void _Process(double delta)
+    {
+        if (_isOpened) return;
+        if (!RequireAllEnemiesDefeated) return;
+
+        // Nếu người chơi đang đứng ở Rương, cập nhật kiểm tra liên tục để mở ngay khi quái cuối chết
+        bool isPlayerInside = false;
+        foreach (var body in GetOverlappingBodies())
+        {
+            if (body is Player)
+            {
+                isPlayerInside = true;
+                break;
+            }
+        }
+
+        if (isPlayerInside)
+        {
+            var allEnemiesInGroup = GetTree().GetNodesInGroup("enemies");
+            int aliveCount = 0;
+
+            foreach (var node in allEnemiesInGroup)
+            {
+                if (node is BaseEnemy enemy && !enemy.IsDead)
+                {
+                    aliveCount++;
+                }
+            }
+
+            if (aliveCount == 0)
+            {
+                // Tìm lại player để chắc chắn
+                Player p = null;
+                foreach (var b in GetOverlappingBodies()) if (b is Player target) p = target;
+                if (p != null) OpenChest(p);
+            }
+            else
+            {
+                // Cập nhật thông báo số quái còn lại để người chơi dễ tìm
+                _messageLabel.Text = $"Còn {aliveCount} quái vật chưa tiêu diệt!";
+                _messageLabel.Visible = true;
+
+                // Debug print (chỉ in mỗi vài giây để admin check log)
+                if (GD.Randi() % 120 == 0)
+                {
+                    GD.Print($"[DEBUG] TreasureChest needs {aliveCount} more enemies dead.");
+                    foreach (var n in allEnemiesInGroup)
+                    {
+                        if (n is BaseEnemy e && !e.IsDead) GD.Print($" - {e.Name} at {e.GlobalPosition}");
+                    }
+                }
+            }
+        }
+        else
+        {
+            _messageLabel.Visible = false;
+        }
     }
 
     private void OnBodyEntered(Node2D body)
     {
+        // Logic bây giờ chủ yếu xử lý ở _Process để mượt mà hơn
         if (_isOpened) return;
-        if (body is not Player player) return;
-
-        if (RequireAllEnemiesDefeated)
+        if (body is Player player)
         {
-            var enemies = GetTree().GetNodesInGroup("enemies");
-            if (enemies.Count > 0)
-            {
-                _messageLabel.Visible = true;
-                var tweenHint = CreateTween();
-                tweenHint.TweenInterval(2.0);
-                tweenHint.TweenCallback(Callable.From(() => { _messageLabel.Visible = false; }));
-                return;
-            }
+            // Trigger check ngay lập tức khi vừa chạm
+            _Process(0);
         }
-
-        OpenChest(player);
     }
 
     private void OpenChest(Player player)
     {
+        if (_isOpened) return;
         _isOpened = true;
-        
+        _messageLabel.Visible = false;
+
         // Hiệu ứng rung lắc rương dữ dội trước khi mở
         var shakeTw = CreateTween();
-        for(int i=0; i<5; i++) {
+        for (int i = 0; i < 5; i++)
+        {
             shakeTw.TweenProperty(_animSprite, "position", new Godot.Vector2(5, 0), 0.05f);
             shakeTw.TweenProperty(_animSprite, "position", new Godot.Vector2(-5, 0), 0.05f);
         }
         shakeTw.TweenProperty(_animSprite, "position", new Godot.Vector2(0, 0), 0.05f);
-        
+
         // Lóe sáng chói lóa rồi chuyển sang frame Mở
         shakeTw.TweenProperty(_animSprite, "modulate", new Godot.Color(5f, 5f, 5f, 1f), 0.1f);
-        shakeTw.TweenCallback(Godot.Callable.From(() => {
+        shakeTw.TweenCallback(Godot.Callable.From(() =>
+        {
             _animSprite.Play("rescued");
             _animSprite.Modulate = Godot.Colors.White;
-            
+
             GameManager.Instance.AddScore(500);
 
             // Bùng nổ hạt bụi vàng
@@ -142,7 +195,7 @@ public partial class TreasureChest : Area2D
         keyRect.Size = new Vector2(8, 20);
         keyRect.Position = new Vector2(-4, -10);
         _keyVisual.AddChild(keyRect);
-        
+
         var keyHead = new ColorRect();
         keyHead.Color = Colors.Yellow;
         keyHead.Size = new Vector2(16, 10);
@@ -168,17 +221,19 @@ public partial class TreasureChest : Area2D
         // Hết nảy lên -> bay vào người nhân vật
         var seqTween = CreateTween();
         seqTween.TweenInterval(0.6f);
-        seqTween.TweenCallback(Callable.From(() => {
+        seqTween.TweenCallback(Callable.From(() =>
+        {
             var flyTween = CreateTween();
             flyTween.SetParallel(true);
             flyTween.TweenProperty(_keyVisual, "global_position", player.GlobalPosition, 0.4f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.In);
             flyTween.TweenProperty(_keyVisual, "scale", new Vector2(0.2f, 0.2f), 0.4f);
-            
-            flyTween.Chain().TweenCallback(Callable.From(() => {
+
+            flyTween.Chain().TweenCallback(Callable.From(() =>
+            {
                 _keyVisual.QueueFree();
                 GameManager.Instance.TotalKeys++;
                 GD.Print("Đã nhặt 1 chìa khóa! Tổng chìa: " + GameManager.Instance.TotalKeys);
-                
+
                 // Mở cổng vĩ đại
                 CreateEpicPortal(player);
             }));
@@ -196,7 +251,7 @@ public partial class TreasureChest : Area2D
         vortex.Size = new Godot.Vector2(120, 180);
         vortex.Position = new Godot.Vector2(-60, -90);
         vortex.PivotOffset = new Godot.Vector2(60, 90);
-        
+
         // Load và Áp dụng Shader
         var shader = Godot.GD.Load<Godot.Shader>("res://Assets/Shaders/epic_portal.gdshader");
         if (shader != null)
@@ -204,7 +259,7 @@ public partial class TreasureChest : Area2D
             var mat = new Godot.ShaderMaterial();
             mat.Shader = shader;
             // Phối màu tím huyền ảo và xanh lóa
-            mat.SetShaderParameter("portal_color_1", new Godot.Color(0.4f, 0.0f, 0.8f, 1.0f)); 
+            mat.SetShaderParameter("portal_color_1", new Godot.Color(0.4f, 0.0f, 0.8f, 1.0f));
             mat.SetShaderParameter("portal_color_2", new Godot.Color(0.0f, 0.8f, 1.0f, 1.0f));
             vortex.Material = mat;
         }
@@ -212,7 +267,7 @@ public partial class TreasureChest : Area2D
         {
             vortex.Color = new Godot.Color(0.4f, 0.1f, 0.9f, 0f); // Xấu xí fallback
         }
-        
+
         vortex.Modulate = new Godot.Color(1, 1, 1, 0); // Ban đầu tàng hình
         _portal.AddChild(vortex);
 
@@ -249,7 +304,7 @@ public partial class TreasureChest : Area2D
         // Cổng nở bật ra
         vortex.Scale = new Godot.Vector2(0.1f, 0.1f);
         portalTween.TweenProperty(vortex, "scale", new Godot.Vector2(1.2f, 1.2f), 1.5f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-        
+
         // Vòng xoáy nhấp nhô tuần hoàn sau khi mở xong
         var pulseTween = CreateTween().SetLoops();
         pulseTween.TweenInterval(1.5f);
@@ -259,17 +314,19 @@ public partial class TreasureChest : Area2D
         // Ép Nhân Vật tự đi vào cổng
         var sequence = CreateTween();
         sequence.TweenInterval(2.5f); // Đợi cổng mở full sức mạnh
-        sequence.TweenCallback(Godot.Callable.From(() => {
+        sequence.TweenCallback(Godot.Callable.From(() =>
+        {
             player.WalkIntoCave(1.5f); // Đi bộ về phía cổng
-            
+
             // Ép Thạch Sanh mờ dần và thu nhỏ lại (Bị hút vào không gian khác)
             var hútTween = CreateTween().SetParallel(true);
             hútTween.TweenProperty(player, "scale", new Godot.Vector2(0.2f, 0.2f), 1.2f).SetTrans(Tween.TransitionType.Circ).SetEase(Tween.EaseType.In);
             hútTween.TweenProperty(player, "modulate:a", 0.0f, 1.2f);
         }));
-        
+
         sequence.TweenInterval(2.0f);
-        sequence.TweenCallback(Godot.Callable.From(() => {
+        sequence.TweenCallback(Godot.Callable.From(() =>
+        {
             GameManager.Instance.NextLevel();
         }));
     }

@@ -19,7 +19,7 @@ public partial class BaseEnemy : CharacterBody2D
 
     // State
     protected int Health;
-    protected bool IsDead = false;
+    public bool IsDead = false;
     protected bool IsHurt = false;
     protected bool CanAttackPlayer = true;
 
@@ -116,32 +116,32 @@ public partial class BaseEnemy : CharacterBody2D
         // Wrapper node
         _healthBarNode = new Node2D();
         _healthBarNode.Position = HealthBarOffset; // Vị trí neo lơ lửng trên đầu quái
-        
+
         // 1. Viền đen ngoài cùng (Black Border)
         ColorRect border = new ColorRect();
         border.Color = new Color(0.05f, 0.05f, 0.05f, 1f); // Đen kịt điểm xuyết
         border.Size = new Vector2(40, 8); // Kích thước tổng
         border.Position = new Vector2(0, 0);
         border.MouseFilter = Control.MouseFilterEnum.Ignore;
-        
+
         // 2. Nền xám tối (Dark background for missing health)
         ColorRect bg = new ColorRect();
         bg.Color = new Color(0.2f, 0.2f, 0.2f, 1f); // Xám tro
         bg.Size = new Vector2(38, 6); // Nhỏ hơn viền 2 pixel (thụt vô 1 pixel mỗi cạnh)
         bg.Position = new Vector2(1, 1);
         bg.MouseFilter = Control.MouseFilterEnum.Ignore;
-        
+
         // 3. Thanh lõi Xanh Lục (Health Fill)
         _healthBarFill = new ColorRect();
         _healthBarFill.Color = new Color("4caf50"); // Xanh lục tươi chuẩn RPG
-        _healthBarFill.Size = new Vector2(38, 6); 
+        _healthBarFill.Size = new Vector2(38, 6);
         _healthBarFill.Position = new Vector2(1, 1);
         _healthBarFill.MouseFilter = Control.MouseFilterEnum.Ignore;
 
         border.AddChild(bg);
         _healthBarNode.AddChild(border);
         _healthBarNode.AddChild(_healthBarFill);
-        
+
         AddChild(_healthBarNode);
     }
 
@@ -218,13 +218,13 @@ public partial class BaseEnemy : CharacterBody2D
                     float dirToPlayer = TargetPlayer.GlobalPosition.X > GlobalPosition.X ? 1f : -1f;
 
                     // Chỉ lật mặt nếu khoảng cách an toàn (tránh jitter 60 nhịp/giây khi rúc vào nhau)
-                    if (distX > 5.0f) 
+                    if (distX > 5.0f)
                     {
                         SetFacingDirection(dirToPlayer < 0);
                     }
 
                     float dist = GlobalPosition.DistanceTo(TargetPlayer.GlobalPosition);
-                    
+
                     if (dist <= AttackRange)
                     {
                         velocity.X = 0; // Đứng yên để đánh
@@ -293,7 +293,7 @@ public partial class BaseEnemy : CharacterBody2D
         IsHurt = true;
         CurrentState = EnemyState.Hurt;
         HurtTimer.Start();
-        
+
         // Cập nhật Size thanh máu Pixel-Perfect
         if (_healthBarFill != null && IsInstanceValid(_healthBarFill))
         {
@@ -415,7 +415,7 @@ public partial class BaseEnemy : CharacterBody2D
         // Container cho toàn bộ hiệu ứng chém
         var slashNode = new Node2D();
         float faceSign = AnimSprite.FlipH ? -1f : 1f;
-        
+
         // Căn chỉnh ra trước mặt quái
         slashNode.Position = new Vector2(faceSign * 40, -30);
         AddChild(slashNode);
@@ -426,25 +426,25 @@ public partial class BaseEnemy : CharacterBody2D
             var claw = new ColorRect();
             claw.Size = new Vector2(6, 70); // Dài và sắc
             claw.PivotOffset = new Vector2(3, 35);
-            
+
             // Xếp 3 vết cào nằm cách nhau và nghiêng chéo
             claw.Position = new Vector2(-15 + (i * 15), -35);
             claw.Rotation = faceSign * 0.4f + (i * 0.1f); // Xoè nhẹ ra như bàn tay cào
-            
+
             slashNode.AddChild(claw);
-            
+
             // Animation từng móng vuốt
             var tw = CreateTween();
             tw.SetParallel(true);
-            
+
             // Móng vuốt trồi lên từ nhỏ xíu và chém phập xuống
             claw.Scale = new Vector2(0.1f, 0.1f);
             tw.TweenProperty(claw, "scale", new Vector2(1.2f, 1.5f), 0.15f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-            
+
             // Chớp màu từ Vàng Trắng rực rỡ nảy sang Đỏ Máu nhạt dần
             claw.Color = Colors.Yellow;
             tw.TweenProperty(claw, "color", new Color(1.0f, 0.0f, 0.0f, 0.9f), 0.1f);
-            
+
             // Mờ dần tiêu biến
             tw.TweenProperty(claw, "modulate:a", 0f, 0.2f).SetDelay(0.1f);
         }
@@ -457,14 +457,14 @@ public partial class BaseEnemy : CharacterBody2D
         sparks.Lifetime = 0.4f;
         sparks.Explosiveness = 0.95f;
         sparks.EmissionShape = CpuParticles2D.EmissionShapeEnum.Point;
-        
+
         // Hướng bắn văng theo chiều chém
-        sparks.Direction = new Vector2(faceSign, -0.5f); 
+        sparks.Direction = new Vector2(faceSign, -0.5f);
         sparks.Spread = 45f;
         sparks.Gravity = new Vector2(0, 300); // Rơi mạnh
         sparks.InitialVelocityMin = 150f;
         sparks.InitialVelocityMax = 300f;
-        
+
         // Hạt nhỏ li ti chớp đỏ vang
         sparks.ScaleAmountMin = 2f;
         sparks.ScaleAmountMax = 5f;

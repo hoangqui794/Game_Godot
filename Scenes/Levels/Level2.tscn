@@ -9,9 +9,22 @@
 [ext_resource type="PackedScene" uid="uid://eagle001" path="res://Scenes/Enemies/Eagle.tscn" id="7"]
 [ext_resource type="PackedScene" uid="uid://chest0000001" path="res://Scenes/NPCs/TreasureChest.tscn" id="8"]
 [ext_resource type="Texture2D" uid="uid://b0vx13i1dftha" path="res://Assets/Sprites/Backgrounds/cave_ground.png" id="9"]
+[ext_resource type="PackedScene" uid="uid://spike001" path="res://Scenes/Hazards/SpikeHazard.tscn" id="11"]
+[ext_resource type="PackedScene" uid="uid://rock001" path="res://Scenes/Hazards/RollingRock.tscn" id="12"]
+[ext_resource type="Script" path="res://Scripts/Hazards/RockSpawner.cs" id="13"]
+[ext_resource type="Script" uid="uid://baug8ii7317vj" path="res://Scripts/Hazards/KillZone.cs" id="14"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
-size = Vector2(4000, 100)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground1"]
+size = Vector2(1200, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground2"]
+size = Vector2(1200, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground3"]
+size = Vector2(1500, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kill"]
+size = Vector2(800, 150)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_plat"]
 size = Vector2(120, 20)
@@ -25,36 +38,71 @@ PlayerScene = ExtResource("5")
 position = Vector2(576, 324)
 script = ExtResource("4")
 SmoothSpeed = 8.0
-MaxX = 4000.0
+MaxX = 4500.0
 
 [node name="Background" type="ColorRect" parent="." unique_id=674989415]
 z_index = -10
-offset_right = 4000.0
+offset_right = 4500.0
 offset_bottom = 800.0
 color = Color(0.12, 0.1, 0.15, 1)
 
 [node name="CaveTop" type="ColorRect" parent="." unique_id=513254125]
 z_index = -5
-offset_right = 4000.0
+offset_right = 4500.0
 offset_bottom = 80.0
 color = Color(0.2, 0.15, 0.12, 1)
 
-[node name="Ground" type="StaticBody2D" parent="." unique_id=997047268]
-position = Vector2(2000, 640)
+[node name="Ground1" type="StaticBody2D" parent="." unique_id=997047268]
+position = Vector2(600, 640)
 collision_layer = 2
 script = ExtResource("3")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1957375193]
-shape = SubResource("RectangleShape2D_ground")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground1" unique_id=1957375193]
+shape = SubResource("RectangleShape2D_ground1")
 
-[node name="GroundSprite" type="Sprite2D" parent="Ground" unique_id=675227010]
+[node name="GroundSprite" type="Sprite2D" parent="Ground1" unique_id=675227010]
 texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
-region_rect = Rect2(0, 0, 4000, 128)
+region_rect = Rect2(0, 0, 1200, 128)
+
+[node name="Ground2" type="StaticBody2D" parent="." unique_id=11111111]
+position = Vector2(2400, 640)
+collision_layer = 2
+script = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground2" unique_id=701944252]
+shape = SubResource("RectangleShape2D_ground2")
+
+[node name="GroundSprite" type="Sprite2D" parent="Ground2" unique_id=191945635]
+texture_repeat = 2
+texture = ExtResource("9")
+region_enabled = true
+region_rect = Rect2(0, 0, 1200, 128)
+
+[node name="Ground3" type="StaticBody2D" parent="." unique_id=22222222]
+position = Vector2(3750, 640)
+collision_layer = 2
+script = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground3" unique_id=528663492]
+shape = SubResource("RectangleShape2D_ground3")
+
+[node name="GroundSprite" type="Sprite2D" parent="Ground3" unique_id=753119688]
+texture_repeat = 2
+texture = ExtResource("9")
+region_enabled = true
+region_rect = Rect2(0, 0, 1500, 128)
+
+[node name="KillZone" type="Area2D" parent="." unique_id=1031921230 groups=["KillZone"]]
+position = Vector2(1500, 750)
+script = ExtResource("14")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="KillZone" unique_id=254761737]
+shape = SubResource("RectangleShape2D_kill")
 
 [node name="Platform1" type="StaticBody2D" parent="." unique_id=2125117910]
-position = Vector2(400, 480)
+position = Vector2(1300, 500)
 collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1" unique_id=633426218]
@@ -67,7 +115,7 @@ region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
 
 [node name="Platform2" type="StaticBody2D" parent="." unique_id=2001823482]
-position = Vector2(750, 410)
+position = Vector2(1500, 400)
 collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2" unique_id=1944955318]
@@ -80,7 +128,7 @@ region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
 
 [node name="Platform3" type="StaticBody2D" parent="." unique_id=1967094073]
-position = Vector2(1100, 350)
+position = Vector2(1700, 500)
 collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform3" unique_id=162805712]
@@ -90,18 +138,100 @@ shape = SubResource("RectangleShape2D_plat")
 texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
-region_rect = Rect2(0, 0, 150, 32)
+region_rect = Rect2(0, 0, 120, 32)
+
+[node name="Snake1" parent="." unique_id=1290029545 instance=ExtResource("6")]
+position = Vector2(400, 590)
+
+[node name="Snake2" parent="." unique_id=798871362 instance=ExtResource("6")]
+position = Vector2(600, 590)
+
+[node name="Snake3" parent="." unique_id=219032978 instance=ExtResource("6")]
+position = Vector2(800, 590)
+
+[node name="Snake_Bridge1" parent="." unique_id=522074953 instance=ExtResource("6")]
+position = Vector2(1300, 450)
+
+[node name="Snake_Bridge2" parent="." unique_id=1087020973 instance=ExtResource("6")]
+position = Vector2(1700, 450)
+
+[node name="Eagle1" parent="." unique_id=1725835823 instance=ExtResource("7")]
+position = Vector2(500, 250)
+
+[node name="Eagle_Abyss1" parent="." unique_id=1236954744 instance=ExtResource("7")]
+position = Vector2(1300, 150)
+
+[node name="Eagle_Abyss2" parent="." unique_id=95740579 instance=ExtResource("7")]
+position = Vector2(1700, 150)
+
+[node name="Spike1" parent="." unique_id=1666986308 instance=ExtResource("11")]
+position = Vector2(700, 590)
+
+[node name="Spike_Fun1" parent="." unique_id=1048047992 instance=ExtResource("11")]
+position = Vector2(1300, 484)
+
+[node name="Eagle2" parent="." unique_id=1539244333 instance=ExtResource("7")]
+position = Vector2(1400, 250)
+
+[node name="Eagle3" parent="." unique_id=671025891 instance=ExtResource("7")]
+position = Vector2(1600, 250)
+
+[node name="Spike2" parent="." unique_id=413016162 instance=ExtResource("11")]
+position = Vector2(1500, 384)
+
+[node name="Spike_Abyss1" parent="." unique_id=1412230185 instance=ExtResource("11")]
+position = Vector2(1700, 484)
+StartDelay = 0.5
+
+[node name="RockSpawner" type="Node2D" parent="." unique_id=1342176009]
+position = Vector2(2200, 150)
+script = ExtResource("13")
+RockScene = ExtResource("12")
+SpawnInterval = 2.0
+
+[node name="Snake4" parent="." unique_id=71040434 instance=ExtResource("6")]
+position = Vector2(2500, 590)
+
+[node name="Snake5" parent="." unique_id=1938770993 instance=ExtResource("6")]
+position = Vector2(2800, 590)
+
+[node name="Snake_Alley1" parent="." unique_id=2600810 instance=ExtResource("6")]
+position = Vector2(2300, 590)
+
+[node name="Eagle4" parent="." unique_id=565921313 instance=ExtResource("7")]
+position = Vector2(2400, 250)
+
+[node name="Eagle5" parent="." unique_id=305850096 instance=ExtResource("7")]
+position = Vector2(2700, 250)
+
+[node name="Eagle_Alley1" parent="." unique_id=618214664 instance=ExtResource("7")]
+position = Vector2(2200, 350)
+
+[node name="Spike3" parent="." unique_id=487918217 instance=ExtResource("11")]
+position = Vector2(3200, 590)
+
+[node name="Spike4" parent="." unique_id=2009813029 instance=ExtResource("11")]
+position = Vector2(3400, 590)
+StartDelay = 0.5
+
+[node name="Spike_Gauntlet1" parent="." unique_id=1315657284 instance=ExtResource("11")]
+position = Vector2(3100, 590)
+StartDelay = 1.0
+
+[node name="Spike_Gauntlet2" parent="." unique_id=1654655447 instance=ExtResource("11")]
+position = Vector2(3300, 590)
+StartDelay = 1.5
+
+[node name="Snake_BossGuard" parent="." unique_id=2050995774 instance=ExtResource("6")]
+position = Vector2(3600, 590)
+
+[node name="Eagle_BossGuard" parent="." unique_id=1037107700 instance=ExtResource("7")]
+position = Vector2(3700, 200)
+
+[node name="TreasureChest" parent="." unique_id=590341998 instance=ExtResource("8")]
+position = Vector2(4300, 577)
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=121341788]
 position = Vector2(150, 580)
-
-[node name="Snake1" parent="." unique_id=1829026353 instance=ExtResource("6")]
-position = Vector2(600, 590)
-
-[node name="Eagle1" parent="." unique_id=1086481404 instance=ExtResource("7")]
-position = Vector2(900, 250)
-
-[node name="TreasureChest" parent="." unique_id=1764620266 instance=ExtResource("8")]
-position = Vector2(3918, 577)
 
 [node name="HUD" parent="." unique_id=1867016541 instance=ExtResource("2")]
