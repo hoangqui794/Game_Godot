@@ -31,6 +31,8 @@ public partial class GameManager : Node
 
     // Audio
     private AudioStreamPlayer _bgMusicPlayer;
+    private AudioStream _menuMusic;
+    private AudioStream _gameplayMusic;
 
     public override void _Ready()
     {
@@ -38,8 +40,10 @@ public partial class GameManager : Node
         ProcessMode = ProcessModeEnum.Always;
 
         // Cấu hình âm nhạc toàn cục
+        _menuMusic = GD.Load<AudioStream>("res://Assets/sound/little town - orchestral.ogg");
+        _gameplayMusic = GD.Load<AudioStream>("res://Assets/sound/toocoolforwordsmix.ogg");
+
         _bgMusicPlayer = new AudioStreamPlayer();
-        _bgMusicPlayer.Stream = GD.Load<AudioStream>("res://Assets/sound/little town - orchestral.ogg");
         _bgMusicPlayer.VolumeDb = -10.0f;
         _bgMusicPlayer.Finished += () => _bgMusicPlayer.Play(); // Lặp lại
         AddChild(_bgMusicPlayer);
@@ -71,14 +75,23 @@ public partial class GameManager : Node
 
     private void CheckInitialMusic()
     {
-        if (GetTree().CurrentScene?.SceneFilePath != "res://Scenes/Main/Intro.tscn")
-        {
-            PlayBackgroundMusic();
-        }
+        string path = GetTree().CurrentScene?.SceneFilePath;
+        if (string.IsNullOrEmpty(path) || path == "res://Scenes/Main/Intro.tscn") return;
+
+        bool isGameplay = path.Contains("Scenes/Levels/");
+        PlayBackgroundMusic(isGameplay);
     }
 
-    public void PlayBackgroundMusic()
+    public void PlayBackgroundMusic(bool isGameplay)
     {
+        AudioStream target = isGameplay ? _gameplayMusic : _menuMusic;
+
+        if (_bgMusicPlayer.Stream != target)
+        {
+            _bgMusicPlayer.Stop();
+            _bgMusicPlayer.Stream = target;
+        }
+
         if (!_bgMusicPlayer.Playing) _bgMusicPlayer.Play();
     }
 
@@ -95,9 +108,14 @@ public partial class GameManager : Node
 
         // Kiểm tra nhạc nền cho scene sắp tới
         if (path == "res://Scenes/Main/Intro.tscn")
+        {
             StopBackgroundMusic();
+        }
         else
-            PlayBackgroundMusic();
+        {
+            bool isGameplay = path.Contains("Scenes/Levels/");
+            PlayBackgroundMusic(isGameplay);
+        }
 
         var tw = CreateTween();
         // 1. Fade màn hình sang đen (nhanh)
