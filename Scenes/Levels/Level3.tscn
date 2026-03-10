@@ -5,14 +5,14 @@
 [ext_resource type="Script" uid="uid://bpcywyv86ay6f" path="res://Scripts/Utils/AutoCollision.cs" id="3"]
 [ext_resource type="Script" uid="uid://b6k4imcvq4u5j" path="res://Scripts/Utils/FollowCamera.cs" id="4"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://Scenes/Player/Player.tscn" id="5"]
+[ext_resource type="Texture2D" uid="uid://cektesd8132hf" path="res://Assets/Sprites/Backgrounds/level3_ground.png" id="5_6ggnd"]
 [ext_resource type="PackedScene" uid="uid://snake001" path="res://Scenes/Enemies/Snake.tscn" id="6"]
 [ext_resource type="PackedScene" uid="uid://eagle001" path="res://Scenes/Enemies/Eagle.tscn" id="7"]
 [ext_resource type="PackedScene" uid="uid://princess001" path="res://Scenes/NPCs/Princess.tscn" id="8"]
 [ext_resource type="Texture2D" uid="uid://b0vx13i1dftha" path="res://Assets/Sprites/Backgrounds/cave_ground.png" id="9"]
-[ext_resource type="PackedScene" path="res://Scenes/Enemies/BossEnemy.tscn" id="10"]
+[ext_resource type="PackedScene" uid="uid://bossenemy001" path="res://Scenes/Enemies/BossEnemy.tscn" id="10"]
 [ext_resource type="PackedScene" uid="uid://bosscage001" path="res://Scenes/Objects/BossCage.tscn" id="11"]
 [ext_resource type="PackedScene" uid="uid://levelexit001" path="res://Scenes/Objects/LevelExit.tscn" id="12"]
-
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(4000, 100)
@@ -139,11 +139,95 @@ script = ExtResource("3")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=750782307]
 shape = SubResource("RectangleShape2D_ground")
 
-[node name="GroundSprite" type="Sprite2D" parent="Ground" unique_id=1790554488]
+[node name="Node2D" type="Node2D" parent="Ground" unique_id=1651053492]
+
+[node name="GroundSprite" type="Sprite2D" parent="Ground/Node2D" unique_id=1790554488]
 texture_repeat = 2
-texture = ExtResource("9")
+position = Vector2(-1820.125, -1)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
 region_enabled = true
-region_rect = Rect2(0, 0, 4000, 128)
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite2" type="Sprite2D" parent="Ground/Node2D" unique_id=2036234711]
+texture_repeat = 2
+position = Vector2(-1472, -1)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite3" type="Sprite2D" parent="Ground/Node2D" unique_id=1861926600]
+texture_repeat = 2
+position = Vector2(-1120, -2)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite4" type="Sprite2D" parent="Ground/Node2D" unique_id=2077128442]
+texture_repeat = 2
+position = Vector2(-766, -2)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite5" type="Sprite2D" parent="Ground/Node2D" unique_id=632524215]
+texture_repeat = 2
+position = Vector2(-411, -1)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite6" type="Sprite2D" parent="Ground/Node2D" unique_id=1080783990]
+texture_repeat = 2
+position = Vector2(-58, -2)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite7" type="Sprite2D" parent="Ground/Node2D" unique_id=1352652405]
+texture_repeat = 2
+position = Vector2(295, -2)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite8" type="Sprite2D" parent="Ground/Node2D" unique_id=911417586]
+texture_repeat = 2
+position = Vector2(649, -1)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite9" type="Sprite2D" parent="Ground/Node2D" unique_id=165802066]
+texture_repeat = 2
+position = Vector2(1003, -1)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite10" type="Sprite2D" parent="Ground/Node2D" unique_id=1928717762]
+texture_repeat = 2
+position = Vector2(1356, -2)
+scale = Vector2(0.26137194, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+
+[node name="GroundSprite11" type="Sprite2D" parent="Ground/Node2D" unique_id=1611768820]
+texture_repeat = 2
+position = Vector2(1765.9375, -2)
+scale = Vector2(0.34638667, 0.33440512)
+texture = ExtResource("5_6ggnd")
+region_enabled = true
+region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
 
 [node name="Platform1" type="StaticBody2D" parent="." unique_id=566617549]
 position = Vector2(350, 490)
@@ -184,7 +268,6 @@ texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 140, 32)
 
-
 [node name="Platform4" type="StaticBody2D" parent="." unique_id=1636949486]
 position = Vector2(1400, 300)
 collision_layer = 2
@@ -197,7 +280,6 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 110, 32)
-
 
 [node name="Platform5" type="StaticBody2D" parent="." unique_id=1989856279]
 position = Vector2(1750, 380)
@@ -212,7 +294,6 @@ texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
 
-
 [node name="Platform6" type="StaticBody2D" parent="." unique_id=156103268]
 position = Vector2(2050, 450)
 collision_layer = 2
@@ -226,35 +307,34 @@ texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 100, 32)
 
-
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=644108766]
-position = Vector2(100, 550)
+position = Vector2(2363, 531)
 
 [node name="Snake1" parent="." unique_id=1721858005 instance=ExtResource("6")]
-position = Vector2(500, 570)
+position = Vector2(396, 559)
 
 [node name="Snake2" parent="." unique_id=363848740 instance=ExtResource("6")]
-position = Vector2(1200, 570)
+position = Vector2(1608, 572)
 
 [node name="Eagle1" parent="." unique_id=670907929 instance=ExtResource("7")]
-position = Vector2(700, 280)
+position = Vector2(667, 275)
 
 [node name="Eagle2" parent="." unique_id=1907671223 instance=ExtResource("7")]
-position = Vector2(1300, 250)
+position = Vector2(1377, 262)
 
 [node name="Eagle3" parent="." unique_id=1885299896 instance=ExtResource("7")]
-position = Vector2(1900, 300)
+position = Vector2(2138, 261)
 
 [node name="BossEnemy" parent="." unique_id=987654321 instance=ExtResource("10")]
-position = Vector2(1800, 580)
+position = Vector2(2538, 520)
 
 [node name="BossCage" parent="." unique_id=123456789 instance=ExtResource("11")]
-position = Vector2(2500, 640)
+position = Vector2(2950, 593)
 
 [node name="Princess" parent="." unique_id=376078602 instance=ExtResource("8")]
-position = Vector2(2500, 635)
+position = Vector2(2953, 586)
 
 [node name="LevelExit" parent="." unique_id=555666777 instance=ExtResource("12")]
-position = Vector2(3800, 580)
+position = Vector2(3828, 546)
 
 [node name="HUD" parent="." unique_id=1990820962 instance=ExtResource("2")]

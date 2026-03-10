@@ -409,7 +409,7 @@ public partial class BaseEnemy : CharacterBody2D
         }
     }
 
-    protected void SetFacingDirection(bool faceLeft)
+    protected virtual void SetFacingDirection(bool faceLeft)
     {
         AnimSprite.FlipH = faceLeft;
 
