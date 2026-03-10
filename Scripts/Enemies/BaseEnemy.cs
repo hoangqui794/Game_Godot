@@ -232,6 +232,19 @@ public partial class BaseEnemy : CharacterBody2D
                         {
                             CurrentState = EnemyState.Attack;
                             CreateAttackVFX();
+                            
+                            // Xử lý lỗi đánh hụt khi người chơi đứng yên: Quét lại HitArea
+                            if (AttackArea != null)
+                            {
+                                var checkHitTimer = GetTree().CreateTimer(0.1f);
+                                checkHitTimer.Timeout += () => 
+                                {
+                                    if (!IsInstanceValid(this) || IsQueuedForDeletion() || !IsInstanceValid(AttackArea)) return;
+                                    var bodies = AttackArea.GetOverlappingBodies();
+                                    foreach (var body in bodies)
+                                        OnHitAreaBodyEntered(body);
+                                };
+                            }
                         }
                         else
                         {
@@ -396,7 +409,7 @@ public partial class BaseEnemy : CharacterBody2D
         }
     }
 
-    protected void SetFacingDirection(bool faceLeft)
+    protected virtual void SetFacingDirection(bool faceLeft)
     {
         AnimSprite.FlipH = faceLeft;
 

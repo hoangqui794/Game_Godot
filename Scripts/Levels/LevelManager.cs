@@ -10,23 +10,20 @@ public partial class LevelManager : Node2D
     private HUD _hud;
     private Player _player;
 
-    // Checkpoint system
     private List<Vector2> _checkpoints = new List<Vector2>();
     private int _currentCheckpoint = 0;
 
     public override void _Ready()
     {
-        // Set current level
         GameManager.Instance.CurrentLevel = LevelNumber;
 
-        // ── PHẦN CỦA BẠN: Reset kĩ năng nếu là màn 1 ──
+        // Giữ phần reset skill của bạn
         if (LevelNumber == 1)
         {
             GameManager.Instance.UnlockedSkillsCount = 0;
             GD.Print("Level 1: Reset UnlockedSkillsCount to 0");
         }
 
-        // ── Setup level ───────────────────────────────────────────
         if (HasNode("SpawnPoint"))
             _spawnPoint = GetNode<Node2D>("SpawnPoint");
 
@@ -34,7 +31,7 @@ public partial class LevelManager : Node2D
         SpawnPlayer();
         ConnectPlayerSignals();
 
-        // ── PHẦN TRÊN GIT: Sinh bẫy đá rơi ──
+        // Giữ phần bẫy đá từ GitHub
         if (LevelNumber == 1)
         {
             SpawnLevel1CustomTraps();
@@ -43,7 +40,6 @@ public partial class LevelManager : Node2D
 
     private void SpawnLevel1CustomTraps()
     {
-        // Sinh 3 đá rơi bất ngờ (rơi từ trên cao màn hình xuống)
         var rock1 = new FallingRockTrap();
         rock1.Position = new Vector2(750, -50); 
         rock1.TriggerRange = 600f;              
@@ -63,11 +59,7 @@ public partial class LevelManager : Node2D
     private void CollectCheckpoints()
     {
         _checkpoints.Clear();
-        if (_spawnPoint != null)
-        {
-            _checkpoints.Add(_spawnPoint.GlobalPosition);
-        }
-
+        if (_spawnPoint != null) _checkpoints.Add(_spawnPoint.GlobalPosition);
         foreach (var child in GetChildren())
         {
             if (child is Marker2D marker && child.Name.ToString().StartsWith("Checkpoint"))
@@ -75,9 +67,7 @@ public partial class LevelManager : Node2D
                 _checkpoints.Add(marker.GlobalPosition);
             }
         }
-
         _checkpoints.Sort((a, b) => a.X.CompareTo(b.X));
-        GD.Print($"LevelManager: Tìm thấy {_checkpoints.Count} checkpoint(s)");
     }
 
     private void SpawnPlayer()
@@ -93,26 +83,11 @@ public partial class LevelManager : Node2D
             _player.AddToGroup("player");
             AddChild(_player);
         }
-        else if (HasNode("Player"))
-        {
-            _player = GetNode<Player>("Player");
-            _player.GlobalPosition = spawnPos;
-            _player.AddToGroup("player");
-        }
     }
 
     private void ConnectPlayerSignals()
     {
-        if (_player == null)
-        {
-            var node = GetTree().GetFirstNodeInGroup("player");
-            if (node is Player p) _player = p;
-        }
-
-        if (_player != null)
-        {
-            _player.PlayerDied += OnPlayerDied;
-        }
+        if (_player != null) _player.PlayerDied += OnPlayerDied;
     }
 
     public void ActivateCheckpoint(int index)
@@ -120,15 +95,13 @@ public partial class LevelManager : Node2D
         if (index > _currentCheckpoint && index < _checkpoints.Count)
         {
             _currentCheckpoint = index;
-            GD.Print($"Checkpoint {index} activated!");
         }
     }
 
     private void OnPlayerDied()
     {
         var timer = GetTree().CreateTimer(1.2);
-        timer.Timeout += () =>
-        {
+        timer.Timeout += () => {
             if (!IsInstanceValid(this)) return;
             GameManager.Instance.GameOver();
         };
@@ -137,11 +110,9 @@ public partial class LevelManager : Node2D
     public override void _Process(double delta)
     {
         if (_player == null || _player.IsQueuedForDeletion()) return;
-
         for (int i = _currentCheckpoint + 1; i < _checkpoints.Count; i++)
         {
-            float distToCheckpoint = Mathf.Abs(_player.GlobalPosition.X - _checkpoints[i].X);
-            if (distToCheckpoint < 60f)
+            if (Mathf.Abs(_player.GlobalPosition.X - _checkpoints[i].X) < 60f)
             {
                 ActivateCheckpoint(i);
                 break;

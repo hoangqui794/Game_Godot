@@ -385,6 +385,19 @@ public partial class Player : CharacterBody2D
 
         _attackCollision.Disabled = false;
 
+        // Xử lý lỗi đánh hụt cự ly gần: Buộc Area2D quét lại các mục tiêu đang đứng sát bên trong
+        // Đợi 0.05s để Physics Engine của Godot 4 kịp cập nhật danh sách va chạm sau khi bật _attackCollision
+        var checkHitTimer = GetTree().CreateTimer(0.05);
+        checkHitTimer.Timeout += () =>
+        {
+            if (!IsInstanceValid(this) || IsQueuedForDeletion() || !IsInstanceValid(_attackArea)) return;
+            var bodies = _attackArea.GetOverlappingBodies();
+            foreach (var body in bodies)
+            {
+                OnAttackAreaBodyEntered(body);
+            }
+        };
+
         // Attack lasts 0.3 seconds (since each attack is 1 frame, AnimationFinished fires too fast)
         var attackDurationTimer = GetTree().CreateTimer(0.3);
         attackDurationTimer.Timeout += () =>
@@ -467,6 +480,14 @@ public partial class Player : CharacterBody2D
         tween.TweenProperty(_animatedSprite, "modulate", Colors.White, 0.4f);
         // Knockback (Hất tung)
         Velocity = new Vector2(_animatedSprite.FlipH ? 200 : -200, -150);
+    }
+
+    public void ApplyKnockback(Vector2 force)
+    {
+        if (_isDead) return;
+        Velocity = force;
+        MoveAndSlide();
+        GD.Print($"[Player] Applied knockback force: {force}");
     }
 
     public void Heal(int amount)
