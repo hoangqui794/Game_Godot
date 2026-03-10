@@ -6,28 +6,37 @@ public partial class BossEnemy : BaseEnemy
 
     private Timer _contactDamageTimer;
     private bool _canDealContactDamage = true;
+    private Vector2 _lockedPosition;
+    private int _attackCount = 0;
 
     public override void _Ready()
     {
         // Stats của Đại Boss
         MaxHealth = 300;
-        AttackDamage = 25;
-        MoveSpeed = 0; // Đứng yên tuyệt đối
+        AttackDamage = 10; // Giảm xuống 10 theo yêu cầu
+        MoveSpeed = 0;
         ScoreValue = 2000;
         DetectRange = 500.0f;
-        AttackRange = 180.0f; // Tốt nhất cho Boss to
+        AttackRange = 200.0f; // Điều chỉnh tầm đánh về 200px theo yêu cầu mới nhất
+        AttackCooldown = 1.5f; // Cooldown 1.5s
         PatrolDistance = 0;
         PatrolDirection = -1;
 
-        HealthBarOffset = new Vector2(-20, -450);
+        // Căn chỉnh thanh máu: thấp thêm 50px nữa theo yêu cầu (-180 + 50 = -130)
+        HealthBarOffset = new Vector2(-80, -130);
 
         base._Ready();
         
+        // Cập nhật lại wait time của timer vì base._Ready() đã gán giá trị mặc định 1.0s
+        if (AttackCooldownTimer != null) AttackCooldownTimer.WaitTime = 1.5f;
+
         Scale = new Vector2(1.5f, 1.5f);
+        _lockedPosition = GlobalPosition;
 
         if (_healthBarNode != null)
         {
-            _healthBarNode.Scale = new Vector2(2.0f, 2.0f);
+            // Làm thanh máu Boss dài ra nhìn cho "trâu"
+            _healthBarNode.Scale = new Vector2(4.0f, 1.5f);
             (_healthBarNode as Node2D).ZIndex = 4005;
         }
 
@@ -37,7 +46,7 @@ public partial class BossEnemy : BaseEnemy
         if (AnimSprite != null) {
             AnimSprite.ZIndex = 4001;
             AnimSprite.Visible = true;
-            AnimSprite.FlipH = false; // Phải để false vì SpriteHelper đã chuẩn hóa về hướng Trái
+            AnimSprite.FlipH = false;
         }
 
         // Timer cho sát thương va chạm (2s)
@@ -53,62 +62,56 @@ public partial class BossEnemy : BaseEnemy
     {
         if (IsDead) return;
 
-        // 1. Kháng đẩy: Luôn ép Velocity.X = 0 và không cho di chuyển
-        Vector2 velocity = Velocity;
-        velocity.X = 0;
+        // 1. Kháng đẩy tuyệt đối & Vật thể rắn: Khóa vị trí không cho Player đẩy hoặc đi xuyên qua
+        GlobalPosition = _lockedPosition;
+        Velocity = Vector2.Zero;
         
-        if (!IsOnFloor())
-            velocity.Y += Gravity * (float)delta;
-        
-        Velocity = velocity;
-        MoveAndSlide();
+        // Đảm bảo va chạm luôn được tính toán để Player không đi xuyên qua
+        // (CharacterBody2D khi khóa vị trí vẫn cản bước các vật thể khác nếu Layer/Mask đúng)
+        MoveAndSlide(); 
 
+        // Gravity vẫn tính nhưng Position đã bị khóa (Boss thường ở nền nhà)
+        
         // 2. Ép Animation Idle khi không đánh/đau
         if (CurrentState == EnemyState.Patrol || CurrentState == EnemyState.Chase)
         {
             AnimSprite.Play("idle");
-            AnimSprite.FlipH = false; // Khóa ngay sau Play
         }
 
-        // 3. Tự động tấn công khi Player ở gần (Thêm buffer để tránh jitter)
+        // 3. Tự động tấn công khi Player ở gần
         var player = GetTree().GetFirstNodeInGroup("player") as Player;
         if (player != null && !player.IsQueuedForDeletion())
         {
             float dist = GlobalPosition.DistanceTo(player.GlobalPosition);
             
-            // Nếu đang Idle, chỉ chuyển sang Attack nếu vào sát phạm vi
             if (CurrentState != EnemyState.Attack && dist <= AttackRange)
             {
                 if (CanAttackPlayer && CurrentState != EnemyState.Hurt)
                 {
                     CurrentState = EnemyState.Attack;
-                    AnimSprite.FlipH = false; // Khóa TRƯỚC khi Play để không có frame lật nào
                     AnimSprite.Play("attack");
-                    AnimSprite.FlipH = false; // Khóa NGAY SAU khi Play để chắc chắn
                 }
             }
-            // Nếu đang Attack, chỉ quay lại Idle nếu ra xa hẳn (AttackRange + 30)
             else if (CurrentState == EnemyState.Attack && dist > AttackRange + 30.0f)
             {
                 CurrentState = EnemyState.Patrol;
-                AnimSprite.FlipH = false;
                 AnimSprite.Play("idle");
-                AnimSprite.FlipH = false;
             }
 
-            // 4. Sát thương va chạm (Contact Damage) - 2s một lần
-            if (_canDealContactDamage && dist < 100.0f)
+            // 4. Sát thương va chạm (Contact Damage) & Sát thương khi Đánh
+            // Nếu đang chém (Attack), dùng toàn bộ AttackRange. 
+            // Nếu không thì dùng phạm vi va chạm mặc định (150px cho Boss to).
+            float damageRange = (CurrentState == EnemyState.Attack) ? AttackRange : 150.0f;
+            
+            if (_canDealContactDamage && dist < damageRange)
             {
                 player.TakeDamage(AttackDamage);
                 _canDealContactDamage = false;
-                GD.Print("[BossEnemy] Sát thương va chạm! Player bị mất máu.");
+                GD.Print($"[BossEnemy] Gây sát thương! (Range: {damageRange})");
             }
         }
 
-        // 5. ĐỒNG BỘ HƯỚNG MẶT CỐ ĐỊNH (Triệt để)
-        // Vì toàn bộ animation (Idle, Attack, Die) đã được chuẩn hóa về hướng Trái 
-        // trong SpriteHelper, chúng ta LUÔN giữ FlipH = false.
-        if (AnimSprite != null)
+        if (AnimSprite != null && AnimSprite.FlipH)
         {
             AnimSprite.FlipH = false;
         }
@@ -118,6 +121,34 @@ public partial class BossEnemy : BaseEnemy
     {
         if (AnimSprite.Animation == "attack")
         {
+            _attackCount++;
+            GD.Print($"[BossEnemy] Attack sequence progress: {_attackCount}/3");
+
+            var player = GetTree().GetFirstNodeInGroup("player") as Player;
+            bool playerInRange = player != null && !player.IsQueuedForDeletion() && 
+                                GlobalPosition.DistanceTo(player.GlobalPosition) <= AttackRange + 50.0f;
+
+            // Mỗi 3 đòn tấn công thì hất văng player
+            if (_attackCount >= 3)
+            {
+                if (playerInRange)
+                {
+                    GD.Print("[BossEnemy] Cú đánh thứ 3! Hất văng Player!");
+                    Vector2 knockbackDir = (player.GlobalPosition - GlobalPosition).Normalized();
+                    player.ApplyKnockback(new Vector2(knockbackDir.X * 700, -450));
+                    player.TakeDamage(AttackDamage * 2);
+                }
+                _attackCount = 0;
+            }
+            else
+            {
+                // Đòn 1 và 2 cũng phải chắc chắn gây sát thương nếu trúng
+                if (playerInRange)
+                {
+                    player.TakeDamage(AttackDamage);
+                }
+            }
+
             CurrentState = EnemyState.Patrol;
             CanAttackPlayer = false;
             AttackCooldownTimer.Start();
@@ -161,12 +192,17 @@ public partial class BossEnemy : BaseEnemy
 
     protected override void CreatePlaceholderSprites()
     {
-        // Sử dụng FinalBoss.jpg với thiết lập 4 dòng (Dòng 0: Idle, 2: Attack, 3: Die)
+        // Thử tải cả hai loại để chắc chắn quái nào cũng được xử lý
         AnimSprite.SpriteFrames = SpriteHelper.CreateFinalBossSpriteFrames();
-        
         if (AnimSprite.SpriteFrames == null)
         {
-            GD.PrintErr("Không thể tạo SpriteFrames cho FinalBoss, dùng fallback.");
+            GD.Print("[BossEnemy] FinalBoss.jpg không tìm thấy, thử dùng BossRan.png");
+            AnimSprite.SpriteFrames = SpriteHelper.CreateBossSpriteFrames();
+        }
+
+        if (AnimSprite.SpriteFrames == null)
+        {
+            GD.PrintErr("Không thể tạo SpriteFrames cho Boss, dùng fallback.");
             base.CreatePlaceholderSprites();
             return;
         }
@@ -174,8 +210,8 @@ public partial class BossEnemy : BaseEnemy
         AnimSprite.Play("idle");
 
         // Điều chỉnh Offset để Boss to đứng đúng trên mặt đất
-        // Khung hình 600x600, đưa tâm lên và bù trừ để chân chạm đất
-        AnimSprite.Offset = new Vector2(0, -280.0f);
+        // Hạ thấp Boss xuống một chút (từ -280 xuống -240)
+        AnimSprite.Offset = new Vector2(0, -240.0f);
         AnimSprite.Visible = true;
         
         GD.Print("[BossEnemy] Đã chuyển sang dùng FinalBoss.jpg thành công.");
@@ -188,10 +224,10 @@ public partial class BossEnemy : BaseEnemy
 
     public override void _Process(double delta)
     {
-        // Khóa hướng mặt ở mức _Process để đảm bảo ổn định tuyệt đối là hướng Trái
+        // Khóa hướng mặt ở mức _Process để đảm bảo ổn định tuyệt đối
         if (AnimSprite != null)
         {
-            AnimSprite.FlipH = false;
+            if (AnimSprite.FlipH) AnimSprite.FlipH = false;
         }
     }
 }

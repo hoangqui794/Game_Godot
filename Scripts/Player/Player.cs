@@ -469,6 +469,14 @@ public partial class Player : CharacterBody2D
         Velocity = new Vector2(_animatedSprite.FlipH ? 200 : -200, -150);
     }
 
+    public void ApplyKnockback(Vector2 force)
+    {
+        if (_isDead) return;
+        Velocity = force;
+        MoveAndSlide();
+        GD.Print($"[Player] Applied knockback force: {force}");
+    }
+
     public void Heal(int amount)
     {
         _health = Math.Min(_health + amount, GameManager.Instance.MaxPlayerHealth);

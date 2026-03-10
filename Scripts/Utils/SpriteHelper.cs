@@ -302,6 +302,107 @@ public static class SpriteHelper
     }
 
     /// <summary>
+    /// Heuristic to detect if a character image is facing RIGHT.
+    /// Uses Red-Eye detection as primary (since the snake has red eyes) 
+    /// and weighted Center of Mass as fallback.
+    /// </summary>
+    public static bool IsFacingRight(Image img)
+    {
+        int w = img.GetWidth();
+        int h = img.GetHeight();
+        
+        // Focus on the top 45% of the sprite where the head/eyes are
+        int analysisHeight = (int)(h * 0.45f);
+        int centerX = w / 2;
+        
+        long redPixelsXSum = 0;
+        int redPixelsCount = 0;
+        
+        double weightedXDist = 0;
+        long totalPixels = 0;
+        
+        for (int y = 0; y < analysisHeight; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                Color p = img.GetPixel(x, y);
+                if (p.A > 0.1f)
+                {
+                    // 1. Red-Eye Detection: look for eyes (high Red, low Green/Blue)
+                    // The snake eyes are quite distinctively red, but might be dark.
+                    if (p.R > 0.35f && p.R > p.G * 1.6f && p.R > p.B * 1.6f)
+                    {
+                        redPixelsXSum += x;
+                        redPixelsCount++;
+                    }
+
+                    // 2. Fallback Weighted Mass
+                    weightedXDist += (x - centerX);
+                    totalPixels++;
+                }
+            }
+        }
+        
+        // If we found eyes, they are the absolute ground truth
+        if (redPixelsCount > 0)
+        {
+            float avgEyeX = (float)redPixelsXSum / redPixelsCount;
+            // For a snake, eyes are near the front. If eye is on the right of center, it faces Right.
+            return avgEyeX > centerX;
+        }
+
+        if (totalPixels == 0) return false;
+        
+        // Fallback to mass distribution
+        return weightedXDist > 0;
+    }
+
+    /// <summary>
+    /// Process a list of images and ensure they all face LEFT based on majority vote.
+    /// </summary>
+    public static List<Texture2D> CreateNormalizedAnimation(List<Image> frames, int outW, int outH, float customScale = 1.0f, string animName = "unknown")
+    {
+        int rightCount = 0;
+        var boundsList = new List<Rect2I>();
+        int validCount = 0;
+        
+        // 1. Analyze all frames
+        foreach (var img in frames)
+        {
+            var bounds = FindBounds(img);
+            boundsList.Add(bounds);
+            
+            if (bounds.Size.X > 5 && bounds.Size.Y > 5)
+            {
+                var crop = Image.CreateEmpty(bounds.Size.X, bounds.Size.Y, false, Image.Format.Rgba8);
+                crop.BlitRect(img, bounds, Vector2I.Zero);
+                if (IsFacingRight(crop)) rightCount++;
+                validCount++;
+            }
+        }
+        
+        // 2. Determine flip decision independently for this set
+        bool needsFlip = (validCount > 0 && (float)rightCount / validCount > 0.4f);
+        
+        GD.Print($"[SpriteHelper] Normalizing Animation '{animName}': RightCount={rightCount}/{validCount}, NeedsFlip={needsFlip}");
+        
+        // 3. Create textures with consistent flipping
+        var textures = new List<Texture2D>();
+        for (int i = 0; i < frames.Count; i++)
+        {
+            if (boundsList[i].Size.X > 5 && boundsList[i].Size.Y > 5)
+            {
+                textures.Add(SmartPad(frames[i], boundsList[i], outW, outH, customScale, needsFlip));
+            }
+            else
+            {
+                textures.Add(CreateColoredRect(outW, outH, new Color(0, 0, 0, 0)));
+            }
+        }
+        return textures;
+    }
+
+    /// <summary>
     /// Cắt sprite sheet theo grid và trả về List Image (raw, chưa convert sang texture)
     /// </summary>
     private static List<Image> SliceSpriteSheetGridRaw(Image img, int cols, int rows)
@@ -424,49 +525,30 @@ public static class SpriteHelper
 
         // Ảnh di chuyển là lưới 4x1
         var rawFramesWalk = SliceSpriteSheetGridRaw(imgWalk, 4, 1);
-        var texturesWalk = new List<Texture2D>();
+        // Di chuyển dùng các khung hình uốn lượn liên tiếp
+        var anims = new Dictionary<string, Texture2D[]>();
+        anims["walk"] = CreateNormalizedAnimation(rawFramesWalk, 350, 350, 1.0f, "snake_walk").ToArray();
 
-        foreach (var frameImg in rawFramesWalk)
-        {
-            var bounds = FindBounds(frameImg);
-            if (bounds.Size.X > 5 && bounds.Size.Y > 5)
-                texturesWalk.Add(SmartPad(frameImg, bounds, 350, 350)); // Căn giữa và chuẩn hóa size
-            else
-                texturesWalk.Add(CreateColoredRect(350, 350, new Color(0, 0, 0, 0)));
-        }
-
-        var texturesHurt = new List<Texture2D>();
+        var framesHurtRaw = new List<Image>();
         if (imgHurt != null)
         {
-            // Ảnh bị đánh là lưới 2x1
-            var rawFramesHurt = SliceSpriteSheetGridRaw(imgHurt, 2, 1);
-            foreach (var frameImg in rawFramesHurt)
-            {
-                var bounds = FindBounds(frameImg);
-                if (bounds.Size.X > 5 && bounds.Size.Y > 5)
-                    texturesHurt.Add(SmartPad(frameImg, bounds, 350, 350));
-                else
-                    texturesHurt.Add(CreateColoredRect(350, 350, new Color(0, 0, 0, 0)));
-            }
+            framesHurtRaw = SliceSpriteSheetGridRaw(imgHurt, 2, 1);
         }
         else
         {
-            // Fallback nếu không có ảnh bị đánh
-            texturesHurt.Add(texturesWalk[0]);
-            texturesHurt.Add(texturesWalk.Count > 3 ? texturesWalk[3] : texturesWalk[0]);
+            framesHurtRaw.Add(rawFramesWalk[0]);
+            if (rawFramesWalk.Count > 3) framesHurtRaw.Add(rawFramesWalk[3]);
         }
 
+        // Normalize independently to handle inconsistent source sheets
+        var texturesHurt = CreateNormalizedAnimation(framesHurtRaw, 350, 350, 1.0f, "snake_hurt");
+        
+        anims["attack"] = new[] { anims["walk"][0], anims["walk"][1], anims["walk"].Length > 3 ? anims["walk"][3] : anims["walk"][0], anims["walk"][0] };
+        anims["hurt"] = new[] { texturesHurt[0] };
+        anims["die"] = new[] { texturesHurt.Count > 1 ? texturesHurt[1] : texturesHurt[0] };
+
         // Tạo animation
-        return BuildSpriteFrames(new Dictionary<string, Texture2D[]> {
-            // Di chuyển dùng các khung hình uốn lượn liên tiếp
-            {"walk", texturesWalk.ToArray()}, 
-            // Tấn công dùng các khung có đầu vươn ra xa nhất
-            {"attack", new[] { texturesWalk[0], texturesWalk[1], texturesWalk[3], texturesWalk[0] }},
-            // Bị thương là frame 1 của ảnh bidanh
-            {"hurt", new[] { texturesHurt[0] }},
-            // Chết là frame 2 của ảnh bidanh
-            {"die", new[] { texturesHurt[1] }}
-        }, 8.0f); // Tốc độ di chuyển tăng lên 8 khung hình / giây
+        return BuildSpriteFrames(anims, 8.0f);
     }
 
     public static SpriteFrames CreateEagleSpriteFrames()
@@ -553,16 +635,19 @@ public static class SpriteHelper
             
             if (i < rows.Count)
             {
-                var texList = new List<Texture2D>();
+                var rawRowImages = new List<Image>();
                 foreach (var rect in rows[i])
                 {
-                    // Lật ngang nếu là Rowland 2 (Attack) và Rowland 3 (Die)
-                    // Vì trong source chúng hướng sang Phải, ta cần lật để đồng bộ hướng Trái với Idle.
-                    bool shouldFlip = (animNames[i] == "attack" || animNames[i] == "die");
-                    texList.Add(SmartPad(bossImg, rect, outSize, outSize, 1.0f, shouldFlip));
+                    var crop = Image.CreateEmpty(rect.Size.X, rect.Size.Y, false, Image.Format.Rgba8);
+                    crop.BlitRect(bossImg, rect, Vector2I.Zero);
+                    rawRowImages.Add(crop);
                 }
-                anims[animNames[i]] = texList.ToArray();
-                GD.Print($"[FinalBossHelper] Assigned Row {i} to {animNames[i]} ({texList.Count} frames)");
+                
+                // Chuẩn hóa phát hiện hướng ĐỘC LẬP cho từng hàng
+                var textures = CreateNormalizedAnimation(rawRowImages, outSize, outSize, 1.0f, $"final_boss_{animNames[i]}");
+                
+                anims[animNames[i]] = textures.ToArray();
+                GD.Print($"[FinalBossHelper] Assigned Row {i} to {animNames[i]} ({textures.Count} frames) normalized to LEFT.");
             }
         }
 
@@ -621,44 +706,29 @@ public static class SpriteHelper
         
         // 1. Cắt thô theo Grid
         var rawFrames = SliceSpriteSheetGridRaw(bossImg, cols, rows);
-        var processedFrames = new List<Texture2D>();
-
-        // 2. Với mỗi ô Grid, tìm bao (Bounds) và căn giữa (SmartPad)
-        foreach (var f in rawFrames)
-        {
-            var bounds = FindBounds(f);
-            if (bounds.Size.X > 10 && bounds.Size.Y > 10)
-            {
-                processedFrames.Add(SmartPad(f, bounds, outSize, outSize));
-            }
-            else
-            {
-                // Frame trống
-                processedFrames.Add(null);
-            }
-        }
-
         var anims = new Dictionary<string, Texture2D[]>();
         string[] animNames = { "idle", "walk", "attack", "hurt", "die" };
 
-        // 3. Phân bổ theo hàng (mỗi hàng có tối đa 'cols' frames)
+        // 2. Phân bổ theo hàng và CHUẨN HÓA ĐỘC LẬP theo hàng
         for (int r = 0; r < rows; r++)
         {
             if (r >= animNames.Length) break;
 
-            var rowTextures = new List<Texture2D>();
+            var rawRowFrames = new List<Image>();
             for (int c = 0; c < cols; c++)
             {
                 int index = r * cols + c;
-                if (index < processedFrames.Count && processedFrames[index] != null)
+                if (index < rawFrames.Count)
                 {
-                    rowTextures.Add(processedFrames[index]);
+                    rawRowFrames.Add(rawFrames[index]);
                 }
             }
 
-            if (rowTextures.Count > 0)
+            if (rawRowFrames.Count > 0)
             {
-                anims[animNames[r]] = rowTextures.ToArray();
+                // Chuẩn hóa phát hiện hướng ĐỘC LẬP để xử lý ảnh gốc lỗi hướng
+                var textures = CreateNormalizedAnimation(rawRowFrames, outSize, outSize, 1.0f, $"boss_ran_{animNames[r]}");
+                anims[animNames[r]] = textures.ToArray();
             }
         }
 
