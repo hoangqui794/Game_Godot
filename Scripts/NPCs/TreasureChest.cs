@@ -293,15 +293,25 @@ public partial class TreasureChest : Area2D
 
                 if (GameManager.Instance.CurrentLevel == 1)
                 {
-                    // Đã có Popup rồi nên không cần dòng text hiện đè lên nữa
-
-                    GameManager.Instance.UnlockNextSkill();
+                    // Màn 1: Mở khóa J và K (tổng 2 kỹ năng)
+                    GameManager.Instance.UnlockedSkillsCount = 2; 
                     GameManager.Instance.TotalKeys++; // Nhận luôn 1 chìa khóa ở Màn 1
 
-                    // Hiện 2 trang mô tả (Slide)
+                    // Hiện 3 trang mô tả (Slide): Chìa khóa, Skill J, Skill K
                     ShowRewardPopups(player);
 
-                    GD.Print("Màn 1: Nhận kỹ năng và chìa khóa xong, hiện popup mô tả.");
+                    GD.Print("Màn 1: Nhận kỹ năng J, K và chìa khóa xong, hiện popup mô tả.");
+                }
+                else if (GameManager.Instance.CurrentLevel == 2)
+                {
+                    // Màn 2: Mở khóa kỹ năng thứ 3 (Skill L)
+                    GameManager.Instance.UnlockedSkillsCount = 3;
+                    GameManager.Instance.TotalKeys++;
+                    
+                    // Hiện popup mô tả cho kỹ năng L
+                    ShowRewardPopups(player);
+                    
+                    GD.Print("Màn 2: Nhận kỹ năng L và hiện popup mô tả.");
                 }
                 else
                 {
@@ -458,12 +468,12 @@ public partial class TreasureChest : Area2D
         _popupContentLabel.AddThemeConstantOverride("shadow_offset_y", 2);
         panel.AddChild(_popupContentLabel);
 
-        // Thêm TextureRect cho trang 2
+        // Thêm TextureRect cho các trang Infographic
         _popupInfographic = new TextureRect();
         _popupInfographic.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
-        _popupInfographic.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
-        _popupInfographic.Size = new Vector2(900, 400);
-        _popupInfographic.Position = new Vector2(25, 25);
+        _popupInfographic.StretchMode = TextureRect.StretchModeEnum.Scale; // Phóng to vừa khít khung
+        _popupInfographic.Size = new Vector2(950, 450);
+        _popupInfographic.Position = new Vector2(0, 0);
         _popupInfographic.Visible = false;
         panel.AddChild(_popupInfographic);
 
@@ -507,35 +517,55 @@ public partial class TreasureChest : Area2D
 
     private void UpdatePopupText()
     {
-        if (_popupSlide == 1)
+        if (GameManager.Instance.CurrentLevel == 1)
+        {
+            if (_popupSlide == 1)
+            {
+                _popupContentLabel.Visible = true;
+                _popupInfographic.Visible = false;
+
+                string storyText = "CHÌA KHÓA VÀNG ĐÃ ĐƯỢC TÌM THẤY!\n\nChiếc chìa khóa này tỏa ra ánh sáng yếu ớt, như đang dẫn lối.\nCánh cổng đá cổ phía trước dường như cần 3 chìa khóa để mở.\n\n[ Bạn đã có: 1 / 3 ]\nHãy tiếp tục tìm 2 chiếc còn lại trong hang động.";
+                _popupContentLabel.Text = storyText;
+                _popupContentLabel.AddThemeColorOverride("font_color", new Color(0.25f, 0.15f, 0.05f));
+
+                RunTypewriter(storyText.Length);
+            }
+            else if (_popupSlide == 2)
+            {
+                ShowInfographic("res://Assets/UI/Skill_J_Info.jpg");
+            }
+            else if (_popupSlide == 3)
+            {
+                ShowInfographic("res://Assets/UI/Skill_K_Info.jpg");
+            }
+        }
+        else if (GameManager.Instance.CurrentLevel == 2)
+        {
+            if (_popupSlide == 1)
+            {
+                ShowInfographic("res://Assets/UI/Skill_L_Info.jpg");
+            }
+        }
+    }
+
+    private void ShowInfographic(string path)
+    {
+        _popupContentLabel.Visible = false;
+        _popupInfographic.Visible = true;
+
+        var tex = GD.Load<Texture2D>(path);
+        // Fallback sang .png nếu không có .jpg
+        if (tex == null) tex = GD.Load<Texture2D>(path.Replace(".jpg", ".png"));
+
+        if (tex != null)
+        {
+            _popupInfographic.Texture = tex;
+        }
+        else
         {
             _popupContentLabel.Visible = true;
-            _popupInfographic.Visible = false;
-
-            string storyText = "CHÌA KHÓA VÀNG ĐÃ ĐƯỢC TÌM THẤY!\n\nChiếc chìa khóa này tỏa ra ánh sáng yếu ớt, như đang dẫn lối.\nCánh cổng đá cổ phía trước dường như cần 3 chìa khóa để mở.\n\n[ Bạn đã có: 1 / 3 ]\nHãy tiếp tục tìm 2 chiếc còn lại trong hang động.";
-            _popupContentLabel.Text = storyText;
-            _popupContentLabel.AddThemeColorOverride("font_color", new Color(0.25f, 0.15f, 0.05f)); // Màu nâu gỗ sẫm
-
-            // Hiệu ứng Đánh máy (Typewriter)
-            RunTypewriter(storyText.Length);
-        }
-        else if (_popupSlide == 2)
-        {
-            _popupContentLabel.Visible = false;
-            _popupInfographic.Visible = true;
-
-            // Load hình ảnh Infographic người dùng cung cấp (Hỗ trợ cả .jpg và .png)
-            var tex = GD.Load<Texture2D>("res://Assets/UI/Skill_J_Info.jpg");
-            if (tex == null) tex = GD.Load<Texture2D>("res://Assets/UI/Skill_J_Info.png");
-
-            if (tex != null) _popupInfographic.Texture = tex;
-            else
-            {
-                // Nếu chưa có file thì hiện thông báo tạm
-                _popupContentLabel.Visible = true;
-                _popupContentLabel.Text = "KỸ NĂNG MỚI: RÌU BAY (Phím J)\n\n[ Vui lòng thêm ảnh Skill_J_Info.png vào Assets/UI ]";
-                _popupContentLabel.AddThemeColorOverride("font_color", Colors.Cyan);
-            }
+            _popupContentLabel.Text = $"KỸ NĂNG MỚI\n\n[ Không tìm thấy ảnh tại {path} ]";
+            _popupContentLabel.AddThemeColorOverride("font_color", Colors.Red);
         }
     }
 
@@ -564,8 +594,12 @@ public partial class TreasureChest : Area2D
             return;
         }
 
+        int maxSlides = 0;
+        if (GameManager.Instance.CurrentLevel == 1) maxSlides = 3;
+        else if (GameManager.Instance.CurrentLevel == 2) maxSlides = 1;
+
         _popupSlide++;
-        if (_popupSlide <= 2)
+        if (_popupSlide <= maxSlides)
         {
             UpdatePopupText();
         }
@@ -576,7 +610,24 @@ public partial class TreasureChest : Area2D
                 _popupOverlay.QueueFree();
                 _popupOverlay = null;
             }
-            if (_currentPlayer != null) _currentPlayer.Call("RefreshSkillUI");
+            
+            // Xong popup thì mới mở cổng (nếu là Màn 2 hoặc Màn 1 đã xong việc)
+            if (_currentPlayer != null)
+            {
+                _currentPlayer.Call("RefreshSkillUI");
+                
+                // Sau khi xem xong Skill L ở Màn 2, mở cổng
+                if (GameManager.Instance.CurrentLevel == 2)
+                {
+                    CreateEpicPortal(_currentPlayer);
+                }
+                // Ở Màn 1, nếu muốn mở cổng ngay sau popup thì thêm ở đây
+                // Nhưng hiện tại Màn 1 yêu cầu 3 chìa nên có thể cổng đã có sẵn hoặc chờ logic khác
+                else if (GameManager.Instance.CurrentLevel == 1)
+                {
+                    // Có thể gọi hàm để player biết đường đi tiếp
+                }
+            }
         }
     }
 }
