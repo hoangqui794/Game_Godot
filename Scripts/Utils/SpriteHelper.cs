@@ -144,8 +144,37 @@ public static class SpriteHelper
         if (!anims.ContainsKey("jump")) anims["jump"] = new[] { defaultFrame };
         if (!anims.ContainsKey("fall")) anims["fall"] = new[] { defaultFrame };
 
-        anims["hurt"] = new[] { defaultFrame };
-        anims["die"] = new[] { defaultFrame };
+        // 5. Load Death Animation
+        var dieTextures = new List<Texture2D>();
+        var dieImage1 = LoadAndCleanImage("res://Assets/Sprites/Player/gUC1.png");
+        if (dieImage1 != null)
+        {
+            var blobs = FindBlobs(dieImage1);
+            foreach (var r in blobs)
+            {
+                dieTextures.Add(SmartPad(dieImage1, r, 240, 240));
+            }
+        }
+        var dieImage2 = LoadAndCleanImage("res://Assets/Sprites/Player/GUC2.png");
+        if (dieImage2 != null)
+        {
+            var bounds = FindBounds(dieImage2);
+            if (bounds.Size.X > 5 && bounds.Size.Y > 5)
+            {
+                dieTextures.Add(SmartPad(dieImage2, bounds, 240, 240));
+            }
+        }
+        
+        if (dieTextures.Count > 0) 
+        {
+            anims["die"] = dieTextures.ToArray();
+            anims["hurt"] = new[] { dieTextures[0] }; // Dùng frame đầu tiên của bộ chết làm frame bị thương
+        }
+        else 
+        {
+            anims["hurt"] = new[] { defaultFrame };
+            anims["die"] = new[] { defaultFrame };
+        }
 
         _cachedPlayerFrames = BuildSpriteFrames(anims, 12.0f);
         return _cachedPlayerFrames;

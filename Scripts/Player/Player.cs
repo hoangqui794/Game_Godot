@@ -439,8 +439,10 @@ public partial class Player : CharacterBody2D
 
     private void OnAnimationFinished()
     {
-        // Attack completion is handled by timer in Attack()
-        // This is now only used for other one-shot animations
+        if (_animatedSprite.Animation == "die")
+        {
+            EmitSignal(SignalName.PlayerDied);
+        }
     }
 
     private void OnAttackCooldownTimeout()
@@ -522,18 +524,11 @@ public partial class Player : CharacterBody2D
     private void Die()
     {
         _isDead = true;
+        _animatedSprite.Stop();
         _animatedSprite.Play("die");
-        _animatedSprite.Modulate = new Color(0.8f, 0.2f, 0.2f);
-        var tween = CreateTween();
-        tween.TweenProperty(_animatedSprite, "rotation", Mathf.Pi / 2, 0.8f);
-        tween.TweenCallback(Callable.From(() =>
-        {
-            // Guard: tránh truy cập sau khi Player đã bị free
-            if (!IsInstanceValid(this) || IsQueuedForDeletion()) return;
-            // Phát signal để LevelManager xử lý (respawn hoặc game over)
-            EmitSignal(SignalName.PlayerDied);
-            GetNode<CollisionShape2D>("CollisionShape2D").SetDeferred("disabled", true);
-        }));
+        
+        // Disable collision immediately so player can't interact while dying
+        GetNode<CollisionShape2D>("CollisionShape2D").SetDeferred("disabled", true);
     }
 
     public void WalkIntoCave(float direction = 1f)
