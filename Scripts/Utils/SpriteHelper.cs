@@ -54,41 +54,48 @@ public static class SpriteHelper
             anims["run"] = idleTextures.ToArray();
         }
 
-        // Jump animation - load from ThachSanh_Ani_Nhay.png (2 cols x 2 rows = 4 frames)
-        var jumpImage = LoadAndCleanImage("res://Assets/Sprites/Player/ThachSanh_Ani_Nhay.png");
+        // Jump animation - load from nhảy1 (2).png to nhảy5.png
         var jumpTextures = new List<Texture2D>();
+        string[] jumpPaths = { 
+            "res://Assets/Sprites/Player/nhảy1 (2).png", 
+            "res://Assets/Sprites/Player/nhảy2 (2).png", 
+            "res://Assets/Sprites/Player/nhảy3 (2).png", 
+            "res://Assets/Sprites/Player/nhảy4 (2).png", 
+            "res://Assets/Sprites/Player/nhảy5.png" 
+        };
 
-        if (jumpImage != null)
+        foreach (var path in jumpPaths)
         {
-            var jumpFramesRaw = SliceSpriteSheetGridRaw(jumpImage, 2, 2);
-            GD.Print($"Jump: sliced {jumpFramesRaw.Count} raw frames from sprite sheet");
-
-            foreach (var frameImg in jumpFramesRaw)
+            var frameImg = LoadAndCleanImage(path);
+            if (frameImg != null)
             {
                 var bounds = FindBounds(frameImg);
                 if (bounds.Size.X > 5 && bounds.Size.Y > 5)
                 {
-                    // Scale jump animation by 0.65x so it matches the normal character size
-                    jumpTextures.Add(SmartPad(frameImg, bounds, 240, 240, 0.65f));
+                    // Tăng độ sáng lên 1.25 lần (25%) cho các frame nhảy
+                    jumpTextures.Add(SmartPad(frameImg, bounds, 240, 240, 1.0f, false, 1.25f));
                 }
             }
+        }
 
-            if (jumpTextures.Count >= 4)
+        if (jumpTextures.Count > 0)
+        {
+            // Phân bổ: 3 frame đầu là nhảy lên, 2 frame sau là rơi xuống
+            if (jumpTextures.Count >= 5)
             {
-                // Mặc định: 2 frame đầu nhảy lên, 2 frame sau rơi xuống
-                anims["jump"] = new[] { jumpTextures[0], jumpTextures[1] };
-                anims["fall"] = new[] { jumpTextures[2], jumpTextures[3] };
+                anims["jump"] = new[] { jumpTextures[0], jumpTextures[1], jumpTextures[2] };
+                anims["fall"] = new[] { jumpTextures[3], jumpTextures[4] };
             }
-            else if (jumpTextures.Count > 0)
+            else
             {
                 anims["jump"] = jumpTextures.ToArray();
                 anims["fall"] = jumpTextures.ToArray();
             }
-            GD.Print($"Jump: created {jumpTextures.Count} frames from ThachSanh_Ani_Nhay.png");
+            GD.Print($"Jump: created {jumpTextures.Count} frames from nhảy1-5.png");
         }
         else
         {
-            GD.Print("Jump: failed to load ThachSanh_Ani_Nhay.png");
+            GD.Print("Jump: failed to load nhảy1-5.png");
         }
 
         // 3. Load Attack (Sử dụng Grid 3 cột x 4 hàng)
@@ -267,7 +274,7 @@ public static class SpriteHelper
     /// <summary>
     /// Cắt và căn chỉnh sprite vào frame cố định, cho phép đổi tỷ lệ với customScale
     /// </summary>
-    public static ImageTexture SmartPad(Image source, Rect2I rect, int outW, int outH, float customScale = 1.0f, bool flipX = false)
+    public static ImageTexture SmartPad(Image source, Rect2I rect, int outW, int outH, float customScale = 1.0f, bool flipX = false, float brightness = 1.0f)
     {
         int bw = rect.Size.X;
         int bh = rect.Size.Y;
@@ -281,7 +288,14 @@ public static class SpriteHelper
                 int sy = rect.Position.Y + y;
                 if (sx >= 0 && sy >= 0 && sx < source.GetWidth() && sy < source.GetHeight())
                 {
-                    crop.SetPixel(x, y, source.GetPixel(sx, sy));
+                    Color p = source.GetPixel(sx, sy);
+                    if (brightness != 1.0f && p.A > 0.1f)
+                    {
+                        p.R = Mathf.Min(p.R * brightness, 1.0f);
+                        p.G = Mathf.Min(p.G * brightness, 1.0f);
+                        p.B = Mathf.Min(p.B * brightness, 1.0f);
+                    }
+                    crop.SetPixel(x, y, p);
                 }
             }
         }
