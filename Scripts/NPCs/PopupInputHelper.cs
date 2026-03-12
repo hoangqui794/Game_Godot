@@ -8,6 +8,7 @@ public partial class PopupInputHelper : Node
     // simple helper that forwards any key or click to the parent popup
     public override void _Input(InputEvent @event)
     {
+        if (@event is InputEventKey keyEvent && keyEvent.Echo) return;
         if (Target != null && @event.IsPressed() && (@event is InputEventKey || @event is InputEventMouseButton))
         {
             // notify the target controller

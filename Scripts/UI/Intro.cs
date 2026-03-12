@@ -97,6 +97,9 @@ public partial class Intro : Control
 
 	public override void _Input(InputEvent @event)
 	{
+		if (@event is InputEventKey keyEvent && keyEvent.Echo) return;
+		if (!@event.IsPressed()) return;
+
 		// Cho phép bỏ qua Intro bằng phím ESC, SPACE, hoặc Enter
 		if (@event.IsActionPressed("ui_cancel") || @event.IsActionPressed("ui_accept") || @event.IsActionPressed("jump"))
 		{

@@ -47,7 +47,7 @@ public partial class DialogueManager : CanvasLayer
         // Dừng thời gian game khi đang hội thoại
         if (GameManager.Instance != null && GameManager.Instance.GetTree() != null)
         {
-            GameManager.Instance.GetTree().Paused = true; 
+            GameManager.Instance.GetTree().Paused = true;
         }
 
         Visible = true;
@@ -61,7 +61,7 @@ public partial class DialogueManager : CanvasLayer
         foreach (var line in lines)
         {
             await ShowLine(line);
-            
+
             // Hiện nhấp nháy dòng báo hiệu cho người chơi biết đoạn thoại đã gõ xong
             _nextLineRequested = false;
             _promptLabel.Visible = true;
@@ -102,7 +102,7 @@ public partial class DialogueManager : CanvasLayer
         _nameLabel.Text = line.CharacterName;
         _textLabel.Text = line.Text;
         _textLabel.VisibleCharacters = 0;
-        
+
         // Đổi màu tên tùy vào nhân vật
         if (line.CharacterName == "Thạch Sanh")
             _nameLabel.AddThemeColorOverride("font_color", new Color(0.4f, 0.8f, 1f)); // Xanh lơ sáng thiện
@@ -152,7 +152,7 @@ public partial class DialogueManager : CanvasLayer
             }
 
             _textLabel.VisibleCharacters = i;
-            
+
             // processAlways=true, ignoreTimeScale=true để chạy lúc Pause
             await ToSignal(GetTree().CreateTimer(timePerChar, true, false, true), SceneTreeTimer.SignalName.Timeout);
         }
@@ -162,7 +162,10 @@ public partial class DialogueManager : CanvasLayer
 
     public override void _Input(InputEvent @event)
     {
-        // Bấm Phím Space, Phím Chém (Z), hoặc Chuột Trái để Qua câu/Skip gõ
+        if (@event is InputEventKey keyEvent && keyEvent.Echo) return;
+        if (!@event.IsPressed()) return;
+
+        // Bấm Phím Space, Phím Chém (H), hoặc Chuột Trái để Qua câu/Skip gõ
         if (@event.IsActionPressed("ui_accept") || @event.IsActionPressed("attack") || @event.IsActionPressed("jump"))
         {
             if (_isTyping)
@@ -173,7 +176,7 @@ public partial class DialogueManager : CanvasLayer
             {
                 _nextLineRequested = true; // Chuyển câu thoại kế
             }
-            
+
             GetViewport().SetInputAsHandled();
         }
     }
@@ -225,7 +228,7 @@ public partial class DialogueManager : CanvasLayer
         _avatarRect.CustomMinimumSize = new Vector2(140, 140);
         _avatarRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
         _avatarRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
-        _avatarRect.Visible = false; 
+        _avatarRect.Visible = false;
         hbox.AddChild(_avatarRect);
 
         var vbox = new VBoxContainer();

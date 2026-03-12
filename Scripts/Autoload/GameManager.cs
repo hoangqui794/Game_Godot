@@ -309,6 +309,16 @@ public partial class GameManager : Node
         if (!_bgMusicPlayer.Playing) _bgMusicPlayer.Play();
     }
     private void CheckInitialMusic() { string p = GetTree().CurrentScene?.SceneFilePath; if (!string.IsNullOrEmpty(p)) PlayBackgroundMusic(p.Contains("Scenes/Levels/")); }
-    public override void _Input(InputEvent e) { if (e.IsActionPressed("pause")) TogglePause(); }
+    public override void _Input(InputEvent e)
+    {
+        if (e is InputEventKey keyEvent && keyEvent.Echo) return;
+        if (!e.IsPressed()) return;
+
+        if (e.IsActionPressed("pause"))
+        {
+            GetViewport().SetInputAsHandled();
+            TogglePause();
+        }
+    }
     public void TogglePause() { IsPaused = !IsPaused; GetTree().Paused = IsPaused; }
 }
