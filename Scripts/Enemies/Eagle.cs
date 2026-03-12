@@ -6,7 +6,7 @@ public partial class Eagle : BaseEnemy
 {
     // Eagle-specific properties
     [Export] public float FlyHeight = 100.0f;
-    [Export] public float DiveSpeed = 300.0f;
+    [Export] public float DiveSpeed = 380.0f;  // Tốc độ lao xuống cực nhanh
     [Export] public float FloatAmplitude = 20.0f;
     [Export] public float FloatFrequency = 2.0f;
 
@@ -17,14 +17,17 @@ public partial class Eagle : BaseEnemy
     public override void _Ready()
     {
         // Set eagle-specific stats before base _Ready
-        MaxHealth = 60;
-        AttackDamage = 20;
-        MoveSpeed = 100.0f;
-        ScoreValue = 200;
-        PatrolDistance = 200.0f;
-        DetectRange = 300.0f;
-        AttackRange = 80.0f;
-        AttackCooldown = 2.0f;
+        // ── Đại Bàng: Kẻ thù tầm trung, nguy hiểm ở tầm xa ──
+        // Player cần 5 đòn thường (25×5=125 > 120) để hạ
+        // đại bàng cần 6 đòn láo xuống (18×6=108) để kill player
+        MaxHealth    = 120;      // Cứng gấp 3 lần rắn, kill được bằng skill mới là xứng
+        AttackDamage = 18;       // 18% MaxHP mỗi nhát láo xuống
+        MoveSpeed    = 110.0f;   // Bay nhanh hơn rắn
+        ScoreValue   = 300;      // Xứng với mức độ nguy hiểm
+        PatrolDistance = 220.0f; // Bay xa hơn
+        DetectRange    = 320.0f; // Mắt sắc, nhìn rất xa
+        AttackRange    = 90.0f;  // Tầm láo rộng
+        AttackCooldown = 1.6f;   // Tấn công đồn dập hơn (gảm từ 2.0s)
         
         // Đẩy Thanh Máu vọt thẳng lên trời để vượt mảng Sprite của đầu Đại Bàng
         HealthBarOffset = new Vector2(-20, -75);

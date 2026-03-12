@@ -10,9 +10,13 @@ public partial class Player : CharacterBody2D
     private float _skill2Timer = 0f;
     private float _skill3Timer = 0f;
 
-    private const float Skill1Cooldown = 4.0f;
-    private const float Skill2Cooldown = 6.0f;
-    private const float Skill3Cooldown = 20.0f;
+    // ── Cooldown kỹ năng ──
+    // Skill1 (Rìm thần): bấm thường xuyên được, chỉ mạnh hơn đòn thường
+    // Skill2 (Lốc xoáy): đủ kill Rắn trong vòng quay nếu đứng gần, đủ hạ 1/2 máu Đại bàng
+    // Skill3 (Thiên địa chấn): Mạnh nhất, chỉ dùng khi cấp bách
+    private const float Skill1Cooldown = 5.0f;  // +1s vì dùng được liên tục
+    private const float Skill2Cooldown = 8.0f;  // +2s vì damage tổng cao
+    private const float Skill3Cooldown = 22.0f; // +2s vì mạnh nhất game
 
     // --- Biến lưu trữ UI Chiêu thức ---
     private CanvasLayer _skillPanelLayer;
@@ -144,7 +148,7 @@ public partial class Player : CharacterBody2D
         // Khung Margin bám Toàn màn hình để tự căn chỉnh góc
         var margin = new MarginContainer();
         margin.SetAnchorsPreset(Control.LayoutPreset.TopWide); // Đổi thành TopWide: Chỉ bám nóc màn hình y chang khung Margin của Thanh máu (HUD.tscn)
-        margin.AddThemeConstantOverride("margin_right", 20); // Cách mép phải 20px
+        margin.AddThemeConstantOverride("margin_right", 100); // Chừa 100px bên phải cho nút Cài đặt (Bánh răng)
         margin.AddThemeConstantOverride("margin_top", -40); // BÙ TRỪ KHOẢNG RỖNG: Dùng thông số Âm để giật ngược toàn bộ khung kỹ năng lên trên cao, đâm xuyên lên thanh máu
         _skillPanelLayer.AddChild(margin);
 
@@ -309,7 +313,9 @@ public partial class Player : CharacterBody2D
         axe.Texture = _cachedAxeTexture;
         axe.GlobalPosition = GlobalPosition + new Vector2(_facingDirection * 20, -10);
         axe.Direction = new Vector2(_facingDirection, -0.1f).Normalized();
-        axe.Damage = AttackDamage * 1.5f;
+        // Skill1: 1.8× đòn thường (25×1.8=45)
+        // → cần 2 nhát để kill rắn (45×2=90>80), cần 3 nhát cho đại bàng (45×3=135>120)
+        axe.Damage = AttackDamage * 1.8f;
 
         // Find nearest enemy
         var enemies = GetTree().GetNodesInGroup("enemies");
@@ -390,8 +396,9 @@ public partial class Player : CharacterBody2D
                     {
                         if (e.HasMethod("TakeDamage"))
                         {
-                            // Sát thương liên tục mỗi nhát chém nhỏ
-                            e.Call("TakeDamage", (int)(AttackDamage * 0.4f));
+                            // Skill2: 0.5×/tick, 0.2s/tick, 3s = 15 tick
+                            // Tổng: 25×0.5×15=187 damage (kill rắn 2.3x, đại bàng 1.5x nhừ hết màn)
+                            e.Call("TakeDamage", (int)(AttackDamage * 0.5f));
                         }
                     }
                 }
@@ -563,7 +570,12 @@ public partial class Player : CharacterBody2D
             if (impactPos.DistanceTo(e.GlobalPosition) < 350f)
             {
                 if (e.HasMethod("TakeDamage"))
-                    e.Call("TakeDamage", AttackDamage * 6);
+                {
+                    // Skill3 (Thiên địa chấn): 4× ATK = 25×4 = 100 damage
+                    // → kill rắn (100 > 80) nhưng đại bàng sót lại 20HP (cần cú cầp rứt dần)
+                    // Giảm từ 6× xuống để tránh 1-shot tất cả + giữ cảm giác dùng skill có ý nghĩa
+                    e.Call("TakeDamage", AttackDamage * 4);
+                }
             }
         }
 
