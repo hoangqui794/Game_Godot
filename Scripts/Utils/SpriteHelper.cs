@@ -280,7 +280,7 @@ public static class SpriteHelper
     /// <summary>
     /// Cắt và căn chỉnh sprite vào frame cố định, cho phép đổi tỷ lệ với customScale
     /// </summary>
-    public static ImageTexture SmartPad(Image source, Rect2I rect, int outW, int outH, float customScale = 1.0f, bool flipX = false, float brightness = 1.0f)
+    public static ImageTexture SmartPad(Image source, Rect2I rect, int outW, int outH, float customScale = 1.0f, bool flipX = false, float brightness = 1.0f, bool forceAbsoluteScale = false)
     {
         int bw = rect.Size.X;
         int bh = rect.Size.Y;
@@ -311,23 +311,29 @@ public static class SpriteHelper
         int targetMaxHeight = outH - 20;
         int targetMaxWidth = outW - 20;
 
-        float scaleToFit = 1.0f;
-        if (bw > targetMaxWidth || bh > targetMaxHeight)
+        float finalScale = customScale;
+        
+        // Trôi về logic cũ: Tự động scale để vừa khung hình NẾU không ép buộc kích thước tuyệt đối
+        if (!forceAbsoluteScale)
         {
-            float scaleX = (float)targetMaxWidth / bw;
-            float scaleY = (float)targetMaxHeight / bh;
-            scaleToFit = Math.Min(scaleX, scaleY);
+            float scaleToFit = 1.0f;
+            if (bw > targetMaxWidth || bh > targetMaxHeight)
+            {
+                float scaleX = (float)targetMaxWidth / bw;
+                float scaleY = (float)targetMaxHeight / bh;
+                scaleToFit = Math.Min(scaleX, scaleY);
+            }
+            // customScale đóng vai trò là hệ số nhân thêm vào kích thước đã fit
+            finalScale *= scaleToFit;
         }
-
-        // Áp dụng scale bằng customScale kết hợp với scaleToFit
-        float finalScale = scaleToFit * customScale;
 
         if (Math.Abs(finalScale - 1.0f) > 0.01f)
         {
             int newW = Math.Max(1, (int)(bw * finalScale));
             int newH = Math.Max(1, (int)(bh * finalScale));
 
-            var interp = (bw > 600 || bh > 600) ? Image.Interpolation.Bilinear : Image.Interpolation.Nearest;
+            // Lanczos cho downscale (sắc nét hơn Bilinear), Nearest cho upscale (giữ pixel)
+            var interp = (finalScale < 1.0f) ? Image.Interpolation.Lanczos : Image.Interpolation.Nearest;
             crop.Resize(newW, newH, interp);
             bw = newW;
             bh = newH;
@@ -613,121 +619,171 @@ public static class SpriteHelper
     public static SpriteFrames CreateChanTinhSpriteFrames()
     {
         var anims = new Dictionary<string, Texture2D[]>();
-        int outSize = 512;
-
-        // Thu thập tất cả các ảnh để tính toán Bounding Box chung
-        var allImages = new Dictionary<string, List<Image>>();
-        var allBounds = new List<Rect2I>();
+        // Canvas lớn hơn = giữ chi tiết hình ảnh, sắc nét hơn
+        // ChanTinh.cs sẽ dùng node Scale để thu nhỏ về nửa màn hình
+        int outSize = 600;
+        int targetBodyHeight = 500;
 
         // 1. Load Idle
-        var idleImgs = new List<Image>();
-        var imgIdle = LoadAndCleanImage("res://Assets/Sprites/Enemies/ChanTinh/B_dung.jpeg");
-        if (imgIdle != null) { idleImgs.Add(imgIdle); allBounds.Add(FindBounds(imgIdle)); }
-        allImages["idle"] = idleImgs;
+        // Boss Chăn Tinh có MÀU XANH LÁ → LoadAndCleanImage sẽ xóa luôn thân Boss!
+        // Dùng thuật toán lọc màu thông minh để xóa nền Neon nhưng giữ da Boss.
+        System.Func<string, Image> loadBossImg = (path) =>
+        {
+            var tex = GD.Load<Texture2D>(path);
+            if (tex == null) return null;
+            var img = tex.GetImage();
+            img.Decompress();
+            img.Convert(Image.Format.Rgba8);
+            
+            int w = img.GetWidth(), h = img.GetHeight();
+            Color corner = img.GetPixel(w / 10, h / 10); // Sample hơi xa góc một chút để tránh nhiễu
+            
+            for (int x = 0; x < w; x++)
+            {
+                for (int y = 0; y < h; y++)
+                {
+                    Color p = img.GetPixel(x, y);
+                    
+                    // 1. Kiểm tra pixel có phải màu Xanh Neon (nền) không?
+                    // Nền xanh neon thường có G > R và G > B rất nhiều.
+                    float greenDominance = p.G - Math.Max(p.R, p.B);
+                    bool isBackgroundGreen = p.G > 0.2f && greenDominance > 0.05f;
+                    
+                    // 2. Bảo vệ màu da Boss (Xanh rêu/Xám xanh)
+                    // Màu da Boss thường tối hơn, R và B không quá thấp so với G
+                    // Hoặc G không quá cao.
+                    bool isBossSkin = (p.G < 0.6f && p.R > 0.1f && p.B > 0.1f) || (p.G < 0.3f);
+                    
+                    // 3. Xử lý "Viền xanh" (Green Fringe) ở các frame tấn công
+                    // Nếu là pixel ở rìa, có màu xanh chủ đạo nhưng không phải da boss -> Xóa
+                    if (isBackgroundGreen && !isBossSkin)
+                    {
+                        // Nếu cực kỳ xanh (neon rực), xóa hẳn
+                        if (greenDominance > 0.15f || p.G > 0.7f) 
+                        {
+                            img.SetPixel(x, y, new Color(0, 0, 0, 0));
+                        }
+                        else 
+                        {
+                            // Nếu là xanh nhạt ở rìa, làm nó trong suốt dần
+                            Color ghost = p;
+                            ghost.A = Math.Max(0, p.A - (greenDominance * 2.0f));
+                            // Giảm bớt sắc xanh
+                            ghost.G = Math.Min(ghost.G, Math.Max(ghost.R, ghost.B));
+                            img.SetPixel(x, y, ghost);
+                        }
+                    }
+                    
+                    // Xóa triệt để màu giống hệt màu ở góc
+                    if (ColorsClose(p, corner, 0.2f))
+                    {
+                        img.SetPixel(x, y, new Color(0, 0, 0, 0));
+                    }
+                }
+            }
+            return img;
+        };
 
-        // 2. Load Run
+        var imgIdle = loadBossImg("res://Assets/Sprites/Enemies/ChanTinh/B_dung.jpeg");
+        if (imgIdle == null) return CreateFallbackSprites(Colors.DarkGreen, false);
+
+        // Thu thập tất cả các ảnh
+        var allImages = new Dictionary<string, List<Image>>();
+        allImages["idle"] = new List<Image> { imgIdle };
+
         var runImgs = new List<Image>();
         for (int i = 1; i <= 8; i++)
         {
             if (i == 5) continue;
-            var img = LoadAndCleanImage($"res://Assets/Sprites/Enemies/ChanTinh/B_run{i}.png");
-            if (img != null) { runImgs.Add(img); allBounds.Add(FindBounds(img)); }
+            var img = loadBossImg($"res://Assets/Sprites/Enemies/ChanTinh/B_run{i}.png");
+            if (img != null) runImgs.Add(img);
         }
         allImages["run"] = runImgs;
 
-        // 3. Load Special Attacks
         string folder = "res://Assets/Sprites/Enemies/ChanTinh/";
-        var attackFrames = new Dictionary<string, string>();
-        attackFrames["prep1"] = folder + "attack_prepare_1.png";
-        attackFrames["prep2"] = folder + "attack_prepare_2.png";
-        attackFrames["ready"] = folder + "attack_ready.png";
-        attackFrames["slash"] = folder + "attack_slash.png";
-        attackFrames["end"] = folder + "attack_end.png";
-        attackFrames["smash1"] = folder + "attack_smash.png";
-        attackFrames["smash2"] = folder + "attack_smash2.png";
-        attackFrames["grnd_smash"] = folder + "ground_smash.png";
-        attackFrames["spin"] = folder + "attack_spin.png";
-        attackFrames["d_spin"] = folder + "attack_double_spin.png";
-        attackFrames["fire_p"] = folder + "fire_prepare.png";
-        attackFrames["fire_s"] = folder + "fire_start.png";
-        attackFrames["fire_b"] = folder + "fire_breath.png";
-        attackFrames["jump_a"] = folder + "jump_attack.png";
-        attackFrames["light_a"] = folder + "lightning_attack.png";
-        attackFrames["power"] = folder + "power_charge.png";
+        var attackFrames = new Dictionary<string, string> {
+            {"prep1", folder + "attack_prepare_1.png"},
+            {"prep2", folder + "attack_prepare_2.png"},
+            {"ready", folder + "attack_ready.png"},
+            {"slash", folder + "attack_slash.png"},
+            {"end", folder + "attack_end.png"},
+            {"smash1", folder + "attack_smash.png"},
+            {"smash2", folder + "attack_smash2.png"},
+            {"grnd_smash", folder + "ground_smash.png"},
+            {"spin", folder + "attack_spin.png"},
+            {"d_spin", folder + "attack_double_spin.png"},
+            {"fire_p", folder + "fire_prepare.png"},
+            {"fire_s", folder + "fire_start.png"},
+            {"fire_b", folder + "fire_breath.png"},
+            {"jump_a", folder + "jump_attack.png"},
+            {"light_a", folder + "lightning_attack.png"},
+            {"power", folder + "power_charge.png"},
+            // Thêm các sprite chưa sử dụng để phong phú chiêu thức
+            {"throw", folder + "attack_throw.png"},
+            {"energy", folder + "energy_shot.png"},
+            {"atk_down", folder + "attack_down.png"},
+            {"combat_idle", folder + "combat_idle.png"},
+            {"hit_block", folder + "hit_block.png"}
+        };
 
         var loadedAttacks = new Dictionary<string, Image>();
         foreach (var kv in attackFrames)
         {
-            var img = LoadAndCleanImage(kv.Value);
-            if (img != null)
-            {
-                loadedAttacks[kv.Key] = img;
-                allBounds.Add(FindBounds(img));
-            }
+            var img = loadBossImg(kv.Value);
+            if (img != null) loadedAttacks[kv.Key] = img;
         }
 
-        // Helper to get image if exists
         System.Func<string, Image> getImg = (key) => loadedAttacks.ContainsKey(key) ? loadedAttacks[key] : null;
 
-        // Định nghĩa các chuỗi chiêu thức
+        // 6 chiêu thức cũ + 2 chiêu mới = 8 chiêu đa dạng
         allImages["attack_melee"] = new List<Image> { getImg("prep1"), getImg("ready"), getImg("slash"), getImg("end") };
         allImages["attack_smash"] = new List<Image> { getImg("prep2"), getImg("smash1"), getImg("smash2"), getImg("grnd_smash"), getImg("end") };
-        allImages["attack_spin"] = new List<Image> { getImg("prep1"), getImg("spin"), getImg("d_spin"), getImg("end") };
-        allImages["attack_fire"] = new List<Image> { getImg("fire_p"), getImg("fire_s"), getImg("fire_b"), getImg("end") };
-        allImages["attack_jump"] = new List<Image> { getImg("prep1"), getImg("jump_a"), getImg("end") };
-        allImages["attack_lightning"] = new List<Image> { getImg("prep1"), getImg("ready"), getImg("light_a"), getImg("end") };
+        allImages["attack_spin"] = new List<Image> { getImg("prep1"), getImg("spin"), getImg("d_spin"), getImg("spin"), getImg("end") };
+        allImages["attack_fire"] = new List<Image> { getImg("fire_p"), getImg("fire_s"), getImg("fire_b"), getImg("fire_b"), getImg("end") };
+        allImages["attack_jump"] = new List<Image> { getImg("prep1"), getImg("jump_a"), getImg("atk_down"), getImg("end") };
+        allImages["attack_lightning"] = new List<Image> { getImg("prep1"), getImg("ready"), getImg("light_a"), getImg("light_a"), getImg("end") };
+        // CHIÊU MỚI: Ném rìu
+        allImages["attack_throw"] = new List<Image> { getImg("prep2"), getImg("ready"), getImg("throw"), getImg("end") };
+        // CHIÊU MỚI: Bắn năng lượng  
+        allImages["attack_energy"] = new List<Image> { getImg("power"), getImg("energy"), getImg("energy"), getImg("end") };
+        
         allImages["power_up"] = new List<Image> { getImg("power"), getImg("power"), getImg("power") };
+        allImages["attack_prepare_2"] = new List<Image> { getImg("prep2") };
+        allImages["attack_ready"] = new List<Image> { getImg("ready") };
+        // Thêm hurt và die dùng combat_idle và hit_block
+        allImages["hurt"] = new List<Image> { getImg("hit_block") ?? imgIdle };
+        allImages["die"] = new List<Image> { getImg("hit_block") ?? imgIdle };
 
-        // Clean up: remove nulls from any list in allImages
         foreach (var key in allImages.Keys.ToList())
         {
             allImages[key].RemoveAll(i => i == null);
+            if (allImages[key].Count == 0) allImages[key].Add(imgIdle);
         }
 
-        // 4. Tính toán Unified Scale (Tìm frame to nhất để làm chuẩn)
-        int maxW = 50, maxH = 50;
-        foreach (var b in allBounds)
-        {
-            if (b.Size.X > maxW) maxW = b.Size.X;
-            if (b.Size.Y > maxH) maxH = b.Size.Y;
-        }
-
-        float unifiedScale = 1.0f;
-        int limit = outSize - 40;
-        if (maxW > limit || maxH > limit)
-        {
-            unifiedScale = Math.Min((float)limit / maxW, (float)limit / maxH);
-        }
-
-        // 4. Tạo Texture với tỉ lệ thống nhất
+        // ===== CORE FIX: Mỗi frame được scale RIÊNG để đạt đúng targetBodyHeight =====
         foreach (var entry in allImages)
         {
             var textures = new List<Texture2D>();
-            for (int i = 0; i < entry.Value.Count; i++)
+            foreach (var img in entry.Value)
             {
-                var img = entry.Value[i];
-                // Tìm bounds của chính frame đó nhưng dùng unifiedScale để đảm bảo không bị phóng to tùy tiện
                 var b = FindBounds(img);
-                textures.Add(SmartPad(img, b, outSize, outSize, unifiedScale));
+                float frameScale = (float)targetBodyHeight / b.Size.Y;
+                float maxWidthScale = (float)(outSize - 20) / b.Size.X;
+                if (frameScale > maxWidthScale) frameScale = maxWidthScale;
+                
+                textures.Add(SmartPad(img, b, outSize, outSize, frameScale, false, 1.0f, true));
             }
             if (textures.Count > 0) anims[entry.Key] = textures.ToArray();
         }
 
-        // Fallbacks
-        if (!anims.ContainsKey("idle") && anims.ContainsKey("run")) anims["idle"] = new[] { anims["run"][0] };
-        if (!anims.ContainsKey("run") && anims.ContainsKey("idle")) anims["run"] = anims["idle"];
-        
         string[] standard = { "walk", "attack", "hurt", "die" };
         foreach (var s in standard)
         {
             if (s == "walk") anims["walk"] = anims.ContainsKey("run") ? anims["run"] : anims["idle"];
-            else if (!anims.ContainsKey(s))
-            {
-                if (anims.ContainsKey("idle")) anims[s] = anims["idle"];
-            }
+            else if (!anims.ContainsKey(s)) anims[s] = anims.ContainsKey("idle") ? anims["idle"] : null;
         }
 
-        return BuildSpriteFrames(anims, 6.0f);
+        return BuildSpriteFrames(anims, 4.0f);
     }
 
     public static SpriteFrames CreatePrincessSpriteFrames()

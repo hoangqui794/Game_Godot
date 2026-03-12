@@ -12,6 +12,13 @@ public partial class LevelManager : Node2D
     private Player _player;
     private TutorialManager _tutorialManager;
 
+    // --- Level 3 specific references ---
+    private Node2D _princess;
+    private Node2D _cage;
+    private Node2D _boss;
+    private bool _level3EnemiesCleared = false;
+    private bool _level3BossSpawned = false;
+
     private List<Vector2> _checkpoints = new List<Vector2>();
 
     public override void _Ready()
@@ -24,10 +31,10 @@ public partial class LevelManager : Node2D
             GameManager.Instance.UnlockedSkillsCount = 0;
             GD.Print("Level 1: Reset UnlockedSkillsCount to 0");
         }
-        else if (LevelNumber == 4)
+        else if (LevelNumber == 3 || LevelNumber == 4)
         {
             GameManager.Instance.UnlockedSkillsCount = 3;
-            GD.Print("Level 4: Unlock all skills (JKL)");
+            GD.Print($"Level {LevelNumber}: Unlock all skills (JKL)");
         }
 
         if (HasNode("SpawnPoint"))
@@ -37,6 +44,11 @@ public partial class LevelManager : Node2D
         SpawnPlayer();
         ConnectPlayerSignals();
         CallDeferred(nameof(TryStartBeginnerTutorial));
+
+if (LevelNumber == 3)
+{
+    SetupLevel3();
+}
 
         // Giữ phần bẫy đá từ GitHub
         if (LevelNumber == 1)
@@ -157,7 +169,67 @@ public partial class LevelManager : Node2D
         }
     }
 
-    public void FastRespawnPlayer()
+    // --- Level 3 Specific Setup ---
+private void SetupLevel3()
+{
+    _princess = GetNodeOrNull<Node2D>("Princess");
+    _cage = GetNodeOrNull<Node2D>("BossCage");
+    _boss = GetNodeOrNull<Node2D>("ChanTinh");
+
+    if (_princess != null) _princess.Visible = false;
+    if (_cage != null) _cage.Visible = false;
+    if (_boss != null)
+    {
+        _boss.Visible = false;
+        _boss.ProcessMode = ProcessModeEnum.Disabled; // Don't let it act yet
+    }
+    
+    GD.Print("Level 3 Setup: Hidden Princess, Cage, and Boss.");
+}
+
+private void ProcessLevel3Logic()
+{
+    if (!_level3EnemiesCleared)
+    {
+        var enemies = GetTree().GetNodesInGroup("enemies");
+        bool anySmallEnemies = false;
+        foreach (Node item in enemies)
+        {
+            if (item != _boss && IsInstanceValid(item) && !item.IsQueuedForDeletion())
+            {
+                anySmallEnemies = true;
+                break;
+            }
+        }
+
+        if (!anySmallEnemies)
+        {
+            _level3EnemiesCleared = true;
+            if (_princess != null) _princess.Visible = true;
+            if (_cage != null) _cage.Visible = true;
+            GD.Print("Level 3: All small enemies defeated! Princess appeared.");
+        }
+    }
+    else if (!_level3BossSpawned)
+    {
+        if (_player != null && _princess != null)
+        {
+            float dist = _player.GlobalPosition.DistanceTo(_princess.GlobalPosition);
+            if (dist < 400f) // Threshold to spawn Boss
+            {
+                _level3BossSpawned = true;
+                if (_boss != null)
+                {
+                    _boss.Visible = true;
+                    _boss.ProcessMode = ProcessModeEnum.Inherit;
+                    GD.Print("Level 3: Player approached Princess! Boss Chan Tinh spawned!");
+                }
+            }
+        }
+    }
+}
+
+public void FastRespawnPlayer()
     {
         if (_player != null && IsInstanceValid(_player))
         {
@@ -200,6 +272,12 @@ public partial class LevelManager : Node2D
     public override void _Process(double delta)
     {
         if (_player == null || _player.IsQueuedForDeletion()) return;
+
+        if (LevelNumber == 3)
+        {
+            ProcessLevel3Logic();
+        }
+
         for (int i = GameManager.Instance.CurrentCheckpointIndex + 1; i < _checkpoints.Count; i++)
         {
             if (Mathf.Abs(_player.GlobalPosition.X - _checkpoints[i].X) < 60f)

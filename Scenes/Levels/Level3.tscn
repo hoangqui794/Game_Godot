@@ -10,10 +10,9 @@
 [ext_resource type="PackedScene" uid="uid://eagle001" path="res://Scenes/Enemies/Eagle.tscn" id="7"]
 [ext_resource type="PackedScene" uid="uid://princess001" path="res://Scenes/NPCs/Princess.tscn" id="8"]
 [ext_resource type="Texture2D" uid="uid://b0vx13i1dftha" path="res://Assets/Sprites/Backgrounds/cave_ground.png" id="9"]
-[ext_resource type="PackedScene" uid="uid://bossenemy001" path="res://Scenes/Enemies/BossEnemy.tscn" id="10"]
 [ext_resource type="PackedScene" uid="uid://bosscage001" path="res://Scenes/Objects/BossCage.tscn" id="11"]
 [ext_resource type="PackedScene" uid="uid://levelexit001" path="res://Scenes/Objects/LevelExit.tscn" id="12"]
-[ext_resource type="PackedScene" path="res://Scenes/Enemies/ChanTinh.tscn" id="13"]
+[ext_resource type="PackedScene" uid="uid://chantinh001" path="res://Scenes/Enemies/ChanTinh.tscn" id="13"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(4000, 100)
@@ -32,7 +31,8 @@ script = ExtResource("4")
 
 [node name="Background" type="ColorRect" parent="." unique_id=564659817]
 z_index = -10
-offset_right = 4000.0
+offset_left = 1.0
+offset_right = 4001.0
 offset_bottom = 800.0
 color = Color(0.1, 0.08, 0.12, 1)
 
