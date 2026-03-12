@@ -246,7 +246,7 @@ public partial class DialogueManager : CanvasLayer
         vbox.AddChild(_textLabel);
 
         _promptLabel = new Label();
-        _promptLabel.Text = "Nhấn Phím Space hoặc Z để tiếp tục ▼";
+        _promptLabel.Text = "Nhấn Phím Space hoặc H để tiếp tục ▼";
         _promptLabel.AddThemeFontSizeOverride("font_size", 16);
         _promptLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f, 1f));
         _promptLabel.HorizontalAlignment = HorizontalAlignment.Right;

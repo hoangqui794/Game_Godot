@@ -341,7 +341,7 @@ public partial class TreasureChest : Area2D
                     GameManager.Instance.TotalKeys++; // Nhận luôn 1 chìa khóa ở Màn 1
 
                     // Hiện 3 trang mô tả (Slide): Chìa khóa, Skill J, Skill K
-                    ShowRewardPopups(player);
+                    PlayDialogueAndShowPopups(player, 1);
 
                     GD.Print("Màn 1: Nhận kỹ năng J, K và chìa khóa xong, hiện popup mô tả.");
                 }
@@ -352,7 +352,7 @@ public partial class TreasureChest : Area2D
                     GameManager.Instance.TotalKeys++;
 
                     // Hiện popup mô tả cho kỹ năng L
-                    ShowRewardPopups(player);
+                    PlayDialogueAndShowPopups(player, 2);
 
                     GD.Print("Màn 2: Nhận kỹ năng L và hiện popup mô tả.");
                 }
@@ -360,10 +360,47 @@ public partial class TreasureChest : Area2D
                 {
                     // Ở các màn khác (nếu có rương) thì vẫn mở cổng tự động (nếu muốn)
                     GameManager.Instance.TotalKeys++;
-                    CreateEpicPortal(player);
+                    PlayDialogueAndShowPopups(player, 3);
                 }
             }));
         }));
+    }
+
+    private async void PlayDialogueAndShowPopups(Player player, int level)
+    {
+        var dm = new DialogueManager();
+        AddChild(dm);
+        var lines = new List<DialogueManager.DialogueLine>();
+
+        if (level == 1)
+        {
+            lines.Add(new DialogueManager.DialogueLine("Ngọc Hoàng", "Thạch Sanh! Ta đang dõi theo hành trình của ngươi. Ngươi đã vượt qua rừng thiêng bằng ý chí, không hề nản lòng dù hiểm nguy. Rìu thần của ngươi xứng đáng được thức tỉnh! \"Hãy nhận lấy hai Binh Pháp đầu tiên, hãy dùng chúng bảo vệ lẽ phải trên con đường phía trước! “", null, "res://Assets/Audio/Voices/god_m1_reward.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Hai Binh pháp từ Thiên Đình sẽ giúp ta tiêu diệt cái ác. Ta sẽ không phụ lòng mọi người!", null, "res://Assets/Audio/Voices/ts_m1_god2.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Ngọc Hoàng", "Hãy nhớ cho kỹ, Thạch Sanh. Sức mạnh không phải để phô trương — mà để che chở kẻ yếu và trừng trị yêu tà. Càng vào sâu, lòng ngươi càng phải vững hơn rìu trong tay.", null, "res://Assets/Audio/Voices/god_m1_advise.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Con xin ghi nhớ. Rìu này chỉ vung vì lẽ phải, không vì tư thù…", null, "res://Assets/Audio/Voices/ts_m1_god3.mp3"));
+        }
+        else if (level == 2)
+        {
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Lại là rương này… Ngọc Hoàng còn ban thêm sức mạnh cho ta?.", null, "res://Assets/Audio/Voices/ts_m2_god1.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Ngọc Hoàng", "Thạch Sanh! Ngươi vừa một mình đương đầu với cả bầy rắn lẫn bầy đại bàng. Trời đất cảm phục sự kiên cường đó. Nhưng phía trước còn một thử thách lớn hơn đang chờ ngươi. Hãy nhận lấy binh pháp cuối cùng này, ta ban cho ngươi để hạ con yêu quái trong kia!", null, "res://Assets/Audio/Voices/god_m2_reward.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Ta đã nhận được sức mạnh khổng lồ. Chằn tinh, ngươi chịu thua đi.... .", null, "res://Assets/Audio/Voices/ts_m2_god2.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Con đã hiểu. Con sẽ phá cổng tối, diệt yêu tà, rồi đưa công chúa trở về.", null, "res://Assets/Audio/Voices/ts_m2_god3.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Bầy rắn, bầy đại bàng, tất cả đã bị hạ. Hình như có Tiếng gầm từ phía trong… phải chăng là tiếng của Chằn tinh. Nhưng ta đã có đủ sức mạnh rồi, tiến lên thôi.", null, "res://Assets/Audio/Voices/ts_m2_end.mp3"));
+        }
+
+        if (lines.Count > 0)
+        {
+            await dm.PlayDialogue(lines);
+        }
+        
+        if (level == 1 || level == 2)
+        {
+            ShowRewardPopups(player);
+        }
+        else
+        {
+            CreateEpicPortal(player);
+        }
     }
 
     private void CreateEpicPortal(Player player)

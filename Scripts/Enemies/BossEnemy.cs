@@ -1,5 +1,5 @@
 using Godot;
-
+using System.Collections.Generic;
 public partial class BossEnemy : BaseEnemy
 {
     [Export] public PackedScene KeyScene;
@@ -155,10 +155,22 @@ public partial class BossEnemy : BaseEnemy
         }
     }
 
-    protected override void Die()
+    protected override async void Die()
     {
         base.Die();
+        DeathTimer.Stop(); // Ngăn Boss biến mất ngay lập tức để đợi hội thoại
+        
+        var dm = new DialogueManager();
+        GetParent().AddChild(dm);
+        var lines = new List<DialogueManager.DialogueLine>
+        {
+            new DialogueManager.DialogueLine("Chằn Tinh", "Không thể, cái binh pháp quỷ này, ta đã kiêu ngạo, quá lâu.", null, "res://Assets/Audio/Voices/chantinh_die.mp3"),
+            new DialogueManager.DialogueLine("Thạch Sanh", "Ngươi đã thua rồi, Chằn Tinh. Không phải vì ta mạnh hơn — mà vì lẽ phải trời đất luôn thắng kẻ hung tàn!", null, "res://Assets/Audio/Voices/ts_boss_end1.mp3")
+        };
+        await dm.PlayDialogue(lines);
+
         SpawnKey();
+        QueueFree(); // Xóa boss sau khi hội thoại xong
     }
 
     private void SpawnKey()

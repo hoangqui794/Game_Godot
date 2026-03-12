@@ -72,7 +72,7 @@ public partial class Princess : Area2D
         RescuePrincess();
     }
 
-    private void RescuePrincess()
+    private async void RescuePrincess()
     {
         _isRescued = true;
         _animSprite.Play("rescued");
@@ -81,12 +81,18 @@ public partial class Princess : Area2D
 
         EmitSignal(SignalName.PrincessRescued);
 
-        // Transition to next level after delay
-        var timer = GetTree().CreateTimer(3.0);
-        timer.Timeout += () =>
+        var dm = new DialogueManager();
+        AddChild(dm);
+        var lines = new List<DialogueManager.DialogueLine>
         {
-            GameManager.Instance.AddScore(500);
-            GameManager.Instance.NextLevel();
+            new DialogueManager.DialogueLine("Công Chúa", "Chàng thật sự đến rồi, Cảm ơn Chàng đã cứu ta, Chàng thật dũng cảm.", null, "res://Assets/Audio/Voices/princess_free1.mp3"),
+            new DialogueManager.DialogueLine("Thạch Sanh", "Người vô tội không nên bị giam cầm. Đó là lý do duy nhất ta vào đây. Không có gì cao cả hơn thế.", null, "res://Assets/Audio/Voices/ts_end_princess.mp3"),
+            new DialogueManager.DialogueLine("Ngọc Hoàng", "Chúc mừng ngươi, không chỉ bằng sức mạnh, mà bằng lòng ngay thẳng không đổi. Giờ đây ngươi hãy trở về và nhận được những thứ đáng được hưởng.", null, "res://Assets/Audio/Voices/god_end_win2.mp3"),
+            new DialogueManager.DialogueLine("Công Chúa", "Cảm ơn chàng, Thạch Sanh. Cảm ơn chàng rất nhiều.", null, "res://Assets/Audio/Voices/princess_free2.mp3")
         };
+        await dm.PlayDialogue(lines);
+
+        GameManager.Instance.AddScore(500);
+        GameManager.Instance.NextLevel();
     }
 }

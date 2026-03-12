@@ -43,7 +43,7 @@ public partial class LevelManager : Node2D
         CollectCheckpoints();
         SpawnPlayer();
         ConnectPlayerSignals();
-        CallDeferred(nameof(TryStartBeginnerTutorial));
+        CallDeferred(nameof(PlayLevelStartSequence));
 
 if (LevelNumber == 3)
 {
@@ -147,17 +147,40 @@ if (LevelNumber == 3)
         if (_player != null) _player.PlayerDied += OnPlayerDied;
     }
 
-    private async void TryStartBeginnerTutorial()
+    private async void PlayLevelStartSequence()
     {
-        if (LevelNumber != 1) return;
         if (_player == null || !IsInstanceValid(_player)) return;
-        if (GameManager.Instance == null) return;
-        if (GameManager.Instance.HasCompletedOnboardingTutorial) return;
 
-        _tutorialManager = new TutorialManager();
-        AddChild(_tutorialManager);
+        var dm = new DialogueManager();
+        AddChild(dm);
+        var lines = new List<DialogueManager.DialogueLine>();
 
-        await _tutorialManager.RunTutorial(_player);
+        if (LevelNumber == 1)
+        {
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Chằn Tinh đã bắt công chúa vào hang tối rồi. Ta phải cứu người…. Rìu thần đã ở trên tay — đây chính là xứ mệnh của ta, phải đi thôi!", null, "res://Assets/Audio/Voices/ts_m1_intro.mp3"));
+        }
+        else if (LevelNumber == 2)
+        {
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Cả rắn lẫn đại bàng , chúng bố trí cả trên cao lẫn dưới thấp. Lính canh của Chằn Tinh thật không đơn giản mà… .", null, "res://Assets/Audio/Voices/ts_m2_intro1.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Hãy chịu thua đi. Điều duy nhất các ngươi có thể làm lúc này là đưa ta đến nơi Chằn Tinh đang ở.", null, "res://Assets/Audio/Voices/ts_demand_boss.mp3"));
+        }
+        else if (LevelNumber == 3)
+        {
+            lines.Add(new DialogueManager.DialogueLine("Công Chúa", "Ai đó, cứu tôi, Ai ở đó không?", null, "res://Assets/Audio/Voices/princess_help.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Tụ lại hết đi! Một cơn lốc là đủ quét sạch bọn ngươi rồi! .", null, "res://Assets/Audio/Voices/ts_m2_tactics3.mp3"));
+        }
+
+        if (lines.Count > 0)
+        {
+            await dm.PlayDialogue(lines);
+        }
+
+        if (LevelNumber == 1 && GameManager.Instance != null && !GameManager.Instance.HasCompletedOnboardingTutorial)
+        {
+            _tutorialManager = new TutorialManager();
+            AddChild(_tutorialManager);
+            await _tutorialManager.RunTutorial(_player);
+        }
     }
 
     public void ActivateCheckpoint(int index)
@@ -223,10 +246,24 @@ private void ProcessLevel3Logic()
                     _boss.Visible = true;
                     _boss.ProcessMode = ProcessModeEnum.Inherit;
                     GD.Print("Level 3: Player approached Princess! Boss Chan Tinh spawned!");
+                    CallDeferred(nameof(PlayBossIntroDialogue));
                 }
             }
         }
     }
+}
+
+private async void PlayBossIntroDialogue()
+{
+    var dm = new DialogueManager();
+    AddChild(dm);
+    var lines = new List<DialogueManager.DialogueLine>
+    {
+        new DialogueManager.DialogueLine("Công Chúa", "Thạch Sanh, hãy cẩn thận, con Chằn Tinh này rất mạnh!", null, "res://Assets/Audio/Voices/princess_warn.mp3"),
+        new DialogueManager.DialogueLine("Chằn Tinh", "THẠCH SANH!!! Ngươi thật sự đến được tận đây?! Ta phải thừa nhận, ngươi đã hạ được tất cả lính canh của ta. Nhưng đây là sào huyệt của ta, ngươi nghĩ sẽ thoát được sao!", null, "res://Assets/Audio/Voices/chantinh_intro.mp3"),
+        new DialogueManager.DialogueLine("Thạch Sanh", "Ta đã bước vào đây để cứu người, thì cũng sẵn sàng kết thúc mọi hiểm họa tại đây.", null, "res://Assets/Audio/Voices/ts_boss_phase3.mp3")
+    };
+    await dm.PlayDialogue(lines);
 }
 
 public void FastRespawnPlayer()

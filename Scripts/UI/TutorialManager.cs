@@ -65,19 +65,35 @@ public partial class TutorialManager : CanvasLayer
         var steps = new List<TutorialStep>
         {
             new TutorialStep(
-                "move_jump",
+                "move",
                 "🗣️ Thạch Sanh",
-                "Đường rừng này không có kẻ địch, nhưng chỉ cần sơ sẩy một bước là trả giá. Phải thật tỉnh táo.",
-                "A/D hoặc ←/→ để đi, Space để nhảy.",
-                "res://Assets/Audio/Voices/Tutorial_Move.mp3", // Đường dẫn file âm thanh, bạn có thể tạo sau
-                () => _moveDone && _jumpDone
+                "Đường rừng này không có kẻ địch, nhưng chỉ cần sơ sẩy một bước là trả giá. Phải thật tỉnh táo thôi.",
+                "A/D hoặc ←/→ để đi.",
+                "res://Assets/Audio/Voices/ts_tut_move.mp3",
+                () => _moveDone
+            ),
+            new TutorialStep(
+                "jump",
+                "🗣️ Thạch Sanh",
+                "Khoảng cách này không thể bước thường. Phải lấy đà rồi nhảy thật chuẩn.",
+                "Nhấn Space (Phím cách) để nhảy qua.",
+                "res://Assets/Audio/Voices/ts_tut_jump.mp3",
+                () => _jumpDone
+            ),
+            new TutorialStep(
+                "djump",
+                "🗣️ Thạch Sanh",
+                "Vách đá dựng đứng… Một cú nhảy là chưa đủ. Ta phải đạp gió thêm lần nữa để nhảy cao hơn mới được!",
+                "Nhấn Space thêm một lần nữa trên không (Double Jump).",
+                "res://Assets/Audio/Voices/ts_tut_djump.mp3",
+                () => _jumpDone // Có thể dùng _jumpDone cho djump ở bước này
             ),
             new TutorialStep(
                 "attack",
                 "🗣️ Thạch Sanh",
-                "Trước khi tiến vào sâu trong hang, ta phải khởi động tay chân. Rìu thần sẽ không nương tay với yêu tà!",
-                "Nhấn Z hoặc chuột trái để chém.",
-                "res://Assets/Audio/Voices/Tutorial_Attack.mp3", // Đường dẫn file âm thanh, bạn có thể tạo sau
+                "Trước khi tiến vào sâu trong hang, ta phải khởi động tay chân. Rìu thần sẽ không nương tay với những yêu tà đâu!",
+                "Nhấn H hoặc chuột trái để chém.",
+                "res://Assets/Audio/Voices/ts_tut_attack.mp3",
                 () => _attackDone
             )
         };
@@ -211,12 +227,17 @@ public partial class TutorialManager : CanvasLayer
 
     private void CaptureStepInput(string actionId)
     {
-        if (actionId == "move_jump")
+        if (actionId == "move")
         {
             if (!_moveDone && Mathf.Abs(Input.GetAxis("move_left", "move_right")) > 0.1f)
             {
                 _moveDone = true;
             }
+            return;
+        }
+
+        if (actionId == "jump" || actionId == "djump")
+        {
             if (!_jumpDone && Input.IsActionJustPressed("jump"))
             {
                 _jumpDone = true;
