@@ -76,7 +76,7 @@ public partial class TutorialManager : CanvasLayer
                 "attack",
                 "🗣️ Thạch Sanh",
                 "Trước khi tiến vào sâu trong hang, ta phải khởi động tay chân. Rìu thần sẽ không nương tay với yêu tà!",
-                "Nhấn Z hoặc chuột trái để chém.",
+                "Nhấn H hoặc chuột trái để chém.",
                 "res://Assets/Audio/Voices/Tutorial_Attack.mp3", // Đường dẫn file âm thanh, bạn có thể tạo sau
                 () => _attackDone
             )

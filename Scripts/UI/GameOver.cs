@@ -9,32 +9,32 @@ using Godot;
 /// </summary>
 public partial class GameOver : Control
 {
-    private Label  _scoreLabel;
+    private Label _scoreLabel;
     private Button _retryButton;
     private Button _menuButton;
-    private bool   _inputEnabled = false;
+    private bool _inputEnabled = false;
 
     public override void _Ready()
     {
         // ── Liên kết node từ .tscn ──────────────────────────────
-        _scoreLabel   = GetNode<Label>("ScoreLabel");
-        _retryButton  = GetNode<Button>("RetryButton");
-        _menuButton   = GetNode<Button>("MenuButton");
+        _scoreLabel = GetNode<Label>("ScoreLabel");
+        _retryButton = GetNode<Button>("RetryButton");
+        _menuButton = GetNode<Button>("MenuButton");
 
         // Set state ban đầu
         _scoreLabel.Text = $"Điểm: {GameManager.Instance.Score}";
 
         // Bắt sự kiện click vào nút (người chơi bắt buộc phải click TRÚNG nút)
-        _retryButton.Pressed += () => 
+        _retryButton.Pressed += () =>
         {
             if (_inputEnabled) GameManager.Instance.StartGame(); // Hết mạng thì phải chơi lại từ Map 1
         };
-        
-        _menuButton.Pressed += () => 
+
+        _menuButton.Pressed += () =>
         {
             if (_inputEnabled) GameManager.Instance.GoToMainMenu();
         };
-        
+
         _retryButton.GrabFocus();
 
         // ── Bảo vệ chống bấm nhầm lập tức khi vừa chết ──────────
@@ -51,6 +51,8 @@ public partial class GameOver : Control
     public override void _Input(InputEvent @event)
     {
         if (!_inputEnabled) return;
+        if (@event is InputEventKey keyEvent && keyEvent.Echo) return;
+        if (!@event.IsPressed()) return;
 
         // Chỉ nhận Nhấn Phím SPACE, ENTER để chơi lại
         // (Bỏ bắt sự kiện Click chuột trái toàn màn hình ở đây, tránh bị đè lên nút Về Menu)
