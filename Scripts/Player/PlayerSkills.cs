@@ -11,12 +11,15 @@ public partial class Player : CharacterBody2D
     private float _skill3Timer = 0f;
 
     // ── Cooldown kỹ năng ──
-    // Skill1 (Rìm thần): bấm thường xuyên được, chỉ mạnh hơn đòn thường
-    // Skill2 (Lốc xoáy): đủ kill Rắn trong vòng quay nếu đứng gần, đủ hạ 1/2 máu Đại bàng
+    // Skill1 (Rìu thần): bấm thường xuyên được, chỉ mạnh hơn đòn thường
+    // Skill2 (Lốc xoáy): damage tổng cao nhưng cần đứng yên, nguy hiểm
     // Skill3 (Thiên địa chấn): Mạnh nhất, chỉ dùng khi cấp bách
-    private const float Skill1Cooldown = 5.0f;  // +1s vì dùng được liên tục
-    private const float Skill2Cooldown = 8.0f;  // +2s vì damage tổng cao
-    private const float Skill3Cooldown = 22.0f; // +2s vì mạnh nhất game
+    // private const float Skill1Cooldown = 4.0f;  
+    // private const float Skill2Cooldown = 10.0f; 
+    // private const float Skill3Cooldown = 18.0f; 
+    private const float Skill1Cooldown = 0f;  
+    private const float Skill2Cooldown = 0f; 
+    private const float Skill3Cooldown = 0f; 
 
     // --- Biến lưu trữ UI Chiêu thức ---
     private CanvasLayer _skillPanelLayer;
@@ -313,8 +316,8 @@ public partial class Player : CharacterBody2D
         axe.Texture = _cachedAxeTexture;
         axe.GlobalPosition = GlobalPosition + new Vector2(_facingDirection * 20, -10);
         axe.Direction = new Vector2(_facingDirection, -0.1f).Normalized();
-        // Skill1: 1.8× đòn thường (25×1.8=45)
-        // → cần 2 nhát để kill rắn (45×2=90>80), cần 3 nhát cho đại bàng (45×3=135>120)
+        // Skill1: 1.8× đòn thường (30×1.8=54)
+        // → 2 nhát kill rắn (54×2=108 > 100), 3 nhát nhừ đại bàng (54×3=162 > 150)
         axe.Damage = AttackDamage * 1.8f;
 
         // Find nearest enemy
@@ -396,9 +399,9 @@ public partial class Player : CharacterBody2D
                     {
                         if (e.HasMethod("TakeDamage"))
                         {
-                            // Skill2: 0.5×/tick, 0.2s/tick, 3s = 15 tick
-                            // Tổng: 25×0.5×15=187 damage (kill rắn 2.3x, đại bàng 1.5x nhừ hết màn)
-                            e.Call("TakeDamage", (int)(AttackDamage * 0.5f));
+                        // Skill2: 0.4×/tick, 0.2s/tick, 3s = 15 tick
+                            // Tổng: 30×0.4×15=180 (kill rắn 1.8×, đại bàng 1.2× nhừ)
+                            e.Call("TakeDamage", (int)(AttackDamage * 0.4f));
                         }
                     }
                 }
@@ -571,10 +574,10 @@ public partial class Player : CharacterBody2D
             {
                 if (e.HasMethod("TakeDamage"))
                 {
-                    // Skill3 (Thiên địa chấn): 4× ATK = 25×4 = 100 damage
-                    // → kill rắn (100 > 80) nhưng đại bàng sót lại 20HP (cần cú cầp rứt dần)
-                    // Giảm từ 6× xuống để tránh 1-shot tất cả + giữ cảm giác dùng skill có ý nghĩa
-                    e.Call("TakeDamage", AttackDamage * 4);
+                    // Skill3 (Thiên địa chấn): 5× ATK = 30×5 = 150 damage
+                    // → kill rắn (150 > 100), hạ 1HP đại bàng (150 = 150), boss giáp sống
+                    // Mạnh nhất nhưng vẫn không 1-shot boss để giữ thử thách
+                    e.Call("TakeDamage", AttackDamage * 5);
                 }
             }
         }

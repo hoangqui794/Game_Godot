@@ -330,12 +330,12 @@ position = Vector2(2138, 261)
 position = Vector2(2538, 520)
 
 [node name="BossCage" parent="." unique_id=123456789 instance=ExtResource("11")]
-position = Vector2(2950, 593)
+position = Vector2(3420, 593)
 
 [node name="Princess" parent="." unique_id=376078602 instance=ExtResource("8")]
-position = Vector2(2953, 586)
+position = Vector2(3423, 586)
 
 [node name="LevelExit" parent="." unique_id=555666777 instance=ExtResource("12")]
-position = Vector2(3828, 546)
+position = Vector2(4500, 546)
 
 [node name="HUD" parent="." unique_id=1990820962 instance=ExtResource("2")]

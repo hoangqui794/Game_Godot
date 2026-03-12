@@ -16,7 +16,7 @@ public partial class RollingRock : CharacterBody2D
     private bool _hasHitPlayer = false;
 
     // Visual
-    private ColorRect _rockVisual;
+    private Sprite2D _rockVisual;
 
     public override void _Ready()
     {
@@ -26,13 +26,10 @@ public partial class RollingRock : CharacterBody2D
 
         AddToGroup("rolling_rocks");
 
-        // Tạo visual hình tròn bằng ColorRect (engine tự render)
-        _rockVisual = new ColorRect();
-        _rockVisual.Color = new Color(0.35f, 0.28f, 0.2f); // Màu đá xám nâu
-        _rockVisual.OffsetLeft = -25f;
-        _rockVisual.OffsetTop = -25f;
-        _rockVisual.OffsetRight = 25f;
-        _rockVisual.OffsetBottom = 25f;
+        // Sử dụng ảnh đá "xịn" từ Level 1 để không bị phèn
+        _rockVisual = new Sprite2D();
+        _rockVisual.Texture = GD.Load<Texture2D>("res://Assets/Sprites/Environment/rock_pixel.png");
+        _rockVisual.Scale = new Vector2(0.4f, 0.4f); // Chỉnh scale cho vừa kích cỡ 28px radius
         AddChild(_rockVisual);
 
         // Tạo Area2D để detect Player
@@ -115,3 +112,4 @@ public partial class RollingRock : CharacterBody2D
         }
     }
 }
+

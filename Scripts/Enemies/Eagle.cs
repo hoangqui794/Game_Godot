@@ -18,16 +18,16 @@ public partial class Eagle : BaseEnemy
     {
         // Set eagle-specific stats before base _Ready
         // ── Đại Bàng: Kẻ thù tầm trung, nguy hiểm ở tầm xa ──
-        // Player cần 5 đòn thường (25×5=125 > 120) để hạ
-        // đại bàng cần 6 đòn láo xuống (18×6=108) để kill player
-        MaxHealth    = 120;      // Cứng gấp 3 lần rắn, kill được bằng skill mới là xứng
-        AttackDamage = 18;       // 18% MaxHP mỗi nhát láo xuống
+        // Player cần 5 đòn thường (30×5=150 = 150) để hạ
+        // Đại bàng cần 8 đòn láo xuống (20×8=160) để kill player
+        MaxHealth    = 150;      // Tăng từ 120, cần 5 đòn mới hạ nổi
+        AttackDamage = 20;       // 13% MaxHP mỗi nhát láo xuống
         MoveSpeed    = 110.0f;   // Bay nhanh hơn rắn
-        ScoreValue   = 300;      // Xứng với mức độ nguy hiểm
+        ScoreValue   = 300;      // Xưứng với mức độ nguy hiểm
         PatrolDistance = 220.0f; // Bay xa hơn
         DetectRange    = 320.0f; // Mắt sắc, nhìn rất xa
         AttackRange    = 90.0f;  // Tầm láo rộng
-        AttackCooldown = 1.6f;   // Tấn công đồn dập hơn (gảm từ 2.0s)
+        AttackCooldown = 1.4f;   // Tấn công dồn dập hơn (giảm từ 1.6s)
         
         // Đẩy Thanh Máu vọt thẳng lên trời để vượt mảng Sprite của đầu Đại Bàng
         HealthBarOffset = new Vector2(-20, -75);
@@ -105,7 +105,7 @@ public partial class Eagle : BaseEnemy
                 if (TargetPlayer != null && !TargetPlayer.IsQueuedForDeletion())
                 {
                     // Khi đang chờ cooldown thì lượn cao, chuẩn bị đánh thì là đà sà xuống
-                    float chaseHeight = CanAttackPlayer ? 80.0f : 160.0f; 
+                    float chaseHeight = CanAttackPlayer ? 50.0f : 110.0f; 
                     
                     // Thêm dao động ngang để nó lượn lờ vòng quanh trên đầu, tránh đậu yên tĩnh
                     float offsetX = Mathf.Sin(_floatTimer * 3.0f) * 100.0f;
@@ -153,7 +153,7 @@ public partial class Eagle : BaseEnemy
                         SetFacingDirection(diveDir.X < 0);
 
                     // If eagle has reached player's height or lower, pull up immediately
-                    if (GlobalPosition.Y >= TargetPlayer.GlobalPosition.Y - 20 || IsOnFloor())
+                    if (GlobalPosition.Y >= TargetPlayer.GlobalPosition.Y + 10 || IsOnFloor())
                     {
                         _isDiving = false;
                         CanAttackPlayer = false;

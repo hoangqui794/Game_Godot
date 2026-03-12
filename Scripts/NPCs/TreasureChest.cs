@@ -356,11 +356,21 @@ public partial class TreasureChest : Area2D
 
                     GD.Print("Màn 2: Nhận kỹ năng L và hiện popup mô tả.");
                 }
+                else if (GameManager.Instance.CurrentLevel == 3)
+                {
+                    // Màn 3: Nhận chìa khóa Boss để mở lồng Công Chúa
+                    GameManager.Instance.HasBossKey = true;
+                    GameManager.Instance.TotalKeys++;
+                    
+                    // Hiện hội thoại nhận chìa khóa cuối cùng
+                    PlayDialogueAndShowPopups(player, 3);
+                    GD.Print("Màn 3: Đã nhận Chìa khóa Chằn Tinh từ Rương Báu!");
+                }
                 else
                 {
-                    // Ở các màn khác (nếu có rương) thì vẫn mở cổng tự động (nếu muốn)
+                    // Ở các màn khác (nếu có rương)
                     GameManager.Instance.TotalKeys++;
-                    PlayDialogueAndShowPopups(player, 3);
+                    PlayDialogueAndShowPopups(player, 0);
                 }
             }));
         }));
@@ -387,6 +397,11 @@ public partial class TreasureChest : Area2D
             lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Con đã hiểu. Con sẽ phá cổng tối, diệt yêu tà, rồi đưa công chúa trở về.", null, "res://Assets/Audio/Voices/ts_m2_god3.mp3"));
             lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Bầy rắn, bầy đại bàng, tất cả đã bị hạ. Hình như có Tiếng gầm từ phía trong… phải chăng là tiếng của Chằn tinh. Nhưng ta đã có đủ sức mạnh rồi, tiến lên thôi.", null, "res://Assets/Audio/Voices/ts_m2_end.mp3"));
         }
+        else if (level == 3)
+        {
+            lines.Add(new DialogueManager.DialogueLine("Thạch Sanh", "Đây rồi! Chiếc chìa khóa khóa vạn năng từ Chằn Tinh... Nàng ơi, ta tới đây!", null, "res://Assets/Audio/Voices/ts_m3_key1.mp3"));
+            lines.Add(new DialogueManager.DialogueLine("Ngọc Hoàng", "Thạch Sanh, ngươi đã làm được! Cái ác đã bị đẩy lùi, nhưng hãy nhớ: tình yêu và lòng quả cảm mới là chiếc chìa khóa thực sự mở ra mọi cánh cửa. Hãy cứu lấy nàng ấy!", null, "res://Assets/Audio/Voices/god_m3_end.mp3"));
+        }
 
         if (lines.Count > 0)
         {
@@ -406,7 +421,7 @@ public partial class TreasureChest : Area2D
     private void CreateEpicPortal(Player player)
     {
         _portal = new Godot.Node2D();
-        _portal.Position = new Godot.Vector2(60, -50); // Mở bên phải rương
+        _portal.Position = new Godot.Vector2(250, -50); // Mở xa rương một chút (250px sang phải)
         AddChild(_portal);
 
         // Vòng xoáy ma thuật rực rỡ sử dụng Shader xịn mình vừa code
@@ -421,14 +436,14 @@ public partial class TreasureChest : Area2D
         {
             var mat = new Godot.ShaderMaterial();
             mat.Shader = shader;
-            // Phối màu tím huyền ảo và xanh lóa
-            mat.SetShaderParameter("portal_color_1", new Godot.Color(0.4f, 0.0f, 0.8f, 1.0f));
-            mat.SetShaderParameter("portal_color_2", new Godot.Color(0.0f, 0.8f, 1.0f, 1.0f));
+            // Phối màu khói xám u ám và huyền bí phù hợp hang động
+            mat.SetShaderParameter("portal_color_1", new Godot.Color(0.2f, 0.2f, 0.25f, 1.0f)); // Lõi xám đậm
+            mat.SetShaderParameter("portal_color_2", new Godot.Color(0.4f, 0.4f, 0.45f, 1.0f)); // Khói xám xanh nhạt
             vortex.Material = mat;
         }
         else
         {
-            vortex.Color = new Godot.Color(0.4f, 0.1f, 0.9f, 0f); // Xấu xí fallback
+            vortex.Color = new Godot.Color(0.3f, 0.3f, 0.3f, 1.0f); // Fallback xám
         }
 
         vortex.Modulate = new Godot.Color(1, 1, 1, 0); // Ban đầu tàng hình
@@ -441,25 +456,25 @@ public partial class TreasureChest : Area2D
         portalParticles.EmissionShape = Godot.CpuParticles2D.EmissionShapeEnum.Sphere;
         portalParticles.EmissionSphereRadius = 100f;
         portalParticles.Gravity = new Godot.Vector2(0, 0);
-        portalParticles.RadialAccelMin = -250f; // Hút cực mạnh vào lõi
-        portalParticles.RadialAccelMax = -150f;
+        portalParticles.RadialAccelMin = -150f; // Hút nhẹ nhàng hơn
+        portalParticles.RadialAccelMax = -80f;
         portalParticles.ScaleAmountMin = 2f;
         portalParticles.ScaleAmountMax = 5f;
-        portalParticles.Color = new Godot.Color(0.8f, 0.3f, 1f, 0.8f);
+        portalParticles.Color = new Godot.Color(0.5f, 0.5f, 0.55f, 0.6f); // Màu khói bụi
         _portal.AddChild(portalParticles);
 
-        // Sao bay lên
-        var starParticles = new Godot.CpuParticles2D();
-        starParticles.Amount = 30;
-        starParticles.Lifetime = 2.0f;
-        starParticles.EmissionShape = Godot.CpuParticles2D.EmissionShapeEnum.Point;
-        starParticles.Gravity = new Godot.Vector2(0, -60);
-        starParticles.InitialVelocityMin = 50f;
-        starParticles.InitialVelocityMax = 120f;
-        starParticles.ScaleAmountMin = 1.5f;
-        starParticles.ScaleAmountMax = 3f;
-        starParticles.Color = Godot.Colors.Cyan;
-        _portal.AddChild(starParticles);
+        // Tàn dư khói bay lên
+        var smokeParticles = new Godot.CpuParticles2D();
+        smokeParticles.Amount = 25;
+        smokeParticles.Lifetime = 2.5f;
+        smokeParticles.EmissionShape = Godot.CpuParticles2D.EmissionShapeEnum.Point;
+        smokeParticles.Gravity = new Godot.Vector2(0, -40);
+        smokeParticles.InitialVelocityMin = 20f;
+        smokeParticles.InitialVelocityMax = 60f;
+        smokeParticles.ScaleAmountMin = 3f;
+        smokeParticles.ScaleAmountMax = 8f;
+        smokeParticles.Color = new Godot.Color(0.4f, 0.4f, 0.4f, 0.3f);
+        _portal.AddChild(smokeParticles);
 
         var portalTween = CreateTween().SetParallel(true);
         // Fade in cổng từ từ
@@ -480,15 +495,17 @@ public partial class TreasureChest : Area2D
         sequence.TweenInterval(2.5f); // Đợi cổng mở full sức mạnh
         sequence.TweenCallback(Godot.Callable.From(() =>
         {
-            player.WalkIntoCave(1.5f); // Đi bộ về phía cổng
-
-            // Ép Thạch Sanh mờ dần và thu nhỏ lại (Bị hút vào không gian khác)
-            var hútTween = CreateTween().SetParallel(true);
-            hútTween.TweenProperty(player, "scale", new Godot.Vector2(0.2f, 0.2f), 1.2f).SetTrans(Tween.TransitionType.Circ).SetEase(Tween.EaseType.In);
-            hútTween.TweenProperty(player, "modulate:a", 0.0f, 1.2f);
+            // Xác định hướng để nhân vật đi về phía cổng
+            float moveDir = (_portal.GlobalPosition.X > player.GlobalPosition.X) ? 1.0f : -1.0f;
+            player.WalkIntoCave(moveDir); // Nhân vật bắt đầu đi bộ vào bóng tối
+            
+            // Hiệu ứng mờ dần và thu nhỏ nhẹ để tạo cảm giác đi sâu vào bên trong
+            var depthTween = CreateTween().SetParallel(true);
+            depthTween.TweenProperty(player, "scale", new Godot.Vector2(0.4f, 0.4f), 1.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.In);
+            // (player.WalkIntoCave đã có sẵn tween modulate:a về 0 trong 1s)
         }));
 
-        sequence.TweenInterval(2.0f);
+        sequence.TweenInterval(2.0f); // Đợi hoàn thiện hoạt ảnh dịch chuyển
         sequence.TweenCallback(Godot.Callable.From(() =>
         {
             if (_portalPulseTween != null) _portalPulseTween.Kill();

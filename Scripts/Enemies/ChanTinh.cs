@@ -32,14 +32,14 @@ public partial class ChanTinh : BaseEnemy
 
     public override void _Ready()
     {
-        MaxHealth = 1000;
-        AttackDamage = 30;
-        MoveSpeed = 65f;
+        MaxHealth = 1500;        // Tăng từ 1000 → boss cuối phải trâu chó hơn
+        AttackDamage = 35;       // Tăng từ 30 (23% MaxHP)
+        MoveSpeed = 70f;         // Tăng nhẹ từ 65f
         ScoreValue = 5000;
 
         DetectRange = 900f;
         AttackRange = 180f;
-        AttackCooldown = 1.2f; // Tăng tần suất từ 2.0s xuống 1.2s
+        AttackCooldown = 1.0f;   // Giảm từ 1.2s xuống 1.0s (tấn công dồn dập hơn)
 
         // Health Bar offset cho nửa màn hình
         HealthBarOffset = new Vector2(-40, -220); 
@@ -145,6 +145,18 @@ public partial class ChanTinh : BaseEnemy
         }
 
         ApplyGravityAndMove(dt);
+    }
+
+    public void ResetBoss(Vector2 resetPos)
+    {
+        GlobalPosition = resetPos;
+        _bossState = BossState.Idle;
+        _stateTimer = 0.5f;
+        _hasHitTarget = false;
+        _queuedAttack = "";
+        Velocity = Vector2.Zero;
+        if (AnimSprite != null) AnimSprite.Play("idle");
+        GD.Print("[ChanTinh] Boss reset to position and Idle state.");
     }
 
     private void ProcessIdleState()
@@ -436,9 +448,9 @@ public partial class ChanTinh : BaseEnemy
             GetParent().AddChild(chest);
             chest.GlobalPosition = GlobalPosition + new Vector2(0, -50);
             
-            // Hiệu ứng cái rương bay ra từ người boss
+            // Hiệu ứng cái rương bay ra từ người boss và rơi SÁT MẶT ĐẤT (Y=585)
             var tween = chest.CreateTween();
-            Vector2 targetPos = chest.GlobalPosition + new Vector2(GD.Randf() > 0.5f ? 120 : -120, 40);
+            Vector2 targetPos = new Vector2(chest.GlobalPosition.X + (GD.Randf() > 0.5f ? 120 : -120), 585);
             tween.TweenProperty(chest, "global_position:y", chest.GlobalPosition.Y - 100, 0.5f).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
             tween.Chain().TweenProperty(chest, "global_position", targetPos, 0.5f).SetTrans(Tween.TransitionType.Bounce).SetEase(Tween.EaseType.Out);
             

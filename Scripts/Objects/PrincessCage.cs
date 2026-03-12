@@ -8,22 +8,41 @@ public partial class PrincessCage : StaticBody2D
 
     public override void _Ready()
     {
-        // Thân lồng (Vật cản)
+        // Thân lồng (Phần nền tối bên trong)
         _visual = new ColorRect();
-        _visual.Color = new Color(0.4f, 0.4f, 0.45f, 0.8f);
-        _visual.Size = new Vector2(80, 100);
-        _visual.Position = new Vector2(-40, -100);
+        _visual.Color = new Color(0.1f, 0.1f, 0.12f, 0.7f); // Tối hơn để nổi bật Công Chúa
+        _visual.Size = new Vector2(140, 180); // To bự hơn (Cũ: 80x100)
+        _visual.Position = new Vector2(-70, -180);
+        _visual.ZIndex = -1; // Nằm phía sau Công Chúa
         AddChild(_visual);
 
-        // Các thanh sắt
-        for (int i = 0; i < 5; i++)
+        // Các thanh sắt dày dặn và "to bự"
+        int barCount = 7;
+        for (int i = 0; i < barCount; i++)
         {
             var bar = new ColorRect();
-            bar.Color = new Color(0.2f, 0.2f, 0.25f);
-            bar.Size = new Vector2(4, 100);
-            bar.Position = new Vector2(-40 + i * 20 - 2, -100);
+            bar.Color = new Color(0.25f, 0.25f, 0.3f); // Màu kim loại lạnh
+            bar.Size = new Vector2(8, 180); // Thanh sắt dày hơn (8px)
+            bar.Position = new Vector2(-70 + (i * 140 / (barCount - 1)) - 4, -180);
+            bar.ZIndex = 5; // Nằm phía trước Công Chúa để tạo cảm giác bị nhốt
+            
+            // Thêm viền sáng cho thanh sắt trông khối hơn
+            var highlight = new ColorRect();
+            highlight.Color = new Color(0.4f, 0.4f, 0.5f);
+            highlight.Size = new Vector2(2, 180);
+            highlight.Position = new Vector2(0, 0);
+            bar.AddChild(highlight);
+            
             AddChild(bar);
         }
+
+        // Mái vòm lồng (Trang trí thêm cho uy nghi)
+        var dome = new ColorRect();
+        dome.Color = new Color(0.2f, 0.2f, 0.25f);
+        dome.Size = new Vector2(160, 40);
+        dome.Position = new Vector2(-80, -210);
+        dome.ZIndex = 6; // Mái lồng cũng nằm phía trước
+        AddChild(dome);
 
         // Vùng tương tác
         _interactArea = new Area2D();
@@ -36,11 +55,13 @@ public partial class PrincessCage : StaticBody2D
         _interactArea.AddChild(shape);
         AddChild(_interactArea);
 
-        // Label thông báo
+        // Label thông báo (Nâng cấp giao diện)
         var label = new Label();
         label.Name = "Hint";
-        label.Text = "Cần chìa khóa!";
-        label.Position = new Vector2(-50, -130);
+        label.Text = "CẦN CHÌA KHÓA CỦA CHẰN TINH!";
+        label.HorizontalAlignment = HorizontalAlignment.Center;
+        label.Position = new Vector2(-150, -250);
+        label.Scale = new Vector2(1.2f, 1.2f);
         label.Visible = false;
         AddChild(label);
     }
@@ -78,12 +99,31 @@ public partial class PrincessCage : StaticBody2D
             _visual.Visible = false;
         }));
         
-        // Xóa các thanh sắt (bất cứ ColorRect nào không phải _visual)
+        // Xóa các thanh sắt và mái vòm (ColorRect nào ở Z cao hơn)
         foreach (var child in GetChildren())
         {
             if (child is ColorRect cr && cr != _visual)
             {
-                CreateTween().TweenProperty(cr, "position:y", 50f, 1.0f);
+                var tw = CreateTween();
+                // Hiệu ứng các thanh sắt rơi xuống đất
+                tw.TweenProperty(cr, "position:y", cr.Position.Y + 200f, 1.2f).SetTrans(Tween.TransitionType.Bounce).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(cr, "modulate:a", 0f, 1.0f);
+            }
+        }
+        
+        // Thông báo giải cứu thành công
+        var successLabel = GetNode<Label>("Hint");
+        successLabel.Text = "BẠN ĐÃ GIẢI CỨU CÔNG CHÚA!";
+        successLabel.Visible = true;
+        
+        // Tìm Công chúa trong đấu trường và đổi animation
+        var princess = GetParent().GetNodeOrNull<Node2D>("Princess");
+        if (princess != null)
+        {
+            var sprite = princess.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
+            if (sprite != null && sprite.SpriteFrames.HasAnimation("rescued"))
+            {
+                sprite.Play("rescued");
             }
         }
     }

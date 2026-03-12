@@ -11,14 +11,14 @@ public partial class BossEnemy : BaseEnemy
 
     public override void _Ready()
     {
-        // Stats của Đại Boss
-        MaxHealth = 300;
-        AttackDamage = 10; // Giảm xuống 10 theo yêu cầu
+        // Stats của Đại Boss phòng 2
+        MaxHealth = 500;         // Tăng từ 300 lên 500 → cần ínhh mạnh hơn
+        AttackDamage = 18;       // Tăng từ 10 lên 18 (12% MaxHP)
         MoveSpeed = 0;
         ScoreValue = 2000;
         DetectRange = 500.0f;
-        AttackRange = 200.0f; // Điều chỉnh tầm đánh về 200px theo yêu cầu mới nhất
-        AttackCooldown = 1.5f; // Cooldown 1.5s
+        AttackRange = 200.0f;    // Giữ tầm đánh 200px
+        AttackCooldown = 1.5f;   // Giữ nguyên
         PatrolDistance = 0;
         PatrolDirection = -1;
 
@@ -49,9 +49,9 @@ public partial class BossEnemy : BaseEnemy
             AnimSprite.FlipH = false;
         }
 
-        // Timer cho sát thương va chạm (2s)
+        // Timer cho sát thương va chạm (1.5s)
         _contactDamageTimer = new Timer();
-        _contactDamageTimer.WaitTime = 2.0f;
+        _contactDamageTimer.WaitTime = 1.5f;
         _contactDamageTimer.OneShot = false;
         _contactDamageTimer.Timeout += () => _canDealContactDamage = true;
         AddChild(_contactDamageTimer);

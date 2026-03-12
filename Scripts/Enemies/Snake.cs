@@ -6,15 +6,17 @@ public partial class Snake : BaseEnemy
     public override void _Ready()
     {
         // Set snake-specific stats before base _Ready
-        // ── Rắn: Kẻ thù cơ bản, gặm dần máu player ──
-        // Player cần 4 đòn thường (25×4=100) để hạ, rắn cần 9 cú cắn (12×9=108) để kill player
-        MaxHealth    = 80;       // Đủ chịu 3 đòn thường (25×3=75 < 80) → cần đòn thứ 4
-        AttackDamage = 12;       // 12% MaxHP mỗi đòn → player chịu ~8-9 đòn trước khi chết
+        // ── Rắn: Kẻ thù cơ bản, gừm dần máu player ──
+        // Player cần 4 đòn thường (30×4=120 > 100) để hạ
+        // Rắn cần 10 cú cắn (15×10=150) để kill player
+        MaxHealth    = 100;      // Tăng từ 80 lên 100 cho chắc hơn
+        AttackDamage = 15;       // 10% MaxHP mỗi đòn (cần 10 đòn kill)
         MoveSpeed    = 65.0f;    // Chậm bò sát đất, chắc chắn
-        ScoreValue   = 150;      // Điểm cao hơn vì HP nhiều hơn
-        PatrolDistance = 100.0f; // Vùng tuần tra rộng thêm chút
-        DetectRange    = 220.0f; // Nhìn ra xa vừa đủ
+        ScoreValue   = 150;      // Giữ nguyên
+        PatrolDistance = 100.0f; // Vùng tuần tra rộng
+        DetectRange    = 220.0f; // Nhìn xa vừa đủ
         AttackRange    = 48.0f;  // Cự ly cắn ngắn (phải áp sát)
+        AttackCooldown = 1.5f;   // Tăng CD từ 1.0s lên 1.5s để có cơ hội bỏ chạy
         
         // Đẩy Thanh Máu vọt thẳng lên trời (-90 pixel) để vượt mảng Sprite của đầu Rắn
         HealthBarOffset = new Vector2(-20, -85);

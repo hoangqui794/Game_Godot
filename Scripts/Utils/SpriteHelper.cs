@@ -1101,25 +1101,21 @@ public static class SpriteHelper
     /// </summary>
     private static bool IsCheckeredBackground(Color c1, Color c2)
     {
-        // Checkered background typically has two similar gray tones
-        // Common pattern: light gray (#CCCCCC) and white (#FFFFFF)
-        // Or: gray (#808080) and light gray (#C0C0C0)
+        // Checkerboard thường là cặp: (Trắng, Xám nhạt) hoặc (Xám nhạt, Xám vừa)
+        // VD: #FFFFFF và #CCCCCC, hoặc #808080 và #C0C0C0
+        
+        bool c1IsGrayish = Math.Abs(c1.R - c1.G) < 0.12f && Math.Abs(c1.G - c1.B) < 0.12f;
+        bool c2IsGrayish = Math.Abs(c2.R - c2.G) < 0.12f && Math.Abs(c2.G - c2.B) < 0.12f;
 
-        bool c1IsGrayish = Math.Abs(c1.R - c1.G) < 0.1f && Math.Abs(c1.G - c1.B) < 0.1f;
-        bool c2IsGrayish = Math.Abs(c2.R - c2.G) < 0.1f && Math.Abs(c2.G - c2.B) < 0.1f;
-
-        // Both colors are grayish and different from each other
         if (c1IsGrayish && c2IsGrayish)
         {
             float diff = Math.Abs(c1.R - c2.R);
-            if (diff > 0.05f && diff < 0.5f) return true;
+            // Một sự chênh lệch vừa đủ giữa 2 màu xám của ô cờ (hỗ trợ cả trắng-đen tuyệt đối diff = 1.0)
+            if (diff > 0.04f && diff <= 1.0f) return true;
         }
 
-        // Also detect pure white/light backgrounds
-        if (c1.R > 0.7f && c1.G > 0.7f && c1.B > 0.7f && c1IsGrayish)
-        {
-            return true;
-        }
+        // Trường hợp ảnh có nền trắng tinh hoặc xám rất nhạt bao quanh
+        if (c1.R > 0.85f && c1.G > 0.85f && c1.B > 0.85f && c1IsGrayish) return true;
 
         return false;
     }
@@ -1129,13 +1125,14 @@ public static class SpriteHelper
     /// </summary>
     private static bool IsCheckeredPixel(Color p, Color bg1, Color bg2)
     {
-        // Check if pixel is close to either checkered color
-        if (ColorsClose(p, bg1, 0.15f)) return true;
-        if (ColorsClose(p, bg2, 0.15f)) return true;
+        // Kiểm tra xem pixel có khớp với 1 trong 2 màu nền ô cờ không (tăng độ lệch màu để xóa sạch viền)
+        if (ColorsClose(p, bg1, 0.25f)) return true;
+        if (ColorsClose(p, bg2, 0.25f)) return true;
 
-        // Also remove any grayish pixels that look like background
-        bool isGrayish = Math.Abs(p.R - p.G) < 0.08f && Math.Abs(p.G - p.B) < 0.08f;
-        if (isGrayish && p.R > 0.6f) return true;  // Light gray/white
+        // Xóa các pixel xám trung tính (trắng, đen, xám) xuất hiện trong vùng của ô cờ
+        bool isGrayish = Math.Abs(p.R - p.G) < 0.15f && Math.Abs(p.G - p.B) < 0.15f;
+        // Nếu pixel là màu xám/trắng/đen và không phải là màu cực tối (tránh xóa tóc/mắt nhân vật nếu có màu xám tương tự)
+        if (isGrayish && (p.R > 0.3f || p.R < 0.1f)) return true; 
 
         return false;
     }

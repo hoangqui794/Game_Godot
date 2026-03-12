@@ -18,6 +18,9 @@ public partial class LevelManager : Node2D
     private Node2D _boss;
     private bool _level3EnemiesCleared = false;
     private bool _level3BossSpawned = false;
+    private bool _bossFightStarted = false;
+    private Vector2 _bossArenaEntrance = new Vector2(2350, 580);
+    private StaticBody2D _princessBarrier;
 
     private List<Vector2> _checkpoints = new List<Vector2>();
 
@@ -204,7 +207,9 @@ private void SetupLevel3()
     if (_boss != null)
     {
         _boss.Visible = false;
-        _boss.ProcessMode = ProcessModeEnum.Disabled; // Don't let it act yet
+        _boss.ProcessMode = ProcessModeEnum.Disabled;
+        // Đưa Boss ra xa tít để không bao giờ tạo tường tàng hình chắn đường ở mạng đầu tiên
+        _boss.GlobalPosition = new Vector2(5000, 520); 
     }
     
     GD.Print("Level 3 Setup: Hidden Princess, Cage, and Boss.");
@@ -240,17 +245,80 @@ private void ProcessLevel3Logic()
             float dist = _player.GlobalPosition.DistanceTo(_princess.GlobalPosition);
             if (dist < 400f) // Threshold to spawn Boss
             {
-                _level3BossSpawned = true;
-                if (_boss != null)
+                if (_boss != null && !_level3BossSpawned)
                 {
+                    _level3BossSpawned = true;
+                    _bossFightStarted = true;
+
+                    // 1. Dịch chuyển Boss xuất hiện ngay sát mặt Công Chúa (Vị trí mới: 3300)
+                    _boss.GlobalPosition = new Vector2(3300, 520);
+                    
                     _boss.Visible = true;
                     _boss.ProcessMode = ProcessModeEnum.Inherit;
-                    GD.Print("Level 3: Player approached Princess! Boss Chan Tinh spawned!");
+
+                    // 2. Khóa vùng đấu trường: Rộng đúng 1 màn hình (1152px)
+                    LockBossArena();
+
+                    // 3. Tạo rào chắn chặn sát Công Chúa (Vị trí mới: 3320)
+                    CreatePrincessBarrier();
+
+                    GD.Print("Level 3 Boss Arena: Full 1152px screen locked.");
                     CallDeferred(nameof(PlayBossIntroDialogue));
                 }
             }
         }
     }
+    
+    // Kiểm tra nếu Boss die thì MỞ KHÓA CAMERA và rào chắn
+    if (_bossFightStarted && (_boss == null || !IsInstanceValid(_boss) || (_boss is BaseEnemy enemy && enemy.IsDead)))
+    {
+        if (_princessBarrier != null && IsInstanceValid(_princessBarrier))
+        {
+            _princessBarrier.QueueFree();
+            _princessBarrier = null;
+            
+            // Giải phóng Camera bên phải để đi tiếp tới Exit
+            var cam = GetTree().GetFirstNodeInGroup("MainCamera") as FollowCamera;
+            if (cam != null) cam.LimitRight = 5000; 
+
+            GD.Print("Level 3: Boss defeated! Camera unlocked and barrier removed.");
+        }
+    }
+}
+
+private void CreatePrincessBarrier()
+{
+    // Chặn tại 3320 (Công chúa ở 3420)
+    _princessBarrier = new StaticBody2D();
+    _princessBarrier.Position = new Vector2(3320, 400);
+    _princessBarrier.CollisionLayer = 2; 
+    
+    var shape = new CollisionShape2D();
+    shape.Shape = new RectangleShape2D { Size = new Vector2(40, 1000) };
+    _princessBarrier.AddChild(shape);
+    AddChild(_princessBarrier);
+}
+
+private void LockBossArena()
+{
+    var cam = GetTree().GetFirstNodeInGroup("MainCamera") as FollowCamera;
+    if (cam != null)
+    {
+        // Khóa đúng 1 màn hình: 2350 -> 3502 (1152px)
+        cam.LimitLeft = 2350;
+        cam.LimitRight = 3502;
+    }
+
+    // Tường tàng hình chặn đường lùi
+    var wall = new StaticBody2D();
+    wall.Position = new Vector2(2350, 400);
+    wall.CollisionLayer = 2;
+    wall.CollisionMask = 1;
+
+    var shape = new CollisionShape2D();
+    shape.Shape = new RectangleShape2D { Size = new Vector2(60, 1000) };
+    wall.AddChild(shape);
+    AddChild(wall);
 }
 
 private async void PlayBossIntroDialogue()
@@ -271,10 +339,28 @@ public void FastRespawnPlayer()
         if (_player != null && IsInstanceValid(_player))
         {
             // 1. Reset vị trí về Checkpoint gần nhất
-            int checkpointIndex = GameManager.Instance.CurrentCheckpointIndex;
-            Vector2 spawnPos = _checkpoints.Count > checkpointIndex
-                ? _checkpoints[checkpointIndex]
-                : (_spawnPoint?.GlobalPosition ?? Vector2.Zero);
+            Vector2 spawnPos;
+            
+            // ĐIỀU KIỆN RIÊNG LEVEL 3: Nếu đang đánh Boss thì hồi sinh ở đầu đấu trường
+            if (LevelNumber == 3 && _bossFightStarted)
+            {
+                // Respawn ở 2450 (Rộng rãi hơn, cách tường trái 100px)
+                spawnPos = new Vector2(2450, 580);
+                GD.Print("Level 3 Special Respawn: Returning to Arena Entrance.");
+
+                // RESET BOSS: Đưa boss về lại vị trí đầu để không đứng đè lên người chơi
+                if (_boss != null && IsInstanceValid(_boss) && _boss is ChanTinh chantinh)
+                {
+                    chantinh.ResetBoss(new Vector2(3300, 520));
+                }
+            }
+            else
+            {
+                int checkpointIndex = GameManager.Instance.CurrentCheckpointIndex;
+                spawnPos = _checkpoints.Count > checkpointIndex
+                    ? _checkpoints[checkpointIndex]
+                    : (_spawnPoint?.GlobalPosition ?? Vector2.Zero);
+            }
 
             _player.GlobalPosition = spawnPos;
 

@@ -9,7 +9,8 @@ public partial class FallingRockTrap : Node2D
 
     private bool _isFalling = false;
     private bool _hasHit = false;
-    private float _velocityY = 60f; // Có tốc độ ban đầu một chút
+    private float _velocityY = 60f; // Tốc độ rơi ban đầu
+    private Sprite2D _rockVisual;
     private Area2D _hitArea;
     private Area2D _triggerArea;
 
@@ -17,8 +18,11 @@ public partial class FallingRockTrap : Node2D
 
     public override void _Ready()
     {
-        // Vẽ đá rơi bằng hiệu ứng Shader hoặc chỉ cần cấu trúc _Draw hình tròn. Mình sẽ _Draw() bên dưới
-        QueueRedraw();
+        // Visual
+        _rockVisual = new Sprite2D();
+        _rockVisual.Texture = GD.Load<Texture2D>("res://Assets/Sprites/Environment/rock_pixel.png");
+        _rockVisual.Scale = new Vector2(0.3f, 0.3f);
+        AddChild(_rockVisual);
 
         // Hit Area
         _hitArea = new Area2D();
@@ -64,17 +68,6 @@ public partial class FallingRockTrap : Node2D
         _dustVfx.ScaleAmountMax = 5f;
         _dustVfx.Color = new Color(0.6f, 0.55f, 0.45f, 0.8f);
         AddChild(_dustVfx);
-    }
-
-    public override void _Draw()
-    {
-        // 3D-like rock pixel art
-        DrawCircle(Vector2.Zero, RockRadius, new Color(0.24f, 0.20f, 0.16f));
-        DrawCircle(new Vector2(-5, -5), RockRadius * 0.8f, new Color(0.35f, 0.28f, 0.20f));
-        DrawCircle(new Vector2(-10, -10), RockRadius * 0.4f, new Color(0.45f, 0.38f, 0.26f));
-
-        // Móp méo
-        DrawRect(new Rect2(-RockRadius * 0.5f, 0, RockRadius, RockRadius * 0.8f), new Color(0.28f, 0.22f, 0.18f));
     }
 
     private void OnTrigger(Node2D body)
