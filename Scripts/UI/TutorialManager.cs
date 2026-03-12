@@ -18,7 +18,6 @@ public partial class TutorialManager : CanvasLayer
     private bool _moveDone;
     private bool _jumpDone;
     private bool _attackDone;
-    private bool _skillDone;
 
     private readonly struct TutorialStep
     {
@@ -75,13 +74,6 @@ public partial class TutorialManager : CanvasLayer
                 "Giờ chém thường một nhát cho quen tay.",
                 "Nhấn Z hoặc chuột trái.",
                 () => _attackDone
-            ),
-            new TutorialStep(
-                "skill",
-                "Bước 3: Ghi nhớ kỹ năng",
-                "Kỹ năng dùng phím J/K/L (hoặc 1/2/3). Thử bấm một phím bất kỳ nhé.",
-                "Nếu màn này chưa mở skill thì cứ bấm để nhớ phím thôi.",
-                () => _skillDone
             )
         };
 
@@ -218,23 +210,6 @@ public partial class TutorialManager : CanvasLayer
             return;
         }
 
-        if (actionId == "skill")
-        {
-            bool pressed = Input.IsActionJustPressed("skill1") ||
-                           Input.IsActionJustPressed("skill2") ||
-                           Input.IsActionJustPressed("skill3") ||
-                           Input.IsKeyPressed(Key.J) ||
-                           Input.IsKeyPressed(Key.K) ||
-                           Input.IsKeyPressed(Key.L) ||
-                           Input.IsKeyPressed(Key.Key1) ||
-                           Input.IsKeyPressed(Key.Key2) ||
-                           Input.IsKeyPressed(Key.Key3);
-
-            if (!_skillDone && pressed)
-            {
-                _skillDone = true;
-            }
-        }
     }
 
     private void ResetStepFlags()
@@ -242,7 +217,6 @@ public partial class TutorialManager : CanvasLayer
         _moveDone = false;
         _jumpDone = false;
         _attackDone = false;
-        _skillDone = false;
     }
 
     private void OnSkipPressed()

@@ -294,7 +294,7 @@ public partial class TreasureChest : Area2D
                 if (GameManager.Instance.CurrentLevel == 1)
                 {
                     // Màn 1: Mở khóa J và K (tổng 2 kỹ năng)
-                    GameManager.Instance.UnlockedSkillsCount = 2; 
+                    GameManager.Instance.UnlockedSkillsCount = 2;
                     GameManager.Instance.TotalKeys++; // Nhận luôn 1 chìa khóa ở Màn 1
 
                     // Hiện 3 trang mô tả (Slide): Chìa khóa, Skill J, Skill K
@@ -307,10 +307,10 @@ public partial class TreasureChest : Area2D
                     // Màn 2: Mở khóa kỹ năng thứ 3 (Skill L)
                     GameManager.Instance.UnlockedSkillsCount = 3;
                     GameManager.Instance.TotalKeys++;
-                    
+
                     // Hiện popup mô tả cho kỹ năng L
                     ShowRewardPopups(player);
-                    
+
                     GD.Print("Màn 2: Nhận kỹ năng L và hiện popup mô tả.");
                 }
                 else
@@ -532,9 +532,31 @@ public partial class TreasureChest : Area2D
             }
             else if (_popupSlide == 2)
             {
-                ShowInfographic("res://Assets/UI/Skill_J_Info.jpg");
+                _popupContentLabel.Visible = true;
+                _popupInfographic.Visible = false;
+
+                string skillJText = "BƯỚC 3: NHẬN KỸ NĂNG MỚI\n\nChiêu J - Rìu Bay Truy Kích\nBấm J (hoặc phím 1) để ném rìu thần theo hướng kẻ địch gần nhất.\nChiêu này mở giao tranh từ xa rất êm, không cần lao vào quá sớm.";
+                _popupContentLabel.Text = skillJText;
+                _popupContentLabel.AddThemeColorOverride("font_color", new Color(0.1f, 0.2f, 0.45f));
+
+                RunTypewriter(skillJText.Length);
             }
             else if (_popupSlide == 3)
+            {
+                ShowInfographic("res://Assets/UI/Skill_J_Info.jpg");
+            }
+            else if (_popupSlide == 4)
+            {
+                _popupContentLabel.Visible = true;
+                _popupInfographic.Visible = false;
+
+                string skillKText = "Chiêu K - Lốc Xoáy Cận Chiến\nBấm K (hoặc phím 2) để xoay liên hoàn trong vài giây.\nRất hợp khi bị vây đông hoặc cần dọn bầy quái nhanh gọn.";
+                _popupContentLabel.Text = skillKText;
+                _popupContentLabel.AddThemeColorOverride("font_color", new Color(0.35f, 0.08f, 0.08f));
+
+                RunTypewriter(skillKText.Length);
+            }
+            else if (_popupSlide == 5)
             {
                 ShowInfographic("res://Assets/UI/Skill_K_Info.jpg");
             }
@@ -595,7 +617,7 @@ public partial class TreasureChest : Area2D
         }
 
         int maxSlides = 0;
-        if (GameManager.Instance.CurrentLevel == 1) maxSlides = 3;
+        if (GameManager.Instance.CurrentLevel == 1) maxSlides = 5;
         else if (GameManager.Instance.CurrentLevel == 2) maxSlides = 1;
 
         _popupSlide++;
@@ -610,12 +632,12 @@ public partial class TreasureChest : Area2D
                 _popupOverlay.QueueFree();
                 _popupOverlay = null;
             }
-            
+
             // Xong popup thì mới mở cổng (nếu là Màn 2 hoặc Màn 1 đã xong việc)
             if (_currentPlayer != null)
             {
                 _currentPlayer.Call("RefreshSkillUI");
-                
+
                 // Sau khi xem xong Skill L ở Màn 2, mở cổng
                 if (GameManager.Instance.CurrentLevel == 2)
                 {
