@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bossenemy001" path="res://Scenes/Enemies/BossEnemy.tscn" id="10"]
 [ext_resource type="PackedScene" uid="uid://bosscage001" path="res://Scenes/Objects/BossCage.tscn" id="11"]
 [ext_resource type="PackedScene" uid="uid://levelexit001" path="res://Scenes/Objects/LevelExit.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/ChanTinh.tscn" id="13"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(4000, 100)
@@ -325,7 +326,7 @@ position = Vector2(1377, 262)
 [node name="Eagle3" parent="." unique_id=1885299896 instance=ExtResource("7")]
 position = Vector2(2138, 261)
 
-[node name="BossEnemy" parent="." unique_id=987654321 instance=ExtResource("10")]
+[node name="ChanTinh" parent="." unique_id=987654321 instance=ExtResource("13")]
 position = Vector2(2538, 520)
 
 [node name="BossCage" parent="." unique_id=123456789 instance=ExtResource("11")]
