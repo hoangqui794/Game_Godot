@@ -183,7 +183,8 @@ public partial class LevelManager : Node2D
 
     private void OnPlayerDied()
     {
-        var timer = GetTree().CreateTimer(1.2);
+        Engine.TimeScale = 1.0f;
+        var timer = GetTree().CreateTimer(1.2, true, false, true);
         timer.Timeout += () =>
         {
             if (!IsInstanceValid(this)) return;

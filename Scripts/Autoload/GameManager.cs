@@ -205,6 +205,10 @@ public partial class GameManager : Node
     }
     public async void GameOver()
     {
+        Engine.TimeScale = 1.0f;
+        IsPaused = false;
+        GetTree().Paused = false;
+
         if (PlayerLives > 1)
         {
             // --- HỒI SINH NHANH TRONG MÀN (KHÔNG LOAD LẠI) ---

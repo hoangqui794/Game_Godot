@@ -48,6 +48,7 @@ public partial class Player : CharacterBody2D
     private int _health;
     private bool _isDead = false;
     private bool _isHurt = false;
+    private bool _deathSignalSent = false;
 
     // Components
     private AnimatedSprite2D _animatedSprite;
@@ -444,10 +445,18 @@ public partial class Player : CharacterBody2D
     {
         if (_animatedSprite.Animation == "die")
         {
-            // Reset time scale before signaling death
-            Engine.TimeScale = 1.0f;
-            EmitSignal(SignalName.PlayerDied);
+            CompleteDeathSequence();
         }
+    }
+
+    private void CompleteDeathSequence()
+    {
+        if (_deathSignalSent) return;
+        _deathSignalSent = true;
+
+        // Always restore global speed before handing control to respawn/game-over flow.
+        Engine.TimeScale = 1.0f;
+        EmitSignal(SignalName.PlayerDied);
     }
 
     private void OnAttackCooldownTimeout()
@@ -530,6 +539,7 @@ public partial class Player : CharacterBody2D
     private void Die()
     {
         _isDead = true;
+        _deathSignalSent = false;
 
         // --- Hiệu ứng Slow Motion Chuyên Nghiệp ---
         // 1. Dừng hình nhẹ (Hitstop) để cảm nhận cú đánh chí mạng
@@ -546,6 +556,15 @@ public partial class Player : CharacterBody2D
             _animatedSprite.Play("die");
         };
 
+        // Fallback: nếu animation "die" không phát signal finished (asset lỗi/loop),
+        // vẫn buộc chuyển sang luồng hồi sinh để game không bị kẹt slowmotion.
+        var fallback = GetTree().CreateTimer(1.6, true, false, true);
+        fallback.Timeout += () =>
+        {
+            if (!IsInstanceValid(this) || !_isDead) return;
+            CompleteDeathSequence();
+        };
+
         // Disable collision immediately so player can't interact while dying
         GetNode<CollisionShape2D>("CollisionShape2D").SetDeferred("disabled", true);
     }
@@ -554,6 +573,7 @@ public partial class Player : CharacterBody2D
     {
         _isDead = false;
         _isHurt = false;
+        _deathSignalSent = false;
         _health = GameManager.Instance.MaxPlayerHealth;
         GameManager.Instance.PlayerHealth = _health;
 

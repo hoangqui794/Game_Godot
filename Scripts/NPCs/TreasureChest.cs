@@ -32,6 +32,7 @@ public partial class TreasureChest : Area2D
     private Player _currentPlayer;
     private Tween _typewriterTween;
     private Tween _skillCardPulseTween;
+    private Tween _portalPulseTween;
     private bool _isTypewriting = false;
 
     private readonly struct SkillCardData
@@ -80,6 +81,13 @@ public partial class TreasureChest : Area2D
         {
             Visible = false;
         }
+    }
+
+    public override void _ExitTree()
+    {
+        if (_typewriterTween != null) _typewriterTween.Kill();
+        if (_skillCardPulseTween != null) _skillCardPulseTween.Kill();
+        if (_portalPulseTween != null) _portalPulseTween.Kill();
     }
 
     private void CreatePlaceholderSprites()
@@ -424,10 +432,11 @@ public partial class TreasureChest : Area2D
         portalTween.TweenProperty(vortex, "scale", new Godot.Vector2(1.2f, 1.2f), 1.5f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
 
         // Vòng xoáy nhấp nhô tuần hoàn sau khi mở xong
-        var pulseTween = CreateTween().SetLoops();
-        pulseTween.TweenInterval(1.5f);
-        pulseTween.TweenProperty(vortex, "scale", new Godot.Vector2(1.3f, 1.3f), 0.8f);
-        pulseTween.TweenProperty(vortex, "scale", new Godot.Vector2(1.1f, 1.1f), 0.8f);
+        if (_portalPulseTween != null) _portalPulseTween.Kill();
+        _portalPulseTween = CreateTween().SetLoops();
+        _portalPulseTween.TweenInterval(1.5f);
+        _portalPulseTween.TweenProperty(vortex, "scale", new Godot.Vector2(1.3f, 1.3f), 0.8f);
+        _portalPulseTween.TweenProperty(vortex, "scale", new Godot.Vector2(1.1f, 1.1f), 0.8f);
 
         // Ép Nhân Vật tự đi vào cổng
         var sequence = CreateTween();
@@ -445,6 +454,7 @@ public partial class TreasureChest : Area2D
         sequence.TweenInterval(2.0f);
         sequence.TweenCallback(Godot.Callable.From(() =>
         {
+            if (_portalPulseTween != null) _portalPulseTween.Kill();
             GameManager.Instance.NextLevel();
         }));
     }
@@ -763,14 +773,18 @@ public partial class TreasureChest : Area2D
         }
 
         // Border flash for cinematic feel
-        var flashTween = CreateTween();
-        var original = _popupSkillBorder.BorderColor;
-        flashTween.TweenProperty(_popupSkillBorder, "border_color", Colors.White, 0.08f);
-        flashTween.TweenCallback(Callable.From(() =>
+        if (IsInstanceValid(_popupSkillBorder))
         {
-            var back = CreateTween();
-            back.TweenProperty(_popupSkillBorder, "border_color", original, 0.18f);
-        }));
+            var flashTween = CreateTween();
+            var original = _popupSkillBorder.BorderColor;
+            flashTween.TweenProperty(_popupSkillBorder, "border_color", Colors.White, 0.08f);
+            flashTween.TweenCallback(Callable.From(() =>
+            {
+                if (!IsInstanceValid(this) || !IsInstanceValid(_popupSkillBorder)) return;
+                var back = CreateTween();
+                back.TweenProperty(_popupSkillBorder, "border_color", original, 0.18f);
+            }));
+        }
 
         // Emit particles matching accent
         if (_popupSkillParticles != null)
@@ -935,6 +949,9 @@ public partial class TreasureChest : Area2D
         }
         else
         {
+            if (_typewriterTween != null) _typewriterTween.Kill();
+            if (_skillCardPulseTween != null) _skillCardPulseTween.Kill();
+
             if (_popupOverlay != null)
             {
                 _popupOverlay.QueueFree();
