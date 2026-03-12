@@ -172,6 +172,18 @@ public partial class BaseEnemy : CharacterBody2D
         {
             velocity.Y += Gravity * (float)delta;
         }
+        else
+        {
+            // --- FIX KẸT TRÊN ĐẦU PLAYER ---
+            // Kiểm tra xem quái có đang đứng đè lên Player không
+            var floorCollision = GetLastSlideCollision();
+            if (floorCollision != null && floorCollision.GetCollider() is Player player)
+            {
+                // Nếu đang đứng trên đầu Player, trượt quái sang một bên để không bị "dính"
+                float pushDir = GlobalPosition.X > player.GlobalPosition.X ? 1.0f : -1.0f;
+                velocity.X += pushDir * 500f * (float)delta; 
+            }
+        }
 
         switch (CurrentState)
         {
@@ -423,7 +435,7 @@ public partial class BaseEnemy : CharacterBody2D
         }
     }
 
-    protected void CreateAttackVFX()
+    protected virtual void CreateAttackVFX()
     {
         // Container cho toàn bộ hiệu ứng chém
         var slashNode = new Node2D();

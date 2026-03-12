@@ -170,13 +170,19 @@ public partial class GameManager : Node
     }
     public void RestartLevel()
     {
-        // ✅ QUAN TRỌNG: Reset máu và trạng thái thua trước khi chơi lại
+        // ✅ QUAN TRỌNG: Reset máu, checkpoint và trạng thái thua trước khi chơi lại
         PlayerHealth = MaxPlayerHealth;
+        CurrentCheckpointIndex = 0; // Reset về đầu map
         IsGameOver = false;
         LoadLevel(CurrentLevel);
     }
 
-    public void NextLevel() { CurrentLevel++; LoadLevel(CurrentLevel); }
+    public void NextLevel() 
+    { 
+        CurrentLevel++; 
+        CurrentCheckpointIndex = 0; // Reset checkpoint for the new level
+        LoadLevel(CurrentLevel); 
+    }
     public void GameOver() { IsGameOver = true; ChangeSceneWithTransition("res://Scenes/Main/GameOver.tscn", false); }
     public void WinGame() => ChangeSceneWithTransition("res://Scenes/Main/WinScreen.tscn", false);
     public void GoToMainMenu() { IsGameOver = false; ChangeSceneWithTransition("res://Scenes/Main/MainMenu.tscn", false); }

@@ -109,13 +109,6 @@ public partial class LevelManager : Node2D
     {
         int checkpointIndex = GameManager.Instance.CurrentCheckpointIndex;
 
-        // Force the player to start at the beginning of levels 2, 3 and 4
-        if (LevelNumber >= 2 && LevelNumber <= 4)
-        {
-            checkpointIndex = 0;
-            GameManager.Instance.CurrentCheckpointIndex = 0;
-        }
-
         Vector2 spawnPos = _checkpoints.Count > checkpointIndex
             ? _checkpoints[checkpointIndex]
             : (_spawnPoint?.GlobalPosition ?? Vector2.Zero);

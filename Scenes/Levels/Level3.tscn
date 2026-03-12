@@ -308,7 +308,7 @@ region_enabled = true
 region_rect = Rect2(0, 0, 100, 32)
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=644108766]
-position = Vector2(150, 531)
+position = Vector2(50, 531)
 
 [node name="Snake1" parent="." unique_id=1721858005 instance=ExtResource("6")]
 position = Vector2(396, 559)
