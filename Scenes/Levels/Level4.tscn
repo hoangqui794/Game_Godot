@@ -43,7 +43,7 @@ region_enabled = true
 region_rect = Rect2(0, 350, 5000, 350)
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=1771174519]
-position = Vector2(408, 540)
+position = Vector2(150, 540)
 
 [node name="ChanTinhBoss" parent="." unique_id=233135730 instance=ExtResource("7")]
 position = Vector2(1000, 590)

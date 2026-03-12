@@ -56,16 +56,16 @@ public partial class LevelManager : Node2D
 
                 // Tạo vật lý cản đường (Environment layer = 2)
                 var staticBody = new StaticBody2D();
-                staticBody.CollisionLayer = 2; 
-                
+                staticBody.CollisionLayer = 2;
+
                 var collisionShape = new CollisionShape2D();
                 var circleShape = new CircleShape2D();
                 // Bán kính hình tròn cản (rock texture lớn, scale 0.3 -> effective radius ~ 35-40px)
-                circleShape.Radius = 140f; 
+                circleShape.Radius = 140f;
                 collisionShape.Shape = circleShape;
-                
+
                 // Tâm của đá hơi nhích xuống dưới một chút để Player có thể nhảy lên hoặc đụng cạnh chặn lại
-                collisionShape.Position = new Vector2(0, 30f); 
+                collisionShape.Position = new Vector2(0, 30f);
 
                 staticBody.AddChild(collisionShape);
                 sprite.AddChild(staticBody);
@@ -76,17 +76,17 @@ public partial class LevelManager : Node2D
     private void SpawnLevel1CustomTraps()
     {
         var rock1 = new FallingRockTrap();
-        rock1.Position = new Vector2(750, -50); 
-        rock1.TriggerRange = 600f;              
+        rock1.Position = new Vector2(750, -50);
+        rock1.TriggerRange = 600f;
         AddChild(rock1);
 
         var rock2 = new FallingRockTrap();
-        rock2.Position = new Vector2(1750, 0); 
+        rock2.Position = new Vector2(1750, 0);
         rock2.TriggerRange = 550f;
         AddChild(rock2);
 
         var rock3 = new FallingRockTrap();
-        rock3.Position = new Vector2(3000, -100); 
+        rock3.Position = new Vector2(3000, -100);
         rock3.TriggerRange = 650f;
         AddChild(rock3);
     }
@@ -109,6 +109,13 @@ public partial class LevelManager : Node2D
     {
         int checkpointIndex = GameManager.Instance.CurrentCheckpointIndex;
 
+        // Force the player to start at the beginning of levels 2, 3 and 4
+        if (LevelNumber >= 2 && LevelNumber <= 4)
+        {
+            checkpointIndex = 0;
+            GameManager.Instance.CurrentCheckpointIndex = 0;
+        }
+
         Vector2 spawnPos = _checkpoints.Count > checkpointIndex
             ? _checkpoints[checkpointIndex]
             : (_spawnPoint?.GlobalPosition ?? Vector2.Zero);
@@ -119,7 +126,7 @@ public partial class LevelManager : Node2D
             _player.GlobalPosition = spawnPos;
             _player.AddToGroup("player");
             AddChild(_player);
-            
+
             if (LevelNumber == 4)
             {
                 _player.Call("RefreshSkillUI");
@@ -144,7 +151,8 @@ public partial class LevelManager : Node2D
     private void OnPlayerDied()
     {
         var timer = GetTree().CreateTimer(1.2);
-        timer.Timeout += () => {
+        timer.Timeout += () =>
+        {
             if (!IsInstanceValid(this)) return;
             GameManager.Instance.GameOver();
         };
