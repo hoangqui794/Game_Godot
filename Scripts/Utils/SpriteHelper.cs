@@ -636,7 +636,10 @@ public static class SpriteHelper
             img.Convert(Image.Format.Rgba8);
             
             int w = img.GetWidth(), h = img.GetHeight();
-            Color corner = img.GetPixel(w / 10, h / 10); // Sample hơi xa góc một chút để tránh nhiễu
+            Color corner = img.GetPixel(4, 4); // Sample sát góc hơn để tránh đè vào Boss
+            
+            // Log để debug (sẽ tự hiện trong console Godot)
+            if (path.Contains("B_")) GD.Print($"[SpriteHelper] Loading custom sprite: {path}");
             
             for (int x = 0; x < w; x++)
             {
@@ -681,10 +684,27 @@ public static class SpriteHelper
                     }
                 }
             }
+
+            // PASS CUỐI: Xóa viền 2 pixel để loại bỏ các "khung" dư thừa do nén JPEG
+            for (int x = 0; x < w; x++)
+            {
+                for (int y = 0; y < h; y++)
+                {
+                    if (x <= 1 || x >= w - 2 || y <= 1 || y >= h - 2)
+                    {
+                        Color p = img.GetPixel(x, y);
+                        // Nếu là màu xanh hoặc quá gần màu góc -> Xóa hẳn
+                        if (p.G > Math.Max(p.R, p.B) || ColorsClose(p, corner, 0.4f))
+                        {
+                            img.SetPixel(x, y, new Color(0, 0, 0, 0));
+                        }
+                    }
+                }
+            }
             return img;
         };
 
-        var imgIdle = loadBossImg("res://Assets/Sprites/Enemies/ChanTinh/B_dung.jpeg");
+        var imgIdle = loadBossImg("res://Assets/Sprites/Enemies/ChanTinh/B_dung.jpeg") ?? loadBossImg("res://Assets/Sprites/Enemies/ChanTinh/idle_boss.png");
         if (imgIdle == null) return CreateFallbackSprites(Colors.DarkGreen, false);
 
         // Thu thập tất cả các ảnh
@@ -723,7 +743,24 @@ public static class SpriteHelper
             {"energy", folder + "energy_shot.png"},
             {"atk_down", folder + "attack_down.png"},
             {"combat_idle", folder + "combat_idle.png"},
-            {"hit_block", folder + "hit_block.png"}
+            {"hit_block", folder + "hit_block.png"},
+            // CÁC ĐỘNG TÁC MỚI (JPEG)
+            {"chem", folder + "B_chem.jpeg"},
+            {"chem1", folder + "B_chem1.jpeg"},
+            {"chem2", folder + "B_chem2.jpeg"},
+            {"chem3", folder + "B_chem3.jpeg"},
+            {"ngang1", folder + "B_ngang1.jpeg"},
+            {"ngang2", folder + "B_ngang2.jpeg"},
+            {"tren1", folder + "B_tren 1.jpeg"},
+            {"tren2", folder + "B_tren2.jpeg"},
+            // CÁC ĐỘNG TÁC CHẾT MỚI
+            {"chet0", folder + "B_chet.jpeg"},
+            {"chet1", folder + "B_chet1.jpeg"},
+            {"chet2", folder + "B_chet2.jpeg"},
+            {"chet3", folder + "B_chet3.jpeg"},
+            {"chet4", folder + "B_chet4.jpeg"},
+            {"chet5", folder + "B_chet5.jpeg"},
+            {"chet6", folder + "B_chet6.jpeg"}
         };
 
         var loadedAttacks = new Dictionary<string, Image>();
@@ -750,9 +787,17 @@ public static class SpriteHelper
         allImages["power_up"] = new List<Image> { getImg("power"), getImg("power"), getImg("power") };
         allImages["attack_prepare_2"] = new List<Image> { getImg("prep2") };
         allImages["attack_ready"] = new List<Image> { getImg("ready") };
-        // Thêm hurt và die dùng combat_idle và hit_block
+        // Thêm hurt và die dùng combat_idle và hit_block (Die sẽ dùng bộ ảnh mới)
         allImages["hurt"] = new List<Image> { getImg("hit_block") ?? imgIdle };
-        allImages["die"] = new List<Image> { getImg("hit_block") ?? imgIdle };
+        allImages["die"] = new List<Image> { 
+            getImg("chet0"), getImg("chet1"), getImg("chet2"), 
+            getImg("chet3"), getImg("chet4"), getImg("chet5"), getImg("chet6") 
+        };
+
+        // ĐĂNG KÝ CÁC CHIÊU THỨC MỚI VÀO allImages
+        allImages["attack_chem"] = new List<Image> { getImg("chem"), getImg("chem1"), getImg("chem2"), getImg("chem3") };
+        allImages["attack_ngang"] = new List<Image> { getImg("ngang1"), getImg("ngang2") };
+        allImages["attack_tren"] = new List<Image> { getImg("tren1"), getImg("tren2") };
 
         foreach (var key in allImages.Keys.ToList())
         {
@@ -783,7 +828,8 @@ public static class SpriteHelper
             else if (!anims.ContainsKey(s)) anims[s] = anims.ContainsKey("idle") ? anims["idle"] : null;
         }
 
-        return BuildSpriteFrames(anims, 4.0f);
+        // Tăng tốc độ cho các chiêu thức tấn công (8 FPS thay vì 4)
+        return BuildSpriteFrames(anims, 8.0f);
     }
 
     public static SpriteFrames CreatePrincessSpriteFrames()
