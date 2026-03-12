@@ -237,12 +237,12 @@ public partial class DialogueManager : CanvasLayer
         hbox.AddChild(vbox);
 
         _nameLabel = new Label();
-        _nameLabel.AddThemeFontSizeOverride("font_size", 30);
+        _nameLabel.AddThemeFontSizeOverride("font_size", 26);
         _nameLabel.AddThemeColorOverride("font_color", new Color(1f, 0.85f, 0.4f, 1f));
         vbox.AddChild(_nameLabel);
 
         _textLabel = new Label();
-        _textLabel.AddThemeFontSizeOverride("font_size", 24);
+        _textLabel.AddThemeFontSizeOverride("font_size", 22);
         _textLabel.AddThemeColorOverride("font_color", new Color(0.95f, 0.95f, 0.95f, 1f));
         _textLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart; // Tự động ngắt dòng
         _textLabel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;

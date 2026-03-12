@@ -36,18 +36,18 @@ public partial class WinScreen : Control
         var subBg = new ColorRect();
         subBg.Color = new Color(0, 0, 0, 0.7f);
         subBg.SetAnchorsPreset(LayoutPreset.BottomWide);
-        subBg.CustomMinimumSize = new Vector2(0, 150);
-        subBg.Size = new Vector2(0, 150);
+        subBg.CustomMinimumSize = new Vector2(0, 180);
+        subBg.Size = new Vector2(0, 180);
         subBg.AnchorTop = 1;
         subBg.AnchorBottom = 1;
-        subBg.OffsetTop = -150;
+        subBg.OffsetTop = -180;
         subBg.OffsetBottom = 0;
         _bgImage.AddChild(subBg);
 
         var margin = new MarginContainer();
         margin.SetAnchorsPreset(LayoutPreset.FullRect);
-        margin.AddThemeConstantOverride("margin_left", 60);
-        margin.AddThemeConstantOverride("margin_right", 60);
+        margin.AddThemeConstantOverride("margin_left", 40);
+        margin.AddThemeConstantOverride("margin_right", 40);
         margin.AddThemeConstantOverride("margin_top", 10);
         margin.AddThemeConstantOverride("margin_bottom", 10);
         subBg.AddChild(margin);
@@ -57,7 +57,7 @@ public partial class WinScreen : Control
         _subtitleLabel.HorizontalAlignment = HorizontalAlignment.Center;
         _subtitleLabel.VerticalAlignment = VerticalAlignment.Center;
         _subtitleLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-        _subtitleLabel.AddThemeFontSizeOverride("font_size", 28);
+        _subtitleLabel.AddThemeFontSizeOverride("font_size", 22);
         _subtitleLabel.AddThemeColorOverride("font_color", Colors.White);
         margin.AddChild(_subtitleLabel);
 
@@ -91,6 +91,7 @@ public partial class WinScreen : Control
             }
             
             _subtitleLabel.Text = lines[i];
+            _subtitleLabel.VisibleRatio = 0;
 
             AudioStream audio = GD.Load<AudioStream>($"res://Assets/Audio/Voices/{imagesFiles[i]}.mp3");
             
@@ -99,18 +100,31 @@ public partial class WinScreen : Control
             twIn.TweenProperty(_fadeRect, "color:a", 0.0f, 1.0f);
             await ToSignal(twIn, "finished");
 
+            float duration = 4.0f;
             if (audio != null)
             {
+                duration = (float)audio.GetLength();
                 _audioPlayer.Stream = audio;
                 _audioPlayer.Play();
-                await ToSignal(_audioPlayer, "finished");
-                await Task.Delay(500);
             }
             else
             {
-                // Nếu User chưa add audio thì chờ 1 lúc theo độ dài Text
-                await Task.Delay(1000 + lines[i].Length * 60);
+                duration = lines[i].Length * 0.06f;
             }
+
+            // Hiệu ứng chữ chạy mượt mà theo độ dài âm thanh
+            var typeTw = CreateTween();
+            typeTw.TweenProperty(_subtitleLabel, "visible_ratio", 1.0f, duration);
+
+            if (audio != null)
+            {
+                await ToSignal(_audioPlayer, "finished");
+            }
+            else
+            {
+                await ToSignal(typeTw, "finished");
+            }
+            await Task.Delay(800);
 
             // Fade Out between slides
             if (i < 2)

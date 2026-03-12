@@ -91,8 +91,7 @@ public partial class TutorialManager : CanvasLayer
             new TutorialStep(
                 "attack",
                 "🗣️ Thạch Sanh",
-                "Phía trước có thể có nguy hiểm. Hãy luôn sẵn sàng vũ khí trong tay!",
-                "Nhấn J hoặc Chuột trái để tấn công.",
+
                 "res://Assets/Audio/Voices/ts_tut_attack.mp3",
                 () => _attackDone
             )
