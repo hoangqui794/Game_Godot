@@ -91,8 +91,7 @@ public partial class TutorialManager : CanvasLayer
             new TutorialStep(
                 "attack",
                 "🗣️ Thạch Sanh",
-                "Trước khi tiến vào sâu trong hang, ta phải khởi động tay chân. Rìu thần sẽ không nương tay với những yêu tà đâu!",
-                "Nhấn H hoặc chuột trái để chém.",
+
                 "res://Assets/Audio/Voices/ts_tut_attack.mp3",
                 () => _attackDone
             )

@@ -277,7 +277,18 @@ public partial class GameManager : Node
     }
 
     public void WinGame() => ChangeSceneWithTransition("res://Scenes/Main/WinScreen.tscn", false);
-    public void GoToMainMenu() { IsGameOver = false; PlayerLives = 3; ChangeSceneWithTransition("res://Scenes/Main/MainMenu.tscn", false); }
+    public void GoToMainMenu() 
+    { 
+        IsGameOver = false; 
+        PlayerLives = 3; 
+        
+        // Cần nhả Pause và reset TimeScale khi về Menu, nếu không các nút ở Menu sẽ bị liệt
+        IsPaused = false;
+        GetTree().Paused = false;
+        Engine.TimeScale = 1.0f;
+        
+        ChangeSceneWithTransition("res://Scenes/Main/MainMenu.tscn", false); 
+    }
 
     private void ResetStats()
     {
