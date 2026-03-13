@@ -6,6 +6,9 @@ using System.Linq;
 public static class SpriteHelper
 {
     private static SpriteFrames _cachedPlayerFrames = null;
+    private static SpriteFrames _cachedSnakeFrames = null;
+    private static SpriteFrames _cachedEagleFrames = null;
+    private static SpriteFrames _cachedChanTinhFrames = null;
 
     public static SpriteFrames CreatePlayerSpriteFrames()
     {
@@ -573,6 +576,8 @@ public static class SpriteHelper
 
     public static SpriteFrames CreateSnakeSpriteFrames()
     {
+        if (_cachedSnakeFrames != null) return _cachedSnakeFrames;
+
         var imgWalk = LoadAndCleanImage("res://Assets/Sprites/Enemies/snack3_move.png");
         var imgHurt = LoadAndCleanImage("res://Assets/Sprites/Enemies/snack_bidanh.png");
 
@@ -603,21 +608,27 @@ public static class SpriteHelper
         anims["die"] = new[] { texturesHurt.Count > 1 ? texturesHurt[1] : texturesHurt[0] };
 
         // Tạo animation
-        return BuildSpriteFrames(anims, 8.0f);
+        _cachedSnakeFrames = BuildSpriteFrames(anims, 8.0f);
+        return _cachedSnakeFrames;
     }
 
     public static SpriteFrames CreateEagleSpriteFrames()
     {
+        if (_cachedEagleFrames != null) return _cachedEagleFrames;
+
         var frames = LoadSpriteSheet2x2("res://Assets/Sprites/Enemies/eagle.png");
         if (frames == null) return CreateFallbackSprites(new Color(0.35f, 0.25f, 0.15f), false);
-        return BuildSpriteFrames(new Dictionary<string, Texture2D[]> {
+        _cachedEagleFrames = BuildSpriteFrames(new Dictionary<string, Texture2D[]> {
             {"walk", new[] { frames[0] }}, {"attack", new[] { frames[1] }},
             {"hurt", new[] { frames[2] }}, {"die", new[] { frames[3] }}
         });
+        return _cachedEagleFrames;
     }
 
     public static SpriteFrames CreateChanTinhSpriteFrames()
     {
+        if (_cachedChanTinhFrames != null) return _cachedChanTinhFrames;
+
         var anims = new Dictionary<string, Texture2D[]>();
         // Canvas lớn hơn = giữ chi tiết hình ảnh, sắc nét hơn
         // ChanTinh.cs sẽ dùng node Scale để thu nhỏ về nửa màn hình
@@ -638,65 +649,45 @@ public static class SpriteHelper
             int w = img.GetWidth(), h = img.GetHeight();
             Color corner = img.GetPixel(4, 4); // Sample sát góc hơn để tránh đè vào Boss
             
-            // Log để debug (sẽ tự hiện trong console Godot)
-            if (path.Contains("B_")) GD.Print($"[SpriteHelper] Loading custom sprite: {path}");
-            
+            // 1. Thuật toán Chroma Key mạnh mẽ hơn cho nền Neon Green
             for (int x = 0; x < w; x++)
             {
                 for (int y = 0; y < h; y++)
                 {
                     Color p = img.GetPixel(x, y);
                     
-                    // 1. Kiểm tra pixel có phải màu Xanh Neon (nền) không?
-                    // Nền xanh neon thường có G > R và G > B rất nhiều.
-                    float greenDominance = p.G - Math.Max(p.R, p.B);
-                    bool isBackgroundGreen = p.G > 0.2f && greenDominance > 0.05f;
+                    // Nền xanh neon (Pure Green): G lớn và (G - R) lớn, (G - B) lớn
+                    float greenDiff = p.G - Math.Max(p.R, p.B);
                     
-                    // 2. Bảo vệ màu da Boss (Xanh rêu/Xám xanh)
-                    // Màu da Boss thường tối hơn, R và B không quá thấp so với G
-                    // Hoặc G không quá cao.
-                    bool isBossSkin = (p.G < 0.6f && p.R > 0.1f && p.B > 0.1f) || (p.G < 0.3f);
-                    
-                    // 3. Xử lý "Viền xanh" (Green Fringe) ở các frame tấn công
-                    // Nếu là pixel ở rìa, có màu xanh chủ đạo nhưng không phải da boss -> Xóa
-                    if (isBackgroundGreen && !isBossSkin)
-                    {
-                        // Nếu cực kỳ xanh (neon rực), xóa hẳn
-                        if (greenDominance > 0.15f || p.G > 0.7f) 
-                        {
-                            img.SetPixel(x, y, new Color(0, 0, 0, 0));
-                        }
-                        else 
-                        {
-                            // Nếu là xanh nhạt ở rìa, làm nó trong suốt dần
-                            Color ghost = p;
-                            ghost.A = Math.Max(0, p.A - (greenDominance * 2.0f));
-                            // Giảm bớt sắc xanh
-                            ghost.G = Math.Min(ghost.G, Math.Max(ghost.R, ghost.B));
-                            img.SetPixel(x, y, ghost);
-                        }
-                    }
-                    
-                    // Xóa triệt để màu giống hệt màu ở góc
-                    if (ColorsClose(p, corner, 0.2f))
+                    // Nếu là pixel cực kỳ xanh (Chroma Key) -> Xóa sạch
+                    if (p.G > 0.4f && greenDiff > 0.15f)
                     {
                         img.SetPixel(x, y, new Color(0, 0, 0, 0));
+                        continue;
+                    }
+
+                    // Nếu là pixel viền xanh (Antialiasing) -> Làm trong suốt và khử sắc xanh
+                    if (p.G > 0.2f && greenDiff > 0.05f)
+                    {
+                        Color cleaned = p;
+                        cleaned.A = Math.Max(0, p.A - (greenDiff * 3.0f));
+                        cleaned.G = Math.Max(cleaned.R, cleaned.B); // Khử sắc xanh neon
+                        img.SetPixel(x, y, cleaned);
                     }
                 }
             }
 
-            // PASS CUỐI: Xóa viền 2 pixel để loại bỏ các "khung" dư thừa do nén JPEG
-            for (int x = 0; x < w; x++)
+            // 2. Sample pixel ở cạnh để xóa triệt để màu nền nếu còn sót
+            Color cornerColor = img.GetPixel(0, 0);
+            if (cornerColor.A > 0)
             {
-                for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
                 {
-                    if (x <= 1 || x >= w - 2 || y <= 1 || y >= h - 2)
+                    for (int y = 0; y < h; y++)
                     {
-                        Color p = img.GetPixel(x, y);
-                        // Nếu là màu xanh hoặc quá gần màu góc -> Xóa hẳn
-                        if (p.G > Math.Max(p.R, p.B) || ColorsClose(p, corner, 0.4f))
+                        if (ColorsClose(img.GetPixel(x, y), cornerColor, 0.2f))
                         {
-                            img.SetPixel(x, y, new Color(0, 0, 0, 0));
+                            img.SetPixel(x, y, Colors.Transparent);
                         }
                     }
                 }
@@ -798,6 +789,9 @@ public static class SpriteHelper
         allImages["attack_chem"] = new List<Image> { getImg("chem"), getImg("chem1"), getImg("chem2"), getImg("chem3") };
         allImages["attack_ngang"] = new List<Image> { getImg("ngang1"), getImg("ngang2") };
         allImages["attack_tren"] = new List<Image> { getImg("tren1"), getImg("tren2") };
+        
+        // ANIMATION TRIỆU HỒI CHUYÊN DỤNG (Không bị nhầm với đỡ đòn)
+        allImages["summon"] = new List<Image> { getImg("power") };
 
         foreach (var key in allImages.Keys.ToList())
         {
@@ -828,8 +822,8 @@ public static class SpriteHelper
             else if (!anims.ContainsKey(s)) anims[s] = anims.ContainsKey("idle") ? anims["idle"] : null;
         }
 
-        // Tăng tốc độ cho các chiêu thức tấn công (8 FPS thay vì 4)
-        return BuildSpriteFrames(anims, 8.0f);
+        _cachedChanTinhFrames = BuildSpriteFrames(anims, 8.0f);
+        return _cachedChanTinhFrames;
     }
 
     public static SpriteFrames CreatePrincessSpriteFrames()

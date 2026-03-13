@@ -6,6 +6,8 @@ public partial class ChanTinh : BaseEnemy
 {
     [Export] public PackedScene KeyScene;
     [Export] public PackedScene ChestScene;
+    [Export] public PackedScene MinionSnakeScene;
+    [Export] public PackedScene MinionEagleScene;
 
     private enum BossState
     {
@@ -13,13 +15,21 @@ public partial class ChanTinh : BaseEnemy
         Chase,
         Telegraph,
         Attack,
-        Cooldown
+        Cooldown,
+        Summoning,
+        Dead
     }
 
     private BossState _bossState = BossState.Idle;
     private float _stateTimer = 0f;
     private string _queuedAttack = "";
     private bool _hasHitTarget = false;
+
+    // Summoning flags
+    private bool _summoned70 = false;
+    private bool _summoned30 = false;
+    private CpuParticles2D _summonParticles;
+    private Color _originalModulate = Colors.White;
 
     // Phải khớp CHÍNH XÁC với tên trong SpriteHelper.cs
     // 8 chiêu thức đa dạng: chém, đập, quay, lửa, nhảy, sét, ném, năng lượng
@@ -45,6 +55,10 @@ public partial class ChanTinh : BaseEnemy
         HealthBarOffset = new Vector2(-40, -220); 
 
         base._Ready();
+        
+        // PRELOAD để tránh giật lag (Fix lỗi đơ 3s)
+        if (MinionSnakeScene == null) MinionSnakeScene = GD.Load<PackedScene>("res://Scenes/Enemies/Snake.tscn");
+        if (MinionEagleScene == null) MinionEagleScene = GD.Load<PackedScene>("res://Scenes/Enemies/Eagle.tscn");
 
         // Sprite setup - Canvas 600px, dùng Scale 0.6 để hiển thị nửa màn hình
         AnimSprite.SpriteFrames = SpriteHelper.CreateChanTinhSpriteFrames();
@@ -70,7 +84,13 @@ public partial class ChanTinh : BaseEnemy
 
     public override void TakeDamage(int damage)
     {
-        // Khi bị trúng đòn, Boss sẽ bị khựng lại
+        // SUPER ARMOR & INVULNERABILITY
+        if (_bossState == BossState.Summoning)
+        {
+            GD.Print("[ChanTinh] INVULNERABLE! Boss is summoning minions.");
+            return; // Không nhận sát thương khi đang gồng triệu hồi
+        }
+
         bool isHeavyAttack = _queuedAttack == "attack_fire" || _queuedAttack == "attack_energy" || 
                              _queuedAttack == "attack_smash" || _queuedAttack == "attack_lightning" ||
                              _queuedAttack == "attack_tren" || _queuedAttack == "attack_chem";
@@ -78,6 +98,26 @@ public partial class ChanTinh : BaseEnemy
         // Super Armor: Boss không bị khựng nếu đang ra chiêu nặng hoặc máu còn > 50%
         bool hasSuperArmor = (_bossState == BossState.Attack && isHeavyAttack) || (Health > MaxHealth * 0.5f);
         
+        // Check for summoning thresholds BEFORE base.TakeDamage to prevent hit stun
+        float healthPct = (float)Health / MaxHealth;
+        bool triggeredSummon = false;
+        if (!_summoned70 && healthPct <= 0.7f)
+        {
+            triggeredSummon = true;
+        }
+        else if (!_summoned30 && healthPct <= 0.3f)
+        {
+            triggeredSummon = true;
+        }
+
+        if (triggeredSummon)
+        {
+            base.TakeDamage(damage);
+            IsHurt = false; // Bỏ qua trạng thái bị thương (đỡ đòn) để gồng triệu hồi ngay
+            StartSummoning();
+            return;
+        }
+
         bool wasBusy = (_bossState == BossState.Attack || _bossState == BossState.Telegraph);
         
         base.TakeDamage(damage);
@@ -141,6 +181,9 @@ public partial class ChanTinh : BaseEnemy
                 break;
             case BossState.Cooldown:
                 ProcessCooldownState();
+                break;
+            case BossState.Summoning:
+                ProcessSummoningState(dt);
                 break;
         }
 
@@ -306,6 +349,151 @@ public partial class ChanTinh : BaseEnemy
         }
     }
 
+    private void StartSummoning()
+    {
+        _bossState = BossState.Summoning;
+        _stateTimer = 1.5f; 
+        
+        float healthPct = (float)Health / MaxHealth;
+        if (healthPct <= 0.35f) _summoned30 = true;
+        else _summoned70 = true;
+
+        Velocity = Vector2.Zero;
+        
+        if (AnimSprite.SpriteFrames.HasAnimation("summon")) AnimSprite.Play("summon");
+        else AnimSprite.Play("idle");
+
+        _originalModulate = Modulate;
+
+        // 1. Hiệu ứng Boss ám tím/đen (Nhưng vẫn phải nhìn rõ được Boss)
+        var bossTween = CreateTween();
+        // Giữ cường độ sáng ở mức 0.6-0.8 để Boss không bị đen xì
+        bossTween.TweenProperty(this, "modulate", new Color(0.7f, 0.5f, 0.9f, 1.0f), 0.4f); 
+
+        // 2. Tạo hiệu ứng Aura Đen (Cải thiện hiệu năng & loại bỏ ô vuông mờ)
+        if (_summonParticles == null)
+        {
+            _summonParticles = new CpuParticles2D();
+            _summonParticles.Amount = 30; 
+            _summonParticles.Lifetime = 1.0f;
+            _summonParticles.Explosiveness = 0f;
+            _summonParticles.Spread = 40f;
+            _summonParticles.Gravity = new Vector2(0, -80); 
+            _summonParticles.Direction = new Vector2(0, -1);
+            _summonParticles.InitialVelocityMin = 40f;
+            _summonParticles.InitialVelocityMax = 90f;
+            _summonParticles.ScaleAmountMin = 0.5f; 
+            _summonParticles.ScaleAmountMax = 1.5f;
+            
+            // Dùng texture hình tròn mờ để xóa sổ "ô vuông mờ"
+            _summonParticles.Texture = CreateDotTexture(); 
+            
+            var ramp = new Gradient();
+            ramp.AddPoint(0f, new Color(0.1f, 0f, 0.2f, 0f)); 
+            ramp.AddPoint(0.3f, new Color(0.15f, 0.05f, 0.35f, 0.4f)); 
+            ramp.AddPoint(0.7f, new Color(0.1f, 0f, 0.2f, 0.2f)); 
+            ramp.AddPoint(1.0f, new Color(0, 0, 0, 0)); 
+            _summonParticles.ColorRamp = ramp;
+            
+            AddChild(_summonParticles);
+            _summonParticles.Position = new Vector2(0, 50); 
+        }
+        
+        _summonParticles.Emitting = true;
+        
+        TriggerCameraShake(1.5f, 20f); 
+        GD.Print("[ChanTinh] START SUMMONING! Black Aura Charging...");
+    }
+
+    private void ProcessSummoningState(float dt)
+    {
+        Velocity = new Vector2(0, Velocity.Y);
+        
+        // Nhấp nháy tà khí tím (Tăng độ sáng để nhìn rõ Boss)
+        float pulse = (float)Math.Sin(Time.GetTicksMsec() * 0.03f) * 0.2f + 0.8f;
+        Modulate = new Color(pulse * 0.8f, pulse * 0.6f, pulse * 1.1f, 1.0f);
+
+        if (_stateTimer <= 0)
+        {
+            PerformSummon();
+            
+            if (_summonParticles != null) _summonParticles.Emitting = false;
+            
+            var restoreTween = CreateTween();
+            restoreTween.TweenProperty(this, "modulate", _originalModulate, 0.3f);
+
+            _bossState = BossState.Cooldown;
+            _stateTimer = 0.8f;
+        }
+    }
+
+    private void PerformSummon()
+    {
+        GD.Print("[ChanTinh] PERFORM SUMMON! Minions appearing.");
+        
+        // Xác định số lượng dựa trên mốc máu
+        float healthPct = (float)Health / MaxHealth;
+        int snakeCount = (healthPct <= 0.4f) ? 3 : 2;
+        int eagleCount = (healthPct <= 0.4f) ? 3 : 1;
+
+        // Vị trí Arena: cam.LimitLeft = 2350; cam.LimitRight = 3502;
+        float arenaMinX = 2400f;
+        float arenaMaxX = 3450f;
+
+        for (int i = 0; i < snakeCount; i++)
+        {
+            if (MinionSnakeScene != null)
+            {
+                var snake = MinionSnakeScene.Instantiate<CharacterBody2D>();
+                GetParent().AddChild(snake);
+                float randomX = (float)GD.RandRange(arenaMinX, arenaMaxX);
+                snake.GlobalPosition = new Vector2(randomX, 550);
+                CreateSpawnVFX(snake.GlobalPosition);
+            }
+        }
+
+        for (int i = 0; i < eagleCount; i++)
+        {
+            if (MinionEagleScene != null)
+            {
+                var eagle = MinionEagleScene.Instantiate<CharacterBody2D>();
+                GetParent().AddChild(eagle);
+                float randomX = (float)GD.RandRange(arenaMinX, arenaMaxX);
+                float randomY = (float)GD.RandRange(200, 450);
+                eagle.GlobalPosition = new Vector2(randomX, randomY);
+                CreateSpawnVFX(eagle.GlobalPosition);
+            }
+        }
+        
+        TriggerCameraShake(0.5f, 30f);
+    }
+
+    private void CreateSpawnVFX(Vector2 pos)
+    {
+        var explosion = new CpuParticles2D();
+        explosion.GlobalPosition = pos;
+        explosion.Emitting = true;
+        explosion.OneShot = true;
+        explosion.Amount = 20;
+        explosion.Lifetime = 0.4f;
+        explosion.Explosiveness = 0.9f;
+        explosion.Spread = 180f;
+        explosion.Gravity = Vector2.Zero;
+        explosion.InitialVelocityMin = 100f;
+        explosion.InitialVelocityMax = 200f;
+        explosion.ScaleAmountMin = 5f;
+        explosion.ScaleAmountMax = 10f;
+        
+        var colorRamp = new Gradient();
+        colorRamp.AddPoint(0.0f, Colors.Cyan);
+        colorRamp.AddPoint(1.0f, new Color(0, 0, 1, 0));
+        explosion.ColorRamp = colorRamp;
+
+        GetParent().AddChild(explosion);
+        var timer = GetTree().CreateTimer(0.6f);
+        timer.Timeout += () => { if (IsInstanceValid(explosion)) explosion.QueueFree(); };
+    }
+
     private void CheckHit()
     {
         if (_hasHitTarget || !IsInstanceValid(TargetPlayer)) return;
@@ -377,9 +565,12 @@ public partial class ChanTinh : BaseEnemy
     {
         if (IsDead) return;
         IsDead = true;
-        _bossState = BossState.Idle;
+        _bossState = BossState.Dead;
         
-        GD.Print("[ChanTinh] Boss defeated! Playing dramatic death sequence.");
+        // RESET màu sắc về mặc định để nhìn rõ animation chết (Fix lỗi bị mờ/đen)
+        Modulate = Colors.White;
+        
+        GD.Print("[ChanTinh] DIED! Starting epic death sequence...");
 
         // --- SỬA LỖI: Tắt ngay lập tức các vùng va chạm để không gây sát thương khi đã chết ---
         if (HasNode("CollisionShape2D"))
@@ -428,8 +619,8 @@ public partial class ChanTinh : BaseEnemy
         // 4. RƠI RƯƠNG BÁU (Thay vì rơi chìa khóa trực tiếp)
         SpawnChest();
 
-        // 5. Đợi một chút trước khi biến mất (TimeScale đang là 0.4f nên 3s thực tế = 1.2s game)
-        await Task.Delay(3000); 
+        // 5. Đợi một chút trước khi biến mất (Giảm xuống 1s như yêu cầu)
+        await Task.Delay(1000); 
         
         if (IsInstanceValid(this)) 
         {
@@ -528,5 +719,28 @@ public partial class ChanTinh : BaseEnemy
             var tween = key.CreateTween();
             tween.TweenProperty(key, "position:y", key.Position.Y - 80, 0.6f).SetTrans(Tween.TransitionType.Back);
         }
+    }
+
+    private Texture2D CreateDotTexture()
+    {
+        int size = 64;
+        var img = Image.CreateEmpty(size, size, false, Image.Format.Rgba8);
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                float dx = x - (size/2f - 0.5f);
+                float dy = y - (size/2f - 0.5f);
+                float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+                float radius = size / 2.2f;
+                if (dist < radius)
+                {
+                    float alpha = (float)Math.Pow(1.0f - (dist / radius), 2.0); // Soft falloff
+                    img.SetPixel(x, y, new Color(1, 1, 1, alpha));
+                }
+                else img.SetPixel(x, y, new Color(1, 1, 1, 0));
+            }
+        }
+        return ImageTexture.CreateFromImage(img);
     }
 }
