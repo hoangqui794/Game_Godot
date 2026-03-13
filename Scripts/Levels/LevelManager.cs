@@ -447,7 +447,7 @@ public partial class LevelManager : Node2D
         var lines = new List<DialogueManager.DialogueLine>
     {
         new DialogueManager.DialogueLine("Công Chúa", "Thạch Sanh, hãy cẩn thận, con Chằn Tinh này rất mạnh!", null, "res://Assets/Audio/Voices/princess_warn.mp3"),
-        new DialogueManager.DialogueLine("Chằn Tinh", "THẠCH SANH!!! Ngươi thật sự đến được tận đây?! Ta phải thừa nhận, ngươi đã hạ được tất cả lính canh của ta. Nhưng đây là sào huyệt của ta, ngươi nghĩ sẽ thoát được sao!", null, "res://Assets/Audio/Voices/chantinh_intro.mp3"),
+        new DialogueManager.DialogueLine("Chằn Tinh", "THẠCH SANH!!! Ngươi thật sự đến được tận đây?! Ta phải thừa nhận, ngươi đã hạ được tất cả lính canh của ta. Nhưng đây là sào huyệt của ta, ngươi nghĩ sẽ thoát được sao hahaha!", null, "res://Assets/Audio/Voices/chantinh_intro.mp3"),
         new DialogueManager.DialogueLine("Thạch Sanh", "Ta đã bước vào đây để cứu người, thì cũng sẵn sàng kết thúc mọi hiểm họa tại đây.", null, "res://Assets/Audio/Voices/ts_boss_phase3.mp3")
     };
         await dm.PlayDialogue(lines);
