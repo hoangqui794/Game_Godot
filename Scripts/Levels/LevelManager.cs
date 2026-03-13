@@ -23,6 +23,14 @@ public partial class LevelManager : Node2D
     private Vector2 _bossArenaEntrance = new Vector2(2350, 580);
     private StaticBody2D _princessBarrier;
 
+    // --- Level 3 atmosphere effects ---
+    private List<ColorRect> _fireflies = new List<ColorRect>();
+    private List<ColorRect> _fogLayers = new List<ColorRect>();
+    private ColorRect _lightningFlash;
+    private float _lightningTimer = 0f;
+    private float _nextLightningTime = 5f;
+    private double _elapsedTime = 0;
+
     private List<Vector2> _checkpoints = new List<Vector2>();
 
     public override void _Ready()
@@ -52,6 +60,7 @@ public partial class LevelManager : Node2D
         if (LevelNumber == 3)
         {
             SetupLevel3();
+            SetupLevel3Atmosphere();
         }
 
         // Giữ phần bẫy đá từ GitHub
@@ -214,6 +223,88 @@ public partial class LevelManager : Node2D
         }
 
         GD.Print("Level 3 Setup: Hidden Princess, Cage, and Boss.");
+    }
+
+    private void SetupLevel3Atmosphere()
+    {
+        // Thu thập tất cả đom đóm để animate
+        foreach (var child in GetChildren())
+        {
+            if (child is ColorRect cr)
+            {
+                string name = cr.Name.ToString();
+                if (name.StartsWith("Firefly"))
+                    _fireflies.Add(cr);
+                else if (name.StartsWith("Fog_"))
+                    _fogLayers.Add(cr);
+            }
+        }
+
+        // Tạo layer Flash sấm chớp (toàn màn hình, ẩn đi)
+        _lightningFlash = new ColorRect();
+        _lightningFlash.ZIndex = 50;
+        _lightningFlash.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _lightningFlash.Color = new Color(1, 1, 1, 0);
+        _lightningFlash.MouseFilter = Control.MouseFilterEnum.Ignore;
+        _lightningFlash.Size = new Vector2(5000, 1000);
+        _lightningFlash.Position = new Vector2(-500, -200);
+        AddChild(_lightningFlash);
+
+        // Random thời gian sấm chớp đầu tiên
+        _nextLightningTime = (float)GD.RandRange(4.0, 10.0);
+
+        // Animate đom đóm bay lên xuống nhẹ
+        foreach (var fly in _fireflies)
+        {
+            AnimateFirefly(fly);
+        }
+
+        GD.Print($"Level 3 Atmosphere: {_fireflies.Count} fireflies, {_fogLayers.Count} fog layers.");
+    }
+
+    private void AnimateFirefly(ColorRect fly)
+    {
+        var tw = CreateTween();
+        tw.SetLoops(); // Lặp vô hạn
+
+        float baseY = fly.Position.Y;
+        float duration = (float)GD.RandRange(1.5, 3.5);
+        float amplitude = (float)GD.RandRange(8.0, 25.0);
+        float xDrift = (float)GD.RandRange(-15.0, 15.0);
+
+        // Bay lên
+        tw.TweenProperty(fly, "position",
+            new Vector2(fly.Position.X + xDrift, baseY - amplitude), duration)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.InOut);
+
+        // Mờ dần
+        tw.TweenProperty(fly, "modulate:a", 0.3f, duration * 0.5f)
+            .SetTrans(Tween.TransitionType.Sine);
+
+        // Bay xuống
+        tw.TweenProperty(fly, "position",
+            new Vector2(fly.Position.X - xDrift, baseY + amplitude * 0.5f), duration)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.InOut);
+
+        // Sáng lại
+        tw.TweenProperty(fly, "modulate:a", 1.0f, duration * 0.5f)
+            .SetTrans(Tween.TransitionType.Sine);
+    }
+
+    private void TriggerLightning()
+    {
+        if (_lightningFlash == null) return;
+
+        var tw = CreateTween();
+        // Flash nhanh
+        tw.TweenProperty(_lightningFlash, "color:a", 0.15f, 0.05f);
+        tw.TweenProperty(_lightningFlash, "color:a", 0.0f, 0.08f);
+        tw.TweenInterval(0.1f);
+        // Flash lần 2 (mạnh hơn)
+        tw.TweenProperty(_lightningFlash, "color:a", 0.25f, 0.03f);
+        tw.TweenProperty(_lightningFlash, "color:a", 0.0f, 0.15f);
     }
 
     private void ProcessLevel3Logic()
@@ -427,6 +518,25 @@ public partial class LevelManager : Node2D
         if (LevelNumber == 3)
         {
             ProcessLevel3Logic();
+
+            // Hiệu ứng khí quyển
+            _elapsedTime += delta;
+            _lightningTimer += (float)delta;
+            if (_lightningTimer >= _nextLightningTime)
+            {
+                _lightningTimer = 0;
+                _nextLightningTime = (float)GD.RandRange(5.0, 15.0);
+                TriggerLightning();
+            }
+
+            // Sương mù trôi nhẹ
+            foreach (var fog in _fogLayers)
+            {
+                if (!IsInstanceValid(fog)) continue;
+                float shift = Mathf.Sin((float)_elapsedTime * 0.3f + fog.Position.X * 0.01f) * 0.15f;
+                var c = fog.Color;
+                fog.Color = new Color(c.R, c.G, c.B, Mathf.Clamp(c.A + shift * (float)delta, 0.05f, 0.4f));
+            }
         }
 
         for (int i = GameManager.Instance.CurrentCheckpointIndex + 1; i < _checkpoints.Count; i++)
