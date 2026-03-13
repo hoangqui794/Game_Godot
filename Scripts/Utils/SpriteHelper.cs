@@ -1046,15 +1046,32 @@ public static class SpriteHelper
     {
         int w = img.GetWidth(), h = img.GetHeight();
 
-        // Sample multiple points to avoid picking up a single pixel border or grid line
-        Color bg1 = img.GetPixel(4, 4); 
-        Color bg2 = img.GetPixel(Math.Min(12, w-1), 4);
+        // Sample multiple points to find two potential background colors (for checkerboard)
+        // We sample at different distances to catch both white and gray squares
+        List<Color> samples = new List<Color>();
+        samples.Add(img.GetPixel(0, 0));
+        samples.Add(img.GetPixel(Math.Min(4, w-1), Math.Min(4, h-1)));
+        samples.Add(img.GetPixel(Math.Min(12, w-1), Math.Min(12, h-1)));
+        samples.Add(img.GetPixel(Math.Min(20, w-1), Math.Min(4, h-1)));
         
+        Color bg1 = samples[0];
+        Color bg2 = samples[0];
+
+        // Find a second color that is different from the first to detect checkerboard
+        foreach (var s in samples)
+        {
+            if (Math.Abs(s.R - bg1.R) > 0.02f || Math.Abs(s.G - bg1.G) > 0.02f)
+            {
+                bg2 = s;
+                break;
+            }
+        }
+
         bool isGreenScreen = bg1.G > 0.4f && bg1.G > bg1.R && bg1.G > bg1.B;
         bool isMagentaScreen = bg1.R > 0.4f && bg1.B > 0.4f && bg1.R > bg1.G && bg1.B > bg1.G;
         bool isBlueScreen = bg1.B > 0.4f && bg1.B > bg1.R && bg1.B > bg1.G;
 
-        // Detect checkered/caro pattern
+        // Detect if it's a checkered pattern or just a plain grayish background
         bool isCheckered = IsCheckeredBackground(bg1, bg2);
 
         for (int x = 0; x < w; x++)
@@ -1081,18 +1098,18 @@ public static class SpriteHelper
                 {
                     if (IsCheckeredPixel(p, bg1, bg2)) remove = true;
                     
-                    // Specific fix: Remove black grid lines (typically near edges or centers)
-                    // if it's a "checkerboard" image, black lines are almost certainly background
-                    bool isBlackLine = p.R < 0.1f && p.G < 0.1f && p.B < 0.1f;
-                    // Protect if it's near the character center (rough heuristic)
-                    bool isNearEdgeOrCenter = x <= 2 || x >= w - 3 || y <= 2 || y >= h - 3 || 
-                                              Math.Abs(x - w/2) <= 1 || Math.Abs(y - h/2) <= 1;
+                    // Specific fix: Remove black grid lines (typically near edges or centers of the sheet cells)
+                    bool isBlackLine = p.R < 0.15f && p.G < 0.15f && p.B < 0.15f;
+                    // For the princess 2x2 sheet, lines are at edges and exactly in the middle
+                    bool isAtGridLine = x <= 2 || x >= w - 3 || y <= 2 || y >= h - 3 || 
+                                        Math.Abs(x - w/2) <= 1 || Math.Abs(y - h/2) <= 1;
                     
-                    if (isBlackLine && isNearEdgeOrCenter) remove = true;
+                    if (isBlackLine && isAtGridLine) remove = true;
                 }
                 else
                 {
-                    if (ColorsClose(p, bg1, 0.12f)) remove = true;
+                    // Plain color removal
+                    if (ColorsClose(p, bg1, 0.15f)) remove = true;
                 }
 
                 if (remove) img.SetPixel(x, y, new Color(0, 0, 0, 0));
@@ -1102,27 +1119,31 @@ public static class SpriteHelper
 
     private static bool IsCheckeredBackground(Color c1, Color c2)
     {
-        bool c1IsGrayish = Math.Abs(c1.R - c1.G) < 0.12f && Math.Abs(c1.G - c1.B) < 0.12f;
-        bool c2IsGrayish = Math.Abs(c2.R - c2.G) < 0.12f && Math.Abs(c2.G - c2.B) < 0.12f;
+        bool c1IsGrayish = Math.Abs(c1.R - c1.G) < 0.15f && Math.Abs(c1.G - c1.B) < 0.15f;
+        bool c2IsGrayish = Math.Abs(c2.R - c2.G) < 0.15f && Math.Abs(c2.G - c2.B) < 0.15f;
+
+        // If even one color is clearly white/gray and "fake transparent"
+        if (c1.R > 0.94f && c1IsGrayish) return true;
+        if (c2.R > 0.94f && c2IsGrayish) return true;
 
         if (c1IsGrayish && c2IsGrayish)
         {
             float diff = Math.Abs(c1.R - c2.R);
-            if (diff > 0.03f) return true;
+            if (diff > 0.02f) return true;
         }
-
-        if (c1.R > 0.85f && c1.G > 0.85f && c1.B > 0.85f && c1IsGrayish) return true;
 
         return false;
     }
 
     private static bool IsCheckeredPixel(Color p, Color bg1, Color bg2)
     {
-        if (ColorsClose(p, bg1, 0.18f)) return true;
-        if (ColorsClose(p, bg2, 0.18f)) return true;
+        // Tolerate more on the background colors
+        if (ColorsClose(p, bg1, 0.22f)) return true;
+        if (ColorsClose(p, bg2, 0.22f)) return true;
 
-        bool isGrayish = Math.Abs(p.R - p.G) < 0.15f && Math.Abs(p.G - p.B) < 0.15f;
-        if (isGrayish && p.R > 0.32f) return true; 
+        // Remove any grayish pixels that are bright enough to be background
+        bool isGrayish = Math.Abs(p.R - p.G) < 0.2f && Math.Abs(p.G - p.B) < 0.2f;
+        if (isGrayish && p.R > 0.25f) return true; 
 
         return false;
     }
