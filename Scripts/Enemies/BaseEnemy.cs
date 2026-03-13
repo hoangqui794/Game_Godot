@@ -433,6 +433,8 @@ public partial class BaseEnemy : CharacterBody2D
 
     private void OnHitAreaBodyEntered(Node2D body)
     {
+        if (IsDead) return; // Bảo vệ: Quái chết thì không chém được ai nữa
+        
         if (body is Player player)
         {
             player.TakeDamage(AttackDamage);

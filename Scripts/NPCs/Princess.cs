@@ -56,11 +56,20 @@ public partial class Princess : Area2D
 
         if (RequireAllEnemiesDefeated)
         {
-            // Check if all enemies are defeated
-            var enemies = GetTree().GetNodesInGroup("enemies");
-            if (enemies.Count > 0)
+            // Kiểm tra xem còn quái nào SỐNG không
+            var nodes = GetTree().GetNodesInGroup("enemies");
+            int aliveCount = 0;
+            foreach (var node in nodes)
             {
-                // Show message
+                if (node is BaseEnemy enemy && !enemy.IsDead)
+                {
+                    aliveCount++;
+                }
+            }
+
+            if (aliveCount > 0)
+            {
+                _messageLabel.Text = $"Vẫn còn {aliveCount} yêu tà lảng vảng!";
                 _messageLabel.Visible = true;
                 var tween = CreateTween();
                 tween.TweenInterval(2.0);

@@ -129,30 +129,32 @@ public partial class TreasureChest : Area2D
     public override void _Process(double delta)
     {
         if (_isOpened) return;
-        if (!RequireAllEnemiesDefeated) return;
 
-        // Nếu người chơi đang đứng ở Rương, cập nhật kiểm tra liên tục để mở ngay khi quái cuối chết
-        bool isPlayerInside = false;
+        // Tìm xem Player có đang chạm vào rương không
+        Player p = null;
         foreach (var body in GetOverlappingBodies())
         {
-            if (body is Player)
+            if (body is Player target)
             {
-                isPlayerInside = true;
+                p = target;
                 break;
             }
         }
 
-        if (isPlayerInside)
+        if (p != null)
         {
+            // Rương từ Boss (không yêu cầu diệt quái vì boss đã die rồi)
+            if (!RequireAllEnemiesDefeated)
+            {
+                OpenChest(p);
+                return;
+            }
+
             var allEnemiesInGroup = GetTree().GetNodesInGroup("enemies");
             int aliveCount = 0;
-
             foreach (var node in allEnemiesInGroup)
             {
-                if (node is BaseEnemy enemy && !enemy.IsDead)
-                {
-                    aliveCount++;
-                }
+                if (node is BaseEnemy enemy && !enemy.IsDead) aliveCount++;
             }
 
             if (aliveCount == 0)
@@ -166,23 +168,16 @@ public partial class TreasureChest : Area2D
                         if (node is BaseEnemy e && e.IsDead)
                         {
                             GlobalPosition = e.GlobalPosition;
-                            GD.Print($"Rương đã dịch chuyển tới vị trí quái chết: {GlobalPosition}");
                             break;
                         }
                     }
                 }
 
-                // Hiện rương ra khi quái đã chết hết!
                 Visible = true;
-
-                // Tìm lại player để chắc chắn
-                Player p = null;
-                foreach (var b in GetOverlappingBodies()) if (b is Player target) p = target;
-                if (p != null) OpenChest(p);
+                OpenChest(p);
             }
             else
             {
-                // Cập nhật thông báo số quái còn lại để người chơi dễ tìm (Chỉ hiện khi rương đã hiện)
                 if (Visible)
                 {
                     _messageLabel.Text = $"Còn {aliveCount} quái vật chưa tiêu diệt!";
@@ -194,7 +189,7 @@ public partial class TreasureChest : Area2D
         {
             _messageLabel.Visible = false;
 
-            // Một cơ chế đặc biệt: Nếu quái đã chết hết nhưng người chơi ở xa, rương vẫn phải hiện ra để người chơi biết đường mà tới
+            // Một cơ chế đặc biệt: Hiện rương ra khi quái đã chết hết (dành cho màn 1)
             if (RequireAllEnemiesDefeated && !Visible)
             {
                 var enemies = GetTree().GetNodesInGroup("enemies");
@@ -204,7 +199,6 @@ public partial class TreasureChest : Area2D
                 if (!anyAlive)
                 {
                     Visible = true;
-                    // Chạy hiệu ứng xuất hiện cho ngầu
                     Modulate = new Color(1, 1, 1, 0);
                     var tw = CreateTween();
                     tw.TweenProperty(this, "modulate:a", 1.0f, 1.0f);
@@ -408,13 +402,14 @@ public partial class TreasureChest : Area2D
             await dm.PlayDialogue(lines);
         }
         
-        if (level == 1 || level == 2)
+        if (level == 1 || level == 2 || level == 3)
         {
             ShowRewardPopups(player);
         }
         else
         {
-            CreateEpicPortal(player);
+            // Trường hợp rương phụ (nếu có) có thể hiện Portal hoặc đơn giản là biến mất
+            Modulate = new Color(1, 1, 1, 0); 
         }
     }
 
@@ -635,6 +630,20 @@ public partial class TreasureChest : Area2D
             if (_popupSlide == 1)
             {
                 ShowSkillCard("L");
+            }
+        }
+        else if (GameManager.Instance.CurrentLevel == 3)
+        {
+            if (_popupSlide == 1)
+            {
+                _popupContentLabel.Visible = true;
+                _popupInfographic.Visible = false;
+
+                string storyText = "CHÌA KHÓA BOSS ĐÃ XUẤT HIỆN!\n\nĐây là chìa khóa của Chằn Tinh, nó có thể mở được chiếc lồng kiên cố nhất.\nCông Chúa đang đợi ở cuối đấu trường!\n\nHãy nhanh chóng tiến tới giải cứu nàng!";
+                _popupContentLabel.Text = storyText;
+                _popupContentLabel.AddThemeColorOverride("font_color", new Color(0.3f, 0.1f, 0.05f));
+
+                RunTypewriter(storyText.Length);
             }
         }
     }
@@ -988,6 +997,7 @@ public partial class TreasureChest : Area2D
         int maxSlides = 0;
         if (GameManager.Instance.CurrentLevel == 1) maxSlides = 3;
         else if (GameManager.Instance.CurrentLevel == 2) maxSlides = 1;
+        else if (GameManager.Instance.CurrentLevel == 3) maxSlides = 1;
 
         _popupSlide++;
         if (_popupSlide <= maxSlides)

@@ -1046,16 +1046,16 @@ public static class SpriteHelper
     {
         int w = img.GetWidth(), h = img.GetHeight();
 
-        // Sample corner to detect background type
-        Color bg = img.GetPixel(0, 0);
-        bool isGreenScreen = bg.G > 0.4f && bg.G > bg.R && bg.G > bg.B;
-        bool isMagentaScreen = bg.R > 0.4f && bg.B > 0.4f && bg.R > bg.G && bg.B > bg.G;
-        bool isBlueScreen = bg.B > 0.4f && bg.B > bg.R && bg.B > bg.G;
+        // Sample multiple points to avoid picking up a single pixel border or grid line
+        Color bg1 = img.GetPixel(4, 4); 
+        Color bg2 = img.GetPixel(Math.Min(12, w-1), 4);
+        
+        bool isGreenScreen = bg1.G > 0.4f && bg1.G > bg1.R && bg1.G > bg1.B;
+        bool isMagentaScreen = bg1.R > 0.4f && bg1.B > 0.4f && bg1.R > bg1.G && bg1.B > bg1.G;
+        bool isBlueScreen = bg1.B > 0.4f && bg1.B > bg1.R && bg1.B > bg1.G;
 
-        // Detect checkered/caro pattern (transparent grid pattern)
-        // Usually alternating light gray and white or similar
-        Color bg2 = (w > 1 && h > 1) ? img.GetPixel(1, 0) : bg;
-        bool isCheckered = IsCheckeredBackground(bg, bg2);
+        // Detect checkered/caro pattern
+        bool isCheckered = IsCheckeredBackground(bg1, bg2);
 
         for (int x = 0; x < w; x++)
         {
@@ -1066,29 +1066,33 @@ public static class SpriteHelper
 
                 if (isGreenScreen)
                 {
-                    // Chromakey removal: Green is dominant
                     if (p.G > 0.3f && p.G > p.R * 1.1f && p.G > p.B * 1.1f) remove = true;
-                    // Catch dark green shadows
                     else if (p.G > 0.15f && p.G > p.R * 1.4f) remove = true;
                 }
                 else if (isMagentaScreen)
                 {
-                    // Chromakey removal: Magenta (Red + Blue) is dominant
                     if (p.R > 0.3f && p.B > 0.3f && p.R > p.G * 1.1f && p.B > p.G * 1.1f) remove = true;
                 }
                 else if (isBlueScreen)
                 {
-                    // Chromakey removal: Blue is dominant
                     if (p.B > 0.3f && p.B > p.R * 1.1f && p.B > p.G * 1.1f) remove = true;
                 }
                 else if (isCheckered)
                 {
-                    // Remove checkered/caro background (typically gray/white pattern)
-                    if (IsCheckeredPixel(p, bg, bg2)) remove = true;
+                    if (IsCheckeredPixel(p, bg1, bg2)) remove = true;
+                    
+                    // Specific fix: Remove black grid lines (typically near edges or centers)
+                    // if it's a "checkerboard" image, black lines are almost certainly background
+                    bool isBlackLine = p.R < 0.1f && p.G < 0.1f && p.B < 0.1f;
+                    // Protect if it's near the character center (rough heuristic)
+                    bool isNearEdgeOrCenter = x <= 2 || x >= w - 3 || y <= 2 || y >= h - 3 || 
+                                              Math.Abs(x - w/2) <= 1 || Math.Abs(y - h/2) <= 1;
+                    
+                    if (isBlackLine && isNearEdgeOrCenter) remove = true;
                 }
                 else
                 {
-                    if (ColorsClose(p, bg, 0.1f)) remove = true;
+                    if (ColorsClose(p, bg1, 0.12f)) remove = true;
                 }
 
                 if (remove) img.SetPixel(x, y, new Color(0, 0, 0, 0));
@@ -1096,43 +1100,29 @@ public static class SpriteHelper
         }
     }
 
-    /// <summary>
-    /// Detect if background is a checkered/caro pattern (transparency grid)
-    /// </summary>
     private static bool IsCheckeredBackground(Color c1, Color c2)
     {
-        // Checkerboard thường là cặp: (Trắng, Xám nhạt) hoặc (Xám nhạt, Xám vừa)
-        // VD: #FFFFFF và #CCCCCC, hoặc #808080 và #C0C0C0
-        
         bool c1IsGrayish = Math.Abs(c1.R - c1.G) < 0.12f && Math.Abs(c1.G - c1.B) < 0.12f;
         bool c2IsGrayish = Math.Abs(c2.R - c2.G) < 0.12f && Math.Abs(c2.G - c2.B) < 0.12f;
 
         if (c1IsGrayish && c2IsGrayish)
         {
             float diff = Math.Abs(c1.R - c2.R);
-            // Một sự chênh lệch vừa đủ giữa 2 màu xám của ô cờ (hỗ trợ cả trắng-đen tuyệt đối diff = 1.0)
-            if (diff > 0.04f && diff <= 1.0f) return true;
+            if (diff > 0.03f) return true;
         }
 
-        // Trường hợp ảnh có nền trắng tinh hoặc xám rất nhạt bao quanh
         if (c1.R > 0.85f && c1.G > 0.85f && c1.B > 0.85f && c1IsGrayish) return true;
 
         return false;
     }
 
-    /// <summary>
-    /// Check if a pixel matches the checkered background colors
-    /// </summary>
     private static bool IsCheckeredPixel(Color p, Color bg1, Color bg2)
     {
-        // Kiểm tra xem pixel có khớp với 1 trong 2 màu nền ô cờ không (tăng độ lệch màu để xóa sạch viền)
-        if (ColorsClose(p, bg1, 0.25f)) return true;
-        if (ColorsClose(p, bg2, 0.25f)) return true;
+        if (ColorsClose(p, bg1, 0.18f)) return true;
+        if (ColorsClose(p, bg2, 0.18f)) return true;
 
-        // Xóa các pixel xám trung tính (trắng, đen, xám) xuất hiện trong vùng của ô cờ
         bool isGrayish = Math.Abs(p.R - p.G) < 0.15f && Math.Abs(p.G - p.B) < 0.15f;
-        // Nếu pixel là màu xám/trắng/đen và không phải là màu cực tối (tránh xóa tóc/mắt nhân vật nếu có màu xám tương tự)
-        if (isGrayish && (p.R > 0.3f || p.R < 0.1f)) return true; 
+        if (isGrayish && p.R > 0.32f) return true; 
 
         return false;
     }

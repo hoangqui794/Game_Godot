@@ -380,6 +380,14 @@ public partial class ChanTinh : BaseEnemy
         _bossState = BossState.Idle;
         
         GD.Print("[ChanTinh] Boss defeated! Playing dramatic death sequence.");
+
+        // --- SỬA LỖI: Tắt ngay lập tức các vùng va chạm để không gây sát thương khi đã chết ---
+        if (HasNode("CollisionShape2D"))
+            GetNode<CollisionShape2D>("CollisionShape2D").SetDeferred("disabled", true);
+        if (HasNode("HitArea/CollisionShape2D"))
+            GetNode<CollisionShape2D>("HitArea/CollisionShape2D").SetDeferred("disabled", true);
+        if (HasNode("DetectArea/CollisionShape2D"))
+            GetNode<CollisionShape2D>("DetectArea/CollisionShape2D").SetDeferred("disabled", true);
         
         // 1. HITSTOP & SLOW MOTION (Cinematic feel)
         Engine.TimeScale = 0.15f; // Dừng hình nhẹ 0.15s
@@ -448,9 +456,9 @@ public partial class ChanTinh : BaseEnemy
             GetParent().AddChild(chest);
             chest.GlobalPosition = GlobalPosition + new Vector2(0, -50);
             
-            // Hiệu ứng cái rương bay ra từ người boss và rơi SÁT MẶT ĐẤT (Y=585)
+            // Hiệu ứng cái rương bay ra từ người boss và rơi SÁT MẶT ĐẤT (Y=615)
             var tween = chest.CreateTween();
-            Vector2 targetPos = new Vector2(chest.GlobalPosition.X + (GD.Randf() > 0.5f ? 120 : -120), 585);
+            Vector2 targetPos = new Vector2(chest.GlobalPosition.X + (GD.Randf() > 0.5f ? 120 : -120), 615);
             tween.TweenProperty(chest, "global_position:y", chest.GlobalPosition.Y - 100, 0.5f).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
             tween.Chain().TweenProperty(chest, "global_position", targetPos, 0.5f).SetTrans(Tween.TransitionType.Bounce).SetEase(Tween.EaseType.Out);
             
@@ -460,19 +468,53 @@ public partial class ChanTinh : BaseEnemy
 
     private void CreateExplosionVFX()
     {
-        // Giả lập hiệu ứng nổ bằng cách tạo VFX tại các vị trí ngẫu nhiên quanh Boss
-        var pos = GlobalPosition + new Vector2((float)GD.RandRange(-100, 100), (float)GD.RandRange(-200, 0));
-        var vfx = new Sprite2D();
-        vfx.Texture = GD.Load<Texture2D>("res://Assets/Sprites/VFX/explosion.png"); // Giả định path này tồn tại hoặc dùng fallback
-        if (vfx.Texture == null) return;
+        // 1. Vị trí ngẫu nhiên quanh Boss
+        var pos = GlobalPosition + new Vector2((float)GD.RandRange(-150, 150), (float)GD.RandRange(-300, 50));
         
-        GetParent().AddChild(vfx);
-        vfx.GlobalPosition = pos;
-        vfx.Scale = new Vector2(2f, 2f);
+        // 2. Sử dụng CPUParticles2D thay vì Sprite2D để tránh lỗi thiếu file (explosion.png)
+        // và tạo hiệu ứng nổ lung linh, hoành tráng hơn cho Boss cuối.
+        var explosion = new CpuParticles2D();
+        explosion.GlobalPosition = pos;
+        explosion.Emitting = true;
+        explosion.OneShot = true;
+        explosion.Amount = 35;
+        explosion.Lifetime = 0.5f;
+        explosion.Explosiveness = 0.95f;
         
-        var tween = vfx.CreateTween();
-        tween.TweenProperty(vfx, "modulate:a", 0, 0.5f);
-        tween.TweenCallback(Callable.From(vfx.QueueFree));
+        // Cấu hình hướng nổ tỏa tròn
+        explosion.Spread = 180f;
+        explosion.Gravity = Vector2.Zero; 
+        explosion.InitialVelocityMin = 150f;
+        explosion.InitialVelocityMax = 350f;
+        explosion.DampingMin = 100f;
+        explosion.DampingMax = 200f;
+        
+        // Kích thước hạt (Hạt nổ to dần rồi biến mất)
+        explosion.ScaleAmountMin = 8f;
+        explosion.ScaleAmountMax = 18f;
+        
+        // Gradient màu nổ: Trắng -> Vàng sáng -> Cam rực -> Đỏ -> Xám đen (khói)
+        var colorRamp = new Gradient();
+        colorRamp.AddPoint(0.0f, Colors.White);
+        colorRamp.AddPoint(0.2f, Colors.Yellow);
+        colorRamp.AddPoint(0.4f, Colors.OrangeRed);
+        colorRamp.AddPoint(0.7f, Colors.Red);
+        colorRamp.AddPoint(1.0f, new Color(0.1f, 0.1f, 0.1f, 0f)); 
+        explosion.ColorRamp = colorRamp;
+
+        // Thêm vào scene (gắn vào parent để không bị di chuyển theo boss nếu boss đang chết)
+        if (GetParent() != null)
+        {
+            GetParent().AddChild(explosion);
+            
+            // Tự hủy sau khi hoàn thành lifetime + buffer
+            var timer = GetTree().CreateTimer(explosion.Lifetime + 0.2f);
+            timer.Timeout += () => { if (IsInstanceValid(explosion)) explosion.QueueFree(); };
+        }
+        else
+        {
+            explosion.QueueFree();
+        }
     }
 
     private void SpawnKey()
