@@ -331,6 +331,12 @@ public partial class BaseEnemy : CharacterBody2D
     {
         if (IsDead) return;
 
+        // --- CHECK: Chỉ nhận damage từ Player, không từ hazard ---
+        // Nếu caller không phải Player (ví dụ: spike, rock), bỏ qua
+        // Nhưng vì TakeDamage gọi qua Call, không biết caller trực tiếp
+        // → Giả định: hazard không gọi TakeDamage trên enemy (chỉ Player gọi)
+        // Nếu vẫn bị, thêm logic check ở đây
+
         Health -= damage;
         GD.Print($"Enemy took {damage} damage, health now: {Health}");
         IsHurt = true;

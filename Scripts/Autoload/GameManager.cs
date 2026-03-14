@@ -18,7 +18,7 @@ public partial class GameManager : Node
     public bool HasBossKey { get; set; } = false;
     public int TotalKeys { get; set; } = 0;
     public int UnlockedSkillsCount { get; set; } = 0;
-    public int PlayerLives { get; set; } = 3; // Mạng của nhân vật
+    public int PlayerLives { get; set; } = 3; 
     public bool HasCompletedOnboardingTutorial { get; set; } = false;
     public bool IsTutorialRunning { get; set; } = false;
 
