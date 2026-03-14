@@ -12,11 +12,13 @@ public partial class CaveDoor : Area2D
     private bool _isTriggered = false;
     private Label _hintLabel;
     private AnimatedSprite2D _doorGlow;
+    public bool IsLocked = false;
 
     public override void _Ready()
     {
         CollisionLayer = 0;
         CollisionMask = 1; // Detect Player
+        AddToGroup("cave_door");
 
         BodyEntered += OnBodyEntered;
         BodyExited += OnBodyExited;
@@ -50,6 +52,13 @@ public partial class CaveDoor : Area2D
     {
         if (_isTriggered) return;
         if (body is not Player player) return;
+
+        if (IsLocked)
+        {
+            _hintLabel.Text = "✦ Cửa Hang ✦\nCần tìm rương báu để mở cửa!";
+            _hintLabel.Visible = true;
+            return;
+        }
 
         _isTriggered = true;
         _hintLabel.Visible = false;

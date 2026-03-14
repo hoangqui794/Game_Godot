@@ -80,6 +80,13 @@ public partial class TreasureChest : Area2D
         if (RequireAllEnemiesDefeated)
         {
             Visible = false;
+            
+            // Ở Màn 1, khóa cửa hang lại cho đến khi mở rương xong
+            if (GameManager.Instance.CurrentLevel == 1)
+            {
+                var doors = GetTree().GetNodesInGroup("cave_door");
+                foreach (var d in doors) if (d is CaveDoor door) door.IsLocked = true;
+            }
         }
     }
 
@@ -223,6 +230,9 @@ public partial class TreasureChest : Area2D
         if (_isOpened) return;
         _isOpened = true;
         _messageLabel.Visible = false;
+        
+        // Khóa nhân vật lại để tập trung vào rương và đối thoại
+        player.SetCutsceneMode(true);
 
         // Hiệu ứng rung lắc rương dữ dội trước khi mở
         var shakeTw = CreateTween();
@@ -1026,10 +1036,30 @@ public partial class TreasureChest : Area2D
                     CreateEpicPortal(_currentPlayer);
                 }
                 // Ở Màn 1, nếu muốn mở cổng ngay sau popup thì thêm ở đây
-                // Nhưng hiện tại Màn 1 yêu cầu 3 chìa nên có thể cổng đã có sẵn hoặc chờ logic khác
                 else if (GameManager.Instance.CurrentLevel == 1)
                 {
-                    // Có thể gọi hàm để player biết đường đi tiếp
+                    // Tự động tìm cửa hang và đi vào
+                    var doors = GetTree().GetNodesInGroup("cave_door");
+                    if (doors.Count > 0 && doors[0] is CaveDoor door)
+                    {
+                        door.IsLocked = false; // Mở khóa cửa
+                        float dir = (door.GlobalPosition.X > _currentPlayer.GlobalPosition.X) ? 1.0f : -1.0f;
+                        _currentPlayer.WalkIntoCave(dir);
+                        
+                        // Kích hoạt transition sau 1.5s (giống trong CaveDoor.cs)
+                        var timer = GetTree().CreateTimer(1.5f);
+                        timer.Timeout += () => GameManager.Instance.NextLevel();
+                    }
+                    else
+                    {
+                        // Nếu không tìm thấy cửa, trả lại quyền điều khiển
+                        _currentPlayer.SetCutsceneMode(false);
+                    }
+                }
+                else
+                {
+                    // Trả lại quyền điều khiển cho các trường hợp khác
+                    _currentPlayer.SetCutsceneMode(false);
                 }
             }
         }

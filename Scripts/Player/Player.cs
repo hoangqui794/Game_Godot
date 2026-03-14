@@ -620,6 +620,24 @@ public partial class Player : CharacterBody2D
         };
     }
 
+    /// <summary>
+    /// Kích hoạt chế độ Cutscene: Khóa phím điều khiển.
+    /// Nếu direction != 0, nhân vật sẽ tự động đi theo hướng đó.
+    /// </summary>
+    public void SetCutsceneMode(bool enabled, float direction = 0f)
+    {
+        _inCutscene = enabled;
+        _cutsceneDirection = direction;
+        
+        if (enabled && direction == 0)
+        {
+            // Nếu chỉ muốn đứng yên, xóa hết lực quán tính ngang
+            var v = Velocity;
+            v.X = 0;
+            Velocity = v;
+        }
+    }
+
     public void WalkIntoCave(float direction = 1f)
     {
         _inCutscene = true;

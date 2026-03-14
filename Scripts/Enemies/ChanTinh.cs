@@ -42,9 +42,9 @@ public partial class ChanTinh : BaseEnemy
 
     public override void _Ready()
     {
-        MaxHealth = 1500;        // Tăng từ 1000 → boss cuối phải trâu chó hơn
-        AttackDamage = 35;       // Tăng từ 30 (23% MaxHP)
-        MoveSpeed = 70f;         // Tăng nhẹ từ 65f
+        MaxHealth = 1500;        
+        AttackDamage = 35;       
+        MoveSpeed = 70f;         
         ScoreValue = 5000;
 
         DetectRange = 900f;
