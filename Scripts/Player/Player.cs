@@ -36,7 +36,7 @@ public partial class Player : CharacterBody2D
 
     // Combat
     //[Export] public int AttackDamage = 30;
-    [Export] public int AttackDamage = 100;
+    [Export] public int AttackDamage = 30;
     [Export] public float AttackCooldown = 0.3f;
     [Export] public float ComboResetTime = 0.6f;  // Time before combo resets to attack1
     private bool _canAttack = true;

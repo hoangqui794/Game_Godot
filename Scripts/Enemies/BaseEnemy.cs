@@ -381,7 +381,7 @@ public partial class BaseEnemy : CharacterBody2D
         if (player != null && !player.IsQueuedForDeletion())
         {
             GD.Print("Enemy died, healing player");
-            int healAmount = (int)(GameManager.Instance.MaxPlayerHealth * 0.10f); // Hồi 10% máu khi giết quái
+            int healAmount = (int)(GameManager.Instance.MaxPlayerHealth * 0.20f); // Hồi 10% máu khi giết quái
             player.Heal(healAmount);
         }
 

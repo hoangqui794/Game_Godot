@@ -14,12 +14,12 @@ public partial class Player : CharacterBody2D
     // Skill1 (Rìu thần): bấm thường xuyên được, chỉ mạnh hơn đòn thường
     // Skill2 (Lốc xoáy): damage tổng cao nhưng cần đứng yên, nguy hiểm
     // Skill3 (Thiên địa chấn): Mạnh nhất, chỉ dùng khi cấp bách
-    // private const float Skill1Cooldown = 4.0f;  
-    // private const float Skill2Cooldown = 10.0f; 
-    // private const float Skill3Cooldown = 18.0f; 
-    private const float Skill1Cooldown = 0f;  
-    private const float Skill2Cooldown = 0f; 
-    private const float Skill3Cooldown = 0f; 
+    private const float Skill1Cooldown = 2.0f;  
+    private const float Skill2Cooldown = 8.0f; 
+    private const float Skill3Cooldown = 14.0f; 
+    // private const float Skill1Cooldown = 0f;  
+    // private const float Skill2Cooldown = 0f; 
+    // private const float Skill3Cooldown = 0f; 
 
     // --- Biến lưu trữ UI Chiêu thức ---
     private CanvasLayer _skillPanelLayer;

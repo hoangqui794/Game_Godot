@@ -11,8 +11,8 @@ public partial class GameManager : Node
     public int Score { get; set; } = 0;
     public int CurrentLevel { get; set; } = 1;
     public int CurrentCheckpointIndex { get; set; } = 0;
-    public int PlayerHealth { get; set; } = 150;
-    public int MaxPlayerHealth { get; set; } = 150;
+    public int PlayerHealth { get; set; } = 250;
+    public int MaxPlayerHealth { get; set; } = 250;
     public bool IsGameOver { get; set; } = false;
     public bool IsPaused { get; set; } = false;
     public bool HasBossKey { get; set; } = false;
