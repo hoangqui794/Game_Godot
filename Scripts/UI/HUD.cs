@@ -21,7 +21,7 @@ public partial class HUD : CanvasLayer
     private Label       _countdownLabel;
 
     // ── State ────────────────────────────────────────────────────────────────
-    private Player _player;
+    private Node   _player;
     private bool   _isMuted = false;
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -314,10 +314,12 @@ public partial class HUD : CanvasLayer
     {
         if (!IsInstanceValid(_player))
         {
-            if (GetTree().GetFirstNodeInGroup("player") is Player p)
+            var p = GetTree().GetFirstNodeInGroup("player");
+            if (p != null)
             {
                 _player = p;
-                _player.HealthChanged += OnHealthChanged;
+                if (_player.HasSignal("HealthChanged"))
+                    _player.Connect("HealthChanged", Callable.From<int, int>(OnHealthChanged));
             }
         }
 

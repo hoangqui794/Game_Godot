@@ -1,0 +1,465 @@
+[gd_scene load_steps=18 format=3 uid="uid://level2_3d"]
+
+[ext_resource type="Script" path="res://Scripts/Levels/LevelManager3D.cs" id="1"]
+[ext_resource type="PackedScene" uid="uid://player3d" path="res://Scenes/Player/Player3D.tscn" id="2"]
+[ext_resource type="Script" path="res://Scripts/Utils/FollowCamera3D.cs" id="5"]
+[ext_resource type="PackedScene" uid="uid://hud001" path="res://Scenes/UI/HUD.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://snake3d" path="res://Scenes/Enemies/Snake3D.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/stone.glb" id="8"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/stone-rocks.glb" id="9"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/stone-mountain.glb" id="10"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/stone-hill.glb" id="11"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/building-mine.glb" id="12"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/dirt.glb" id="13"]
+[ext_resource type="PackedScene" uid="uid://eagle3d" path="res://Scenes/Enemies/Eagle3D.tscn" id="14"]
+[ext_resource type="Script" path="res://Scripts/Hazards/SpikeHazard3D.cs" id="15"]
+[ext_resource type="PackedScene" uid="uid://chest3d" path="res://Scenes/NPCs/TreasureChest3D.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://Assets/Envaironment/Models/GLB format/grass.glb" id="17"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor1"]
+size = Vector3(60, 1, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor2"]
+size = Vector3(60, 1, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor3"]
+size = Vector3(70, 1, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_plat"]
+size = Vector3(3.5, 0.4, 1.5)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+sky_top_color = Color(0.06, 0.05, 0.10, 1)
+sky_horizon_color = Color(0.12, 0.10, 0.18, 1)
+ground_bottom_color = Color(0.04, 0.03, 0.06, 1)
+ground_horizon_color = Color(0.08, 0.06, 0.12, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 2
+ambient_light_color = Color(0.15, 0.12, 0.20, 1)
+ambient_light_energy = 0.35
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.3
+glow_bloom = 0.15
+fog_enabled = true
+fog_light_color = Color(0.10, 0.08, 0.15, 1)
+fog_density = 0.04
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.06
+volumetric_fog_albedo = Color(0.12, 0.10, 0.18, 1)
+
+[node name="Level2_3D" type="Node3D"]
+script = ExtResource("1")
+LevelNumber = 2
+PlayerScene = ExtResource("2")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+; === ÁNH SÁNG YẾU TRONG HANG ===
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 10, 0)
+shadow_enabled = true
+light_energy = 0.4
+light_color = Color(0.6, 0.55, 0.8, 1)
+
+; --- Đuốc treo tường (OmniLight3D) tạo ánh sáng cục bộ ---
+[node name="Torch1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 3, -1)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8
+omni_attenuation = 1.5
+
+[node name="Torch2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3, -1)
+light_color = Color(1, 0.5, 0.15, 1)
+light_energy = 2.5
+omni_range = 8
+omni_attenuation = 1.5
+
+[node name="Torch3" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 3, -1)
+light_color = Color(1, 0.55, 0.18, 1)
+light_energy = 2.5
+omni_range = 8
+omni_attenuation = 1.5
+
+[node name="Torch4" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 3, -1)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8
+omni_attenuation = 1.5
+
+[node name="Torch5" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 3, -1)
+light_color = Color(1, 0.5, 0.15, 1)
+light_energy = 2.0
+omni_range = 7
+omni_attenuation = 1.5
+
+; === CAMERA ===
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 10)
+script = ExtResource("5")
+FollowOffset = Vector3(0, 10, 10)
+MaxX = 100.0
+MaxY = 20.0
+
+; === SPAWN & CHECKPOINTS ===
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
+
+[node name="Checkpoint1" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 1, 0)
+
+[node name="Checkpoint2" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1, 0)
+
+[node name="HUD" parent="." instance=ExtResource("6")]
+
+; ============ SÀN ĐÁ HANG ĐỘNG ============
+; Ba đoạn sàn cách nhau bằng hố sâu
+
+[node name="Floor" type="Node3D" parent="."]
+
+; --- Đoạn sàn 1 (x=0 đến x=30) ---
+[node name="Ground1" type="StaticBody3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, -0.5, 0)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/Ground1"]
+shape = SubResource("BoxShape3D_floor1")
+
+; --- Lớp cỏ sàn 1 (x=-15 đến x=30) ---
+[node name="GrassRow1" type="Node3D" parent="Floor/Ground1"]
+
+[node name="g01" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -14, 0.5, 0)
+
+[node name="g02" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -12, 0.5, 0)
+
+[node name="g03" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -10, 0.5, 0)
+
+[node name="g04" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -8, 0.5, 0)
+
+[node name="g05" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -6, 0.5, 0)
+
+[node name="g06" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4, 0.5, 0)
+
+[node name="g07" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2, 0.5, 0)
+
+[node name="g08" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.5, 0)
+
+[node name="g09" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 2, 0.5, 0)
+
+[node name="g10" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 4, 0.5, 0)
+
+[node name="g11" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 6, 0.5, 0)
+
+[node name="g12" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 8, 0.5, 0)
+
+[node name="g13" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 10, 0.5, 0)
+
+[node name="g14" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 12, 0.5, 0)
+
+[node name="g15" parent="Floor/Ground1/GrassRow1" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 14, 0.5, 0)
+
+; --- Đoạn sàn 2 (x=38 đến x=68) ---
+[node name="Ground2" type="StaticBody3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53, -0.5, 0)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/Ground2"]
+shape = SubResource("BoxShape3D_floor2")
+
+; --- Lớp cỏ sàn 2 ---
+[node name="GrassRow2" type="Node3D" parent="Floor/Ground2"]
+
+[node name="g16" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -14, 0.5, 0)
+
+[node name="g17" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -12, 0.5, 0)
+
+[node name="g18" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -10, 0.5, 0)
+
+[node name="g19" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -8, 0.5, 0)
+
+[node name="g20" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -6, 0.5, 0)
+
+[node name="g21" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4, 0.5, 0)
+
+[node name="g22" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2, 0.5, 0)
+
+[node name="g23" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.5, 0)
+
+[node name="g24" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 2, 0.5, 0)
+
+[node name="g25" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 4, 0.5, 0)
+
+[node name="g26" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 6, 0.5, 0)
+
+[node name="g27" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 8, 0.5, 0)
+
+[node name="g28" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 10, 0.5, 0)
+
+[node name="g29" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 12, 0.5, 0)
+
+[node name="g30" parent="Floor/Ground2/GrassRow2" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 14, 0.5, 0)
+
+; --- Đoạn sàn 3 (x=75 đến x=110) ---
+[node name="Ground3" type="StaticBody3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87, -0.5, 0)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/Ground3"]
+shape = SubResource("BoxShape3D_floor3")
+
+; --- Lớp cỏ sàn 3 ---
+[node name="GrassRow3" type="Node3D" parent="Floor/Ground3"]
+
+[node name="g31" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -16, 0.5, 0)
+
+[node name="g32" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -14, 0.5, 0)
+
+[node name="g33" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -12, 0.5, 0)
+
+[node name="g34" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -10, 0.5, 0)
+
+[node name="g35" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -8, 0.5, 0)
+
+[node name="g36" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -6, 0.5, 0)
+
+[node name="g37" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4, 0.5, 0)
+
+[node name="g38" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2, 0.5, 0)
+
+[node name="g39" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.5, 0)
+
+[node name="g40" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 2, 0.5, 0)
+
+[node name="g41" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 4, 0.5, 0)
+
+[node name="g42" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 6, 0.5, 0)
+
+[node name="g43" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 8, 0.5, 0)
+
+[node name="g44" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 10, 0.5, 0)
+
+[node name="g45" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 12, 0.5, 0)
+
+[node name="g46" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 14, 0.5, 0)
+
+[node name="g47" parent="Floor/Ground3/GrassRow3" instance=ExtResource("17")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 16, 0.5, 0)
+
+; --- Platform bắc cầu qua hố ---
+[node name="Plat1" type="StaticBody3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 1.5, 0)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/Plat1"]
+shape = SubResource("BoxShape3D_plat")
+
+[node name="PlatStone1" parent="Floor/Plat1" instance=ExtResource("8")]
+transform = Transform3D(1.2, 0, 0, 0, 0.3, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Plat2" type="StaticBody3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 2.5, 0)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/Plat2"]
+shape = SubResource("BoxShape3D_plat")
+
+[node name="PlatStone2" parent="Floor/Plat2" instance=ExtResource("8")]
+transform = Transform3D(1.2, 0, 0, 0, 0.3, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Plat3" type="StaticBody3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 1.5, 0)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/Plat3"]
+shape = SubResource("BoxShape3D_plat")
+
+[node name="PlatStone3" parent="Floor/Plat3" instance=ExtResource("8")]
+transform = Transform3D(1.2, 0, 0, 0, 0.3, 0, 0, 0, 1, 0, 0, 0)
+
+; ============ HANG ĐỘNG - TƯỜNG ĐÁ & NÚI ============
+
+[node name="CaveWalls" type="Node3D" parent="."]
+
+; --- Tường đá hai bên ---
+[node name="rocks01" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, -4)
+
+[node name="rocks02" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, 15, 0, -5)
+
+[node name="rocks03" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 30, 0, -4)
+
+[node name="rocks04" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, 45, 0, -5)
+
+[node name="rocks05" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 60, 0, -4)
+
+[node name="rocks06" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, 75, 0, -5)
+
+[node name="rocks07" parent="CaveWalls" instance=ExtResource("9")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 90, 0, -4)
+
+; --- Núi đá nền xa ---
+[node name="mtn01" parent="CaveWalls" instance=ExtResource("10")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -5, 0, -12)
+
+[node name="mtn02" parent="CaveWalls" instance=ExtResource("10")]
+transform = Transform3D(3.5, 0, 0, 0, 3.5, 0, 0, 0, 3.5, 25, 0, -15)
+
+[node name="mtn03" parent="CaveWalls" instance=ExtResource("10")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 55, 0, -12)
+
+[node name="mtn04" parent="CaveWalls" instance=ExtResource("10")]
+transform = Transform3D(3.5, 0, 0, 0, 3.5, 0, 0, 0, 3.5, 80, 0, -14)
+
+; --- Đồi đá ---
+[node name="shill01" parent="CaveWalls" instance=ExtResource("11")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 10, 0, -8)
+
+[node name="shill02" parent="CaveWalls" instance=ExtResource("11")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 40, 0, -7)
+
+[node name="shill03" parent="CaveWalls" instance=ExtResource("11")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 70, 0, -9)
+
+; --- Mỏ khoáng dọc đường ---
+[node name="mine" parent="CaveWalls" instance=ExtResource("12")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 85, 0, -3)
+
+; ============ KẺ THÙ ============
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Snake1" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.1, 0)
+
+[node name="Snake2" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0.1, 0)
+
+[node name="Snake3" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0.1, 0)
+
+[node name="Snake4" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 0.1, 0)
+
+[node name="Snake5" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 0.1, 0)
+
+[node name="Snake6" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65, 0.1, 0)
+
+[node name="Snake7" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0.1, 0)
+
+[node name="Snake8" parent="Enemies" instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 0.1, 0)
+
+[node name="Eagle1" parent="Enemies" instance=ExtResource("14")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 3.5, 0)
+
+[node name="Eagle2" parent="Enemies" instance=ExtResource("14")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 4, 0)
+
+[node name="Eagle3" parent="Enemies" instance=ExtResource("14")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 3.5, 0)
+
+[node name="Eagle4" parent="Enemies" instance=ExtResource("14")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 4, 0)
+
+[node name="Eagle5" parent="Enemies" instance=ExtResource("14")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 3.5, 0)
+
+; ============ BẪY GAI ============
+
+[node name="Hazards" type="Node3D" parent="."]
+
+[node name="Spike1" type="Node3D" parent="Hazards"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0)
+script = ExtResource("15")
+
+[node name="Spike2" type="Node3D" parent="Hazards"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, 0)
+script = ExtResource("15")
+StartDelay = 0.5
+
+[node name="Spike3" type="Node3D" parent="Hazards"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 0)
+script = ExtResource("15")
+StartDelay = 1.0
+
+[node name="Spike4" type="Node3D" parent="Hazards"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62, 0, 0)
+script = ExtResource("15")
+
+[node name="Spike5" type="Node3D" parent="Hazards"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82, 0, 0)
+script = ExtResource("15")
+StartDelay = 0.8
+
+; ============ RƯƠNG KHO BÁU ============
+
+[node name="TreasureChest" parent="." instance=ExtResource("16")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0.1, 0)

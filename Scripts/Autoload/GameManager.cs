@@ -33,9 +33,9 @@ public partial class GameManager : Node
     private bool _gameOverInProgress = false;
 
     private readonly string[] _levelPaths = {
-        "res://Scenes/Levels/Level1.tscn",
-        "res://Scenes/Levels/Level2.tscn",
-        "res://Scenes/Levels/Level3.tscn"
+        "res://Scenes/Levels/Level1_3D.tscn",
+        "res://Scenes/Levels/Level2_3D.tscn",
+        "res://Scenes/Levels/Level3_3D.tscn"
     };
 
     private AudioStreamPlayer _bgMusicPlayer;
@@ -262,11 +262,9 @@ public partial class GameManager : Node
         _respawnLabel.Visible = false;
 
         // --- GỌI HÀM HỒI SINH NHANH TỪ LEVEL MANAGER ---
-        var levelManager = GetTree().CurrentScene as LevelManager;
-        if (levelManager != null)
-        {
-            levelManager.FastRespawnPlayer();
-        }
+        var scene = GetTree().CurrentScene;
+        if (scene is LevelManager lm2d) lm2d.FastRespawnPlayer();
+        else if (scene is LevelManager3D lm3d) lm3d.FastRespawnPlayer();
 
         // Mờ dần màn đen trả lại game
         var twHide = CreateTween();

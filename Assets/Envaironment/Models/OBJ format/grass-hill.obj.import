@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bna4kftmbo1ye"
+path="res://.godot/imported/grass-hill.obj-2415dfb1a9875a95c8615e55a2e8b417.mesh"
+
+[deps]
+
+files=["res://.godot/imported/grass-hill.obj-2415dfb1a9875a95c8615e55a2e8b417.mesh"]
+
+source_file="res://Assets/Envaironment/Models/OBJ format/grass-hill.obj"
+dest_files=["res://.godot/imported/grass-hill.obj-2415dfb1a9875a95c8615e55a2e8b417.mesh", "res://.godot/imported/grass-hill.obj-2415dfb1a9875a95c8615e55a2e8b417.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

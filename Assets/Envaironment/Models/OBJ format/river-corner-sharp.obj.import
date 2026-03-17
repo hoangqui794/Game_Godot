@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dbxtvnnujkdv2"
+path="res://.godot/imported/river-corner-sharp.obj-4ba7030fa5be450fc742bd27fd4a29c3.mesh"
+
+[deps]
+
+files=["res://.godot/imported/river-corner-sharp.obj-4ba7030fa5be450fc742bd27fd4a29c3.mesh"]
+
+source_file="res://Assets/Envaironment/Models/OBJ format/river-corner-sharp.obj"
+dest_files=["res://.godot/imported/river-corner-sharp.obj-4ba7030fa5be450fc742bd27fd4a29c3.mesh", "res://.godot/imported/river-corner-sharp.obj-4ba7030fa5be450fc742bd27fd4a29c3.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
