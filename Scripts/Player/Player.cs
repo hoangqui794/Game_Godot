@@ -36,7 +36,7 @@ public partial class Player : CharacterBody2D
 
     // Combat
     //[Export] public int AttackDamage = 30;
-    [Export] public int AttackDamage = 100;
+    [Export] public int AttackDamage = 30;
     [Export] public float AttackCooldown = 0.3f;
     [Export] public float ComboResetTime = 0.6f;  // Time before combo resets to attack1
     private bool _canAttack = true;
@@ -59,6 +59,8 @@ public partial class Player : CharacterBody2D
     private CollisionShape2D _attackCollision;
     private Timer _attackCooldownTimer;
     private Timer _hurtTimer;
+    private Control _shadow;
+    private RayCast2D _rayCastGround;
 
     // Audio
     private AudioStreamPlayer _sfxPlayer;
@@ -80,6 +82,8 @@ public partial class Player : CharacterBody2D
         _attackArea = GetNode<Area2D>("AttackArea");
         _attackCollision = _attackArea.GetNode<CollisionShape2D>("CollisionShape2D");
         _attackCollision.Disabled = true;
+        _shadow = GetNode<Control>("Shadow");
+        _rayCastGround = GetNode<RayCast2D>("RayCastGround");
 
         // Xóa cache và tạo mới sprites
         SpriteHelper.ClearCache();
@@ -301,11 +305,41 @@ public partial class Player : CharacterBody2D
             Attack();
         }
 
+        // Update shadow scaling and position
+        UpdateShadow(dt);
+
         // Update animation (Truyền delta vào để quản lí tiếng động bước chân)
         UpdateAnimation(direction, dt);
 
         // Handle skills
         HandleSkills(dt);
+    }
+
+    private void UpdateShadow(float dt)
+    {
+        if (_shadow == null || _rayCastGround == null) return;
+
+        if (_rayCastGround.IsColliding())
+        {
+            Vector2 collisionPoint = _rayCastGround.GetCollisionPoint();
+            float distance = collisionPoint.Y - GlobalPosition.Y;
+
+            // Keep shadow on the ground
+            _shadow.GlobalPosition = new Vector2(GlobalPosition.X - 30, collisionPoint.Y - 10);
+
+            // Scale shadow based on distance (smaller when higher)
+            // Original scale is 1.0 at distance 0. Shrink to 0.4 at distance 300.
+            float scaleFactor = Mathf.Clamp(1.0f - (distance / 400.0f), 0.3f, 1.0f);
+            _shadow.Scale = new Vector2(scaleFactor, scaleFactor);
+            
+            // Adjust shadow transparency
+            _shadow.Modulate = new Color(1, 1, 1, scaleFactor * 0.8f);
+            _shadow.Visible = true;
+        }
+        else
+        {
+            _shadow.Visible = false;
+        }
     }
 
     private void UpdateAnimation(float direction, float dt)
@@ -618,6 +652,24 @@ public partial class Player : CharacterBody2D
             _isInvulnerable = false;
             _animatedSprite.Modulate = Colors.White;
         };
+    }
+
+    /// <summary>
+    /// Kích hoạt chế độ Cutscene: Khóa phím điều khiển.
+    /// Nếu direction != 0, nhân vật sẽ tự động đi theo hướng đó.
+    /// </summary>
+    public void SetCutsceneMode(bool enabled, float direction = 0f)
+    {
+        _inCutscene = enabled;
+        _cutsceneDirection = direction;
+        
+        if (enabled && direction == 0)
+        {
+            // Nếu chỉ muốn đứng yên, xóa hết lực quán tính ngang
+            var v = Velocity;
+            v.X = 0;
+            Velocity = v;
+        }
     }
 
     public void WalkIntoCave(float direction = 1f)

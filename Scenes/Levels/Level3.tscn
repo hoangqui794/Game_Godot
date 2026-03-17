@@ -854,148 +854,87 @@ region_rect = Rect2(0, 0, 120, 32)
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=644108766]
 position = Vector2(50, 531)
 
+[node name="Checkpoint1" type="Marker2D" parent="." unique_id=654108767]
+position = Vector2(900, 531)
+
+[node name="Checkpoint2" type="Marker2D" parent="." unique_id=654108768]
+position = Vector2(1600, 531)
+
+# --- Giảm số lượng kẻ địch để người chơi không bị dồn quá nhanh ---
 [node name="Snake2" parent="." unique_id=363848740 instance=ExtResource("6")]
 position = Vector2(500, 565)
 
 [node name="Snake3" parent="." unique_id=107010301 instance=ExtResource("6")]
-position = Vector2(700, 565)
+position = Vector2(900, 570)
 
 [node name="Snake4" parent="." unique_id=107010302 instance=ExtResource("6")]
-position = Vector2(950, 570)
+position = Vector2(1400, 570)
 
 [node name="Snake5" parent="." unique_id=107010303 instance=ExtResource("6")]
-position = Vector2(1150, 572)
-
-[node name="Snake6" parent="." unique_id=207010601 instance=ExtResource("6")]
-position = Vector2(1350, 568)
-
-[node name="Snake7" parent="." unique_id=207010602 instance=ExtResource("6")]
-position = Vector2(1550, 572)
-
-[node name="Snake8" parent="." unique_id=207010603 instance=ExtResource("6")]
-position = Vector2(1700, 565)
-
-[node name="Snake9" parent="." unique_id=207010604 instance=ExtResource("6")]
-position = Vector2(1850, 570)
-
-[node name="Snake10" parent="." unique_id=207010605 instance=ExtResource("6")]
-position = Vector2(2000, 575)
-
-[node name="Snake12" parent="." unique_id=207010607 instance=ExtResource("6")]
-position = Vector2(2250, 568)
+position = Vector2(1900, 570)
 
 [node name="Eagle2" parent="." unique_id=1907671223 instance=ExtResource("7")]
-position = Vector2(550, 200)
+position = Vector2(650, 220)
 
 [node name="Eagle3" parent="." unique_id=1885299896 instance=ExtResource("7")]
-position = Vector2(750, 250)
+position = Vector2(1100, 200)
 
 [node name="Eagle4" parent="." unique_id=107010401 instance=ExtResource("7")]
-position = Vector2(950, 180)
+position = Vector2(1550, 210)
 
 [node name="Eagle5" parent="." unique_id=107010402 instance=ExtResource("7")]
-position = Vector2(1150, 220)
-
-[node name="Eagle6" parent="." unique_id=107010403 instance=ExtResource("7")]
-position = Vector2(1350, 170)
-
-[node name="Eagle7" parent="." unique_id=207010701 instance=ExtResource("7")]
-position = Vector2(1500, 250)
-
-[node name="Eagle8" parent="." unique_id=207010702 instance=ExtResource("7")]
-position = Vector2(1700, 190)
-
-[node name="Eagle10" parent="." unique_id=207010704 instance=ExtResource("7")]
-position = Vector2(2000, 160)
-
-[node name="Eagle11" parent="." unique_id=207010705 instance=ExtResource("7")]
-position = Vector2(2150, 240)
-
-[node name="Eagle12" parent="." unique_id=207010706 instance=ExtResource("7")]
-position = Vector2(2300, 200)
+position = Vector2(1950, 220)
 
 [node name="Spike1" parent="." unique_id=107010501 instance=ExtResource("14")]
 position = Vector2(300, 590)
-SpikeCount = 3
-
-[node name="Spike1" parent="Spike1" unique_id=6274919 instance=ExtResource("14")]
-position = Vector2(300, 590)
-SpikeCount = 3
-
-[node name="Spike2" parent="Spike1" unique_id=728963884 instance=ExtResource("14")]
-position = Vector2(351, -187)
-SpikeCount = 3
-
-[node name="Spike1" parent="Spike1/Spike2" unique_id=718417142 instance=ExtResource("14")]
-position = Vector2(300, 590)
-SpikeCount = 3
-
-[node name="Spike2" parent="Spike1/Spike2" unique_id=1288710896 instance=ExtResource("14")]
-position = Vector2(193, -74)
-SpikeCount = 3
-
-[node name="Spike1" parent="Spike1/Spike2/Spike2" unique_id=1572776908 instance=ExtResource("14")]
-position = Vector2(300, 590)
-SpikeCount = 3
-
-[node name="Spike2" parent="Spike1/Spike2/Spike2" unique_id=1363166475 instance=ExtResource("14")]
-position = Vector2(546, -20)
-SpikeCount = 3
-
-[node name="Spike1" parent="Spike1/Spike2/Spike2/Spike2" unique_id=1660305083 instance=ExtResource("14")]
-position = Vector2(300, 590)
-SpikeCount = 3
-
-[node name="Spike2" parent="Spike1/Spike2/Spike2/Spike2" unique_id=683534487 instance=ExtResource("14")]
-position = Vector2(367, 52)
-SpikeCount = 3
-
-[node name="Spike1" parent="Spike1/Spike2/Spike2/Spike2/Spike2" unique_id=1047884702 instance=ExtResource("14")]
-position = Vector2(300, 590)
+UpDuration = 1.2
+DownDuration = 2.0
 SpikeCount = 3
 
 [node name="Spike3" parent="." unique_id=107010503 instance=ExtResource("14")]
 position = Vector2(680, 590)
-StartDelay = 0.8
+UpDuration = 1.2
+DownDuration = 2.0
+StartDelay = 1.0
 
 [node name="Spike5" parent="." unique_id=207010801 instance=ExtResource("14")]
 position = Vector2(1050, 590)
-UpDuration = 1.5
-DownDuration = 1.0
+UpDuration = 1.2
+DownDuration = 2.0
+StartDelay = 0.9
 
 [node name="Spike7" parent="." unique_id=207010803 instance=ExtResource("14")]
 position = Vector2(1400, 590)
-UpDuration = 1.5
-DownDuration = 0.8
-StartDelay = 1.0
+UpDuration = 1.2
+DownDuration = 2.0
+StartDelay = 1.3
 
 [node name="Spike9" parent="." unique_id=207010805 instance=ExtResource("14")]
 position = Vector2(1698, 590)
-UpDuration = 1.6
-DownDuration = 1.0
-StartDelay = 0.7
+UpDuration = 1.2
+DownDuration = 2.0
+StartDelay = 1.1
 
 [node name="Spike12" parent="." unique_id=207010808 instance=ExtResource("14")]
 position = Vector2(2100, 590)
-StartDelay = 0.5
+UpDuration = 1.2
+DownDuration = 2.0
+StartDelay = 0.8
 SpikeCount = 3
 
 [node name="Spike13" parent="." unique_id=207010809 instance=ExtResource("14")]
 position = Vector2(2200, 590)
-UpDuration = 1.8
-DownDuration = 1.0
-StartDelay = 0.9
+UpDuration = 1.2
+DownDuration = 2.0
+StartDelay = 1.4
+SpikeCount = 3
 
 [node name="RockSpawner1" type="Node2D" parent="." unique_id=207010901]
 position = Vector2(900, 100)
 script = ExtResource("15")
 RockScene = ExtResource("16")
-SpawnInterval = 3.5
+SpawnInterval = 4.5
 
-[node name="RockSpawner2" type="Node2D" parent="." unique_id=207010902]
-position = Vector2(1800, 80)
-script = ExtResource("15")
-RockScene = ExtResource("16")
 
 [node name="ChanTinh" parent="." unique_id=987654321 instance=ExtResource("13")]
 position = Vector2(2538, 520)

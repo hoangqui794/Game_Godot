@@ -11,12 +11,43 @@
 [ext_resource type="Script" path="res://Scripts/Hazards/RockSpawner.cs" id="10"]
 [ext_resource type="Texture2D" uid="uid://klkjw0k7w17n" path="res://Assets/Sprites/Environment/tree_pixel.png" id="12"]
 [ext_resource type="Texture2D" uid="uid://bj5gn3jfmmc35" path="res://Assets/Sprites/Environment/rock_pixel.png" id="13"]
-[ext_resource type="Shader" uid="uid://b6cvmpa7801c4" path="res://Assets/Shaders/dirt_ground.gdshader" id="14"]
 [ext_resource type="Shader" uid="uid://byobls48rmd2" path="res://Assets/Shaders/pit_depth.gdshader" id="15"]
 [ext_resource type="Shader" uid="uid://7y20m8w0ulwp" path="res://Assets/Shaders/cave_stone.gdshader" id="16"]
 [ext_resource type="Shader" uid="uid://c3ll47lc5fefq" path="res://Assets/Shaders/cave_interior.gdshader" id="17"]
 [ext_resource type="PackedScene" uid="uid://snake001" path="res://Scenes/Enemies/Snake.tscn" id="18"]
 [ext_resource type="PackedScene" uid="uid://chest0000001" path="res://Scenes/NPCs/TreasureChest.tscn" id="19"]
+[ext_resource type="Shader" uid="uid://bq32kef8l7w6v" path="res://Assets/Shaders/god_rays.gdshader" id="20"]
+[ext_resource type="Shader" uid="uid://i85cpn58rwmk" path="res://Assets/Shaders/fog.gdshader" id="21"]
+[ext_resource type="Shader" uid="uid://l2asbsnnytq1" path="res://Assets/Shaders/asset_25d.gdshader" id="22"]
+[ext_resource type="Shader" uid="uid://k8msp5bpo4te" path="res://Assets/Shaders/drop_shadow.gdshader" id="23"]
+[ext_resource type="Shader" uid="uid://vpiiq85led34" path="res://Assets/Shaders/dirt_ground_25d.gdshader" id="24"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_asset"]
+shader = ExtResource("22")
+shader_parameter/tilt_factor = 0.08
+shader_parameter/lighting_intensity = 0.3
+shader_parameter/light_direction = Vector2(1, 0)
+shader_parameter/shadow_height = 0.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
+shader = ExtResource("23")
+shader_parameter/shadow_color = Color(0, 0, 0, 0.35)
+shader_parameter/shadow_skew = 0.4
+shader_parameter/shadow_scale_y = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rays"]
+shader = ExtResource("20")
+shader_parameter/ray_color = Color(1, 0.9, 0.5, 0.5)
+shader_parameter/ray_angle = -0.5
+shader_parameter/ray_density = 0.7
+shader_parameter/ray_speed = 1.0
+shader_parameter/ray_intensity = 1.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
+shader = ExtResource("21")
+shader_parameter/fog_color = Color(0.2, 0.3, 0.25, 0.4)
+shader_parameter/fog_density = 0.5
+shader_parameter/fog_speed = 0.2
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stone"]
 shader = ExtResource("16")
@@ -28,10 +59,13 @@ shader = ExtResource("17")
 size = Vector2(700, 30)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dirt"]
-shader = ExtResource("14")
+shader = ExtResource("24")
+shader_parameter/top_ratio = 0.25
+shader_parameter/thickness_shading = 0.4
+shader_parameter/cell_size = 24.0
 
 [sub_resource type="RectangleShape2D" id="plat_A"]
-size = Vector2(180, 16)
+size = Vector2(120, 16)
 
 [sub_resource type="RectangleShape2D" id="gnd_mid1"]
 size = Vector2(280, 30)
@@ -40,7 +74,7 @@ size = Vector2(280, 30)
 size = Vector2(220, 30)
 
 [sub_resource type="RectangleShape2D" id="plat_B"]
-size = Vector2(160, 16)
+size = Vector2(110, 16)
 
 [sub_resource type="RectangleShape2D" id="gnd_mid3"]
 size = Vector2(600, 30)
@@ -60,6 +94,12 @@ size = Vector2(180, 60)
 [sub_resource type="RectangleShape2D" id="kill2"]
 size = Vector2(220, 60)
 
+[sub_resource type="Environment" id="Environment_25D"]
+background_mode = 3
+glow_enabled = true
+glow_intensity = 0.8
+glow_bloom = 0.2
+
 [node name="Level1" type="Node2D" unique_id=810628719]
 script = ExtResource("1")
 PlayerScene = ExtResource("5")
@@ -71,7 +111,13 @@ MaxX = 5000.0
 MinY = -200.0
 MaxY = 700.0
 
-[node name="Sky_Deep" type="ColorRect" parent="." unique_id=464139488]
+[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1246545208]
+layer = -1
+
+[node name="Layer_Sky" type="ParallaxLayer" parent="ParallaxBackground" unique_id=609375798]
+motion_scale = Vector2(0, 0)
+
+[node name="Sky_Deep" type="ColorRect" parent="ParallaxBackground/Layer_Sky" unique_id=464139488]
 z_index = -20
 offset_left = 18.0
 offset_top = -1.0
@@ -79,13 +125,13 @@ offset_right = 5218.0
 offset_bottom = 699.0
 color = Color(0.08, 0.14, 0.1, 1)
 
-[node name="Sky_Mid" type="ColorRect" parent="." unique_id=475147922]
+[node name="Sky_Mid" type="ColorRect" parent="ParallaxBackground/Layer_Sky" unique_id=475147922]
 z_index = -19
 offset_right = 5200.0
 offset_bottom = 340.0
 color = Color(0.12, 0.22, 0.14, 1)
 
-[node name="Sky_Light" type="ColorRect" parent="." unique_id=1369301355]
+[node name="Sky_Light" type="ColorRect" parent="ParallaxBackground/Layer_Sky" unique_id=1369301355]
 z_index = -19
 offset_left = 1800.0
 offset_top = 60.0
@@ -93,136 +139,217 @@ offset_right = 2800.0
 offset_bottom = 300.0
 color = Color(0.25, 0.38, 0.2, 0.4)
 
-[node name="ForestFarBase" type="ColorRect" parent="." unique_id=546862911]
+[node name="Layer_FarForest" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1595205635]
+motion_scale = Vector2(0.1, 0.1)
+
+[node name="ForestFarBase" type="ColorRect" parent="ParallaxBackground/Layer_FarForest" unique_id=546862911]
 z_index = -18
 offset_top = 200.0
 offset_right = 5200.0
 offset_bottom = 580.0
 color = Color(0.06, 0.12, 0.05, 1)
 
-[node name="TreeFar1" type="Sprite2D" parent="." unique_id=2104361737]
+[node name="TreeFar1" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=2104361737]
 modulate = Color(0.45, 0.55, 0.35, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(62, 510)
 scale = Vector2(0.53, 0.53)
 texture = ExtResource("12")
 
-[node name="TreeFar2" type="Sprite2D" parent="." unique_id=267830865]
+[node name="TreeFar2" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=267830865]
 modulate = Color(0.42, 0.52, 0.32, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(394, 508)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("12")
 flip_h = true
 
-[node name="TreeFar3" type="Sprite2D" parent="." unique_id=1725114906]
+[node name="TreeFar3" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=1725114906]
 modulate = Color(0.44, 0.54, 0.34, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(863, 512)
 scale = Vector2(0.55, 0.55)
 texture = ExtResource("12")
 
-[node name="TreeFar4" type="Sprite2D" parent="." unique_id=1905440891]
+[node name="TreeFar4" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=1905440891]
 modulate = Color(0.4, 0.5, 0.3, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(1414, 510)
 scale = Vector2(0.52, 0.52)
 texture = ExtResource("12")
 flip_h = true
 
-[node name="TreeFar5" type="Sprite2D" parent="." unique_id=811774083]
+[node name="TreeFar5" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=811774083]
 modulate = Color(0.43, 0.53, 0.33, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(1934, 516)
 scale = Vector2(0.54, 0.54)
 texture = ExtResource("12")
 
-[node name="TreeFar6" type="Sprite2D" parent="." unique_id=757078551]
+[node name="TreeFar6" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=757078551]
 modulate = Color(0.41, 0.51, 0.31, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(2614, 509)
 scale = Vector2(0.51, 0.51)
 texture = ExtResource("12")
 flip_h = true
 
-[node name="TreeFar7" type="Sprite2D" parent="." unique_id=1349896338]
+[node name="TreeFar7" type="Sprite2D" parent="ParallaxBackground/Layer_FarForest" unique_id=1349896338]
 modulate = Color(0.44, 0.54, 0.34, 1)
 z_index = -17
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(3264, 510)
 scale = Vector2(0.53, 0.53)
 texture = ExtResource("12")
 
-[node name="TreeNear1" type="Sprite2D" parent="." unique_id=1649658810]
+[node name="Layer_MidForest" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1116968799]
+motion_scale = Vector2(0.3, 0.3)
+
+[node name="TreeNear1" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=1649658810]
 z_index = -15
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(180, 468)
 scale = Vector2(0.86, 0.86)
 texture = ExtResource("12")
 
-[node name="TreeNear2" type="Sprite2D" parent="." unique_id=787626510]
+[node name="Shadow" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest/TreeNear1" unique_id=1727003982]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_shadow")
+position = Vector2(0, 140)
+texture = ExtResource("12")
+
+[node name="TreeNear2" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=787626510]
 z_index = -15
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(603, 462)
 scale = Vector2(0.9, 0.9)
 texture = ExtResource("12")
 flip_h = true
 
-[node name="TreeNear3" type="Sprite2D" parent="." unique_id=686759808]
+[node name="Shadow" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest/TreeNear2" unique_id=1777914665]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_shadow")
+position = Vector2(0, 140)
+texture = ExtResource("12")
+
+[node name="TreeNear3" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=686759808]
 z_index = -15
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(1130, 465)
 scale = Vector2(0.88, 0.88)
 texture = ExtResource("12")
 
-[node name="TreeNear4" type="Sprite2D" parent="." unique_id=883771467]
+[node name="Shadow" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest/TreeNear3" unique_id=421157489]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_shadow")
+position = Vector2(0, 140)
+texture = ExtResource("12")
+
+[node name="TreeNear4" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=883771467]
 z_index = -15
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(2076, 460)
 scale = Vector2(0.92, 0.92)
 texture = ExtResource("12")
 flip_h = true
 
-[node name="TreeNear5" type="Sprite2D" parent="." unique_id=1926043484]
+[node name="Shadow" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest/TreeNear4" unique_id=1948998382]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_shadow")
+position = Vector2(0, 140)
+texture = ExtResource("12")
+
+[node name="TreeNear5" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=1926043484]
 z_index = -15
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(2830, 463)
 scale = Vector2(0.89, 0.89)
 texture = ExtResource("12")
 
-[node name="TreeNear6" type="Sprite2D" parent="." unique_id=1684508054]
+[node name="Shadow" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest/TreeNear5" unique_id=1916500443]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_shadow")
+position = Vector2(0, 140)
+texture = ExtResource("12")
+
+[node name="TreeNear6" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=1684508054]
 z_index = -15
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(3529, 460)
 scale = Vector2(0.9, 0.9)
 texture = ExtResource("12")
 flip_h = true
 
-[node name="GrassLine" type="ColorRect" parent="." unique_id=479510717]
+[node name="Shadow" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest/TreeNear6" unique_id=877507953]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_shadow")
+position = Vector2(0, 140)
+texture = ExtResource("12")
+
+[node name="GrassLine" type="ColorRect" parent="ParallaxBackground/Layer_MidForest" unique_id=479510717]
 z_index = -11
 offset_top = 570.0
 offset_right = 5200.0
 offset_bottom = 582.0
 color = Color(0.18, 0.38, 0.08, 1)
 
-[node name="Rock_D1" type="Sprite2D" parent="." unique_id=311036671]
+[node name="Rock_D1" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=311036671]
 z_index = -11
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(310, 572)
 scale = Vector2(0.3, 0.3)
 texture = ExtResource("13")
 
-[node name="Rock_D2" type="Sprite2D" parent="." unique_id=1431740103]
+[node name="Rock_D2" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=1431740103]
 z_index = -11
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(1319, 548)
 scale = Vector2(0.28, 0.28)
 texture = ExtResource("13")
 flip_h = true
 
-[node name="Rock_D3" type="Sprite2D" parent="." unique_id=1185730056]
+[node name="Rock_D3" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=1185730056]
 z_index = -11
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(2228, 534)
 scale = Vector2(0.32, 0.32)
 texture = ExtResource("13")
 
-[node name="Rock_D4" type="Sprite2D" parent="." unique_id=1650032809]
+[node name="Rock_D4" type="Sprite2D" parent="ParallaxBackground/Layer_MidForest" unique_id=1650032809]
 z_index = -11
+material = SubResource("ShaderMaterial_asset")
 position = Vector2(3062, 570)
 scale = Vector2(0.29, 0.29)
 texture = ExtResource("13")
 flip_h = true
+
+[node name="GodRays_1" type="ColorRect" parent="ParallaxBackground/Layer_MidForest" unique_id=1410726955]
+material = SubResource("ShaderMaterial_rays")
+offset_left = 8.0
+offset_top = -4.0
+offset_right = 1155.0
+offset_bottom = 596.0
+
+[node name="GodRays_2" type="ColorRect" parent="ParallaxBackground/Layer_MidForest" unique_id=1778949782]
+material = SubResource("ShaderMaterial_rays")
+offset_left = 1049.0
+offset_right = 2300.0
+offset_bottom = 600.0
+
+[node name="Layer_Fog" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1895594102]
+motion_scale = Vector2(0.5, 0.5)
+
+[node name="FogRect" type="ColorRect" parent="ParallaxBackground/Layer_Fog" unique_id=2023971319]
+material = SubResource("ShaderMaterial_fog")
+offset_top = 400.0
+offset_right = 5200.0
+offset_bottom = 700.0
 
 [node name="Cave_CliffBase" type="ColorRect" parent="." unique_id=1523080184]
 z_index = -10
@@ -464,12 +591,12 @@ script = ExtResource("3")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground_Start" unique_id=1871317514]
 shape = SubResource("gnd_start")
 
-[node name="GroundSprite" type="ColorRect" parent="Ground_Start" unique_id=1203458814]
+[node name="GroundSprite" type="ColorRect" parent="Ground_Start" unique_id=749673891]
 material = SubResource("ShaderMaterial_dirt")
 offset_left = -325.0
-offset_top = -10.0
+offset_top = -25.0
 offset_right = 325.0
-offset_bottom = 112.0
+offset_bottom = 200.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_Start" unique_id=214052724]
@@ -489,16 +616,16 @@ shape = SubResource("plat_A")
 
 [node name="Sprite" type="ColorRect" parent="Plat_HopPit1" unique_id=364795261]
 material = SubResource("ShaderMaterial_dirt")
-offset_left = -90.0
-offset_top = -8.0
-offset_right = 90.0
-offset_bottom = 8.0
+offset_left = -60.0
+offset_top = -15.0
+offset_right = 60.0
+offset_bottom = 80.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PlatTop" type="ColorRect" parent="Plat_HopPit1" unique_id=752385969]
-offset_left = -90.0
+offset_left = -60.0
 offset_top = -12.0
-offset_right = 90.0
+offset_right = 60.0
 offset_bottom = -8.0
 color = Color(0.58, 0.54, 0.44, 1)
 
@@ -513,9 +640,9 @@ shape = SubResource("gnd_mid1")
 [node name="GroundSprite" type="ColorRect" parent="Ground_AfterPit1" unique_id=40464459]
 material = SubResource("ShaderMaterial_dirt")
 offset_left = -140.0
-offset_top = -10.0
+offset_top = -25.0
 offset_right = 559.0
-offset_bottom = 109.0
+offset_bottom = 200.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_AfterPit1" unique_id=107619778]
@@ -536,9 +663,9 @@ shape = SubResource("gnd_mid2")
 [node name="GroundSprite" type="ColorRect" parent="Ground_RockZone" unique_id=397774673]
 material = SubResource("ShaderMaterial_dirt")
 offset_left = -160.0
-offset_top = -10.0
+offset_top = -25.0
 offset_right = 160.0
-offset_bottom = 109.0
+offset_bottom = 200.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_RockZone" unique_id=114734806]
@@ -558,16 +685,16 @@ shape = SubResource("plat_B")
 
 [node name="Sprite" type="ColorRect" parent="Plat_HopPit2" unique_id=1275478905]
 material = SubResource("ShaderMaterial_dirt")
-offset_left = -80.0
-offset_top = -8.0
-offset_right = 80.0
-offset_bottom = 8.0
+offset_left = -55.0
+offset_top = -15.0
+offset_right = 55.0
+offset_bottom = 80.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PlatTop" type="ColorRect" parent="Plat_HopPit2" unique_id=1719047491]
-offset_left = -80.0
+offset_left = -55.0
 offset_top = -12.0
-offset_right = 80.0
+offset_right = 55.0
 offset_bottom = -8.0
 color = Color(0.58, 0.54, 0.44, 1)
 
@@ -582,9 +709,9 @@ shape = SubResource("gnd_mid3")
 [node name="GroundSprite" type="ColorRect" parent="Ground_SpikeZone23" unique_id=1896007485]
 material = SubResource("ShaderMaterial_dirt")
 offset_left = -300.0
-offset_top = -10.0
+offset_top = -25.0
 offset_right = 1008.0
-offset_bottom = 109.0
+offset_bottom = 240.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_SpikeZone23" unique_id=1405384079]
@@ -605,9 +732,9 @@ shape = SubResource("gnd_mid4")
 [node name="GroundSprite" type="ColorRect" parent="Ground_SpikeZone3" unique_id=2037652014]
 material = SubResource("ShaderMaterial_dirt")
 offset_left = -200.0
-offset_top = -10.0
+offset_top = -25.0
 offset_right = 200.0
-offset_bottom = 109.0
+offset_bottom = 200.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_SpikeZone3" unique_id=169539169]
@@ -628,9 +755,9 @@ shape = SubResource("gnd_end")
 [node name="GroundSprite" type="ColorRect" parent="Ground_End" unique_id=1645334517]
 material = SubResource("ShaderMaterial_dirt")
 offset_left = -950.0
-offset_top = -10.0
+offset_top = -25.0
 offset_right = 258.0
-offset_bottom = 111.0
+offset_bottom = 200.0
 color = Color(0.66, 0.43, 0.22, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_End" unique_id=407521773]
@@ -890,5 +1017,12 @@ position = Vector2(3473, 561)
 
 [node name="TreasureChest" parent="." unique_id=99999999 instance=ExtResource("19")]
 position = Vector2(3684, 585)
+
+[node name="DirectionalLight2D" type="DirectionalLight2D" parent="." unique_id=25000004]
+color = Color(0.8, 0.9, 1, 1)
+energy = 0.3
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=25000005]
+environment = SubResource("Environment_25D")
 
 [node name="HUD" parent="." unique_id=781967314 instance=ExtResource("2")]

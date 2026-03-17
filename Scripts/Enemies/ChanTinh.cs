@@ -42,9 +42,9 @@ public partial class ChanTinh : BaseEnemy
 
     public override void _Ready()
     {
-        MaxHealth = 1500;        // Tăng từ 1000 → boss cuối phải trâu chó hơn
-        AttackDamage = 35;       // Tăng từ 30 (23% MaxHP)
-        MoveSpeed = 70f;         // Tăng nhẹ từ 65f
+        MaxHealth = 1500;        
+        AttackDamage = 35;       
+        MoveSpeed = 70f;         
         ScoreValue = 5000;
 
         DetectRange = 900f;
@@ -436,8 +436,8 @@ public partial class ChanTinh : BaseEnemy
 
         // Xác định số lượng dựa trên mốc máu
         float healthPct = (float)Health / MaxHealth;
-        int snakeCount = (healthPct <= 0.4f) ? 3 : 2;
-        int eagleCount = (healthPct <= 0.4f) ? 3 : 1;
+        int snakeCount = (healthPct <= 0.4f) ? 2 : 2;
+        int eagleCount = (healthPct <= 0.4f) ? 2 : 1;
 
         // Vị trí Arena: cam.LimitLeft = 2350; cam.LimitRight = 3502;
         float arenaMinX = 2400f;
