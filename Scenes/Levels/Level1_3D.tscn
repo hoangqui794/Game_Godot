@@ -367,69 +367,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.1, 0)
 [node name="SpawnPoint" type="Marker3D" parent="Enemies/Snake1" unique_id=2145730081]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.010169, 0.89279425, 1.7151322)
 
-[node name="g01" parent="Enemies/Snake1" unique_id=667466868 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -15.010169, -0.10720575, 1.7151322)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g01" unique_id=520142902]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g01/Collider" unique_id=1891292137]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g02" parent="Enemies/Snake1" unique_id=605361069 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -13.035613, -0.08732498, 1.7060075)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g02" unique_id=1969686288]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g02/Collider" unique_id=1186764681]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g03" parent="Enemies/Snake1" unique_id=570878280 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -11.067955, -0.08705157, 1.7151322)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g03" unique_id=1655627620]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g03/Collider" unique_id=1223074237]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g04" parent="Enemies/Snake1" unique_id=1656870427 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -9.083862, -0.10720575, 1.7151322)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g04" unique_id=225720655]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g04/Collider" unique_id=149903383]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g05" parent="Enemies/Snake1" unique_id=1479033713 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -7.116523, -0.10720575, 1.7151322)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g05" unique_id=81857430]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g05/Collider" unique_id=1559490250]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g06" parent="Enemies/Snake1" unique_id=733218678 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -5.2012215, -0.10720575, 1.7151322)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g06" unique_id=629779004]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g06/Collider" unique_id=1388317399]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g07" parent="Enemies/Snake1" unique_id=1313504 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -3.238286, -0.10720575, 1.7151322)
-
-[node name="Collider" type="StaticBody3D" parent="Enemies/Snake1/g07" unique_id=373809438]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Enemies/Snake1/g07/Collider" unique_id=1270377968]
-shape = SubResource("BoxShape3D_plat")
-
 [node name="tree_fg1" parent="Enemies/Snake1" unique_id=2046930862 instance=ExtResource("4")]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -13.010169, -0.10720575, 3.2151322)
 
