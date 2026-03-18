@@ -3,12 +3,9 @@
 [ext_resource type="Script" uid="uid://dujck5s2h035n" path="res://Scripts/Levels/LevelManager3D.cs" id="1"]
 [ext_resource type="PackedScene" uid="uid://player3d" path="res://Scenes/Player/Player3D.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://cm3fjq58o3hgu" path="res://Assets/Envaironment/Models/GLB format/grass.glb" id="3"]
-[ext_resource type="PackedScene" uid="uid://blui20bpu3xw1" path="res://Assets/Envaironment/Models/GLB format/unit-tree.glb" id="4"]
 [ext_resource type="Script" uid="uid://dh3omoo7mt3v2" path="res://Scripts/Utils/FollowCamera3D.cs" id="5"]
 [ext_resource type="PackedScene" uid="uid://hud001" path="res://Scenes/UI/HUD.tscn" id="6"]
 [ext_resource type="PackedScene" uid="uid://snake3d" path="res://Scenes/Enemies/Snake3D.tscn" id="7"]
-[ext_resource type="PackedScene" uid="uid://d33qt2e3383uo" path="res://Assets/Envaironment/Models/GLB format/bridge.glb" id="10"]
-[ext_resource type="PackedScene" uid="uid://y73n2bn3euev" path="res://Assets/Envaironment/Models/GLB format/building-cabin.glb" id="11"]
 [ext_resource type="PackedScene" uid="uid://eagle3d" path="res://Scenes/Enemies/Eagle3D.tscn" id="12"]
 [ext_resource type="Script" uid="uid://baje15c2fu1bv" path="res://Scripts/Hazards/SpikeHazard3D.cs" id="13"]
 [ext_resource type="PackedScene" uid="uid://chest3d" path="res://Scenes/NPCs/TreasureChest3D.tscn" id="14"]
@@ -16,7 +13,6 @@
 [ext_resource type="PackedScene" uid="uid://67p4faq47u8w" path="res://Assets/Envaironment/Models/GLB format/palm_tree.glb" id="16"]
 [ext_resource type="PackedScene" uid="uid://cifrvoxml1vie" path="res://Assets/Envaironment/Models/GLB format/mountain.glb" id="17"]
 [ext_resource type="PackedScene" uid="uid://dadqbq4b3m35a" path="res://Assets/Envaironment/Models/GLB format/grass_patch.glb" id="18"]
-[ext_resource type="PackedScene" uid="uid://cgoau65yqlbx0" path="res://Assets/Envaironment/Models/GLB format/CaveDoor_terrain.glb" id="19"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.22, 0.52, 0.82, 1)
@@ -43,8 +39,24 @@ fog_density = 0.005
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(200, 1, 12)
 
+[sub_resource type="StandardMaterial3D" id="TreeGroundMaterial"]
+albedo_color = Color(0.55, 0.45, 0.3, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(200, 0.2, 12)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_plat"]
 size = Vector3(4, 0.4, 2)
+
+[sub_resource type="BoxMesh" id="TreeGroundMesh"]
+size = Vector3(2, 0.1, 2)
+
+[sub_resource type="StandardMaterial3D" id="DropShadowMaterial"]
+albedo_color = Color(0.1, 0.1, 0.15, 0.6)
+
+[sub_resource type="BoxMesh" id="DropShadowMesh"]
+size = Vector3(2.2, 0.01, 2.2)
 
 [node name="Level1_3D" type="Node3D" unique_id=18982597]
 script = ExtResource("1")
@@ -67,13 +79,13 @@ FollowOffset = Vector3(0, 5, 10)
 MaxX = 120.0
 
 [node name="SpawnPoint" type="Marker3D" parent="." unique_id=307941025]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1.6, 0)
 
 [node name="Checkpoint1" type="Marker3D" parent="." unique_id=1265443315]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 1.6, 0)
 
 [node name="Checkpoint2" type="Marker3D" parent="." unique_id=872329564]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1.6, 0)
 
 [node name="HUD" parent="." unique_id=705070018 instance=ExtResource("6")]
 
@@ -83,190 +95,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1, 0)
 collision_layer = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/StaticBody3D" unique_id=2098667907]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, 0)
 shape = SubResource("BoxShape3D_floor")
 
-[node name="GrassRow" type="Node3D" parent="Floor" unique_id=9934399]
-
-[node name="g01" parent="Floor/GrassRow" unique_id=160290399 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -4, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g01" unique_id=833151413]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g01/Collider" unique_id=1829493339]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g02" parent="Floor/GrassRow" unique_id=733038217 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -2.0254445, 0.019880772, -0.009124517)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g02" unique_id=2072837067]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g02/Collider" unique_id=2108735171]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g03" parent="Floor/GrassRow" unique_id=2008755889 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -0.057786107, 0.020154178, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g03" unique_id=619506075]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g03/Collider" unique_id=1021266165]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g04" parent="Floor/GrassRow" unique_id=1836045564 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.9263065, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g04" unique_id=797271332]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g04/Collider" unique_id=1088368839]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g05" parent="Floor/GrassRow" unique_id=211729158 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 3.8861809, 0.0007543564, -0.024198532)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g05" unique_id=147495970]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g05/Collider" unique_id=408710018]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g06" parent="Floor/GrassRow" unique_id=890811544 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 5.8089476, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g06" unique_id=388179417]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g06/Collider" unique_id=1389141669]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g07" parent="Floor/GrassRow" unique_id=1049650420 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 7.771883, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g07" unique_id=1737489145]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g07/Collider" unique_id=1069029616]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g08" parent="Floor/GrassRow" unique_id=839304263 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 24, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g08" unique_id=1861021615]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g08/Collider" unique_id=1856137756]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g09" parent="Floor/GrassRow" unique_id=118847832 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 28, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g09" unique_id=459966052]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g09/Collider" unique_id=1812192448]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g10" parent="Floor/GrassRow" unique_id=1818060540 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 32, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g10" unique_id=1951145326]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g10/Collider" unique_id=161640638]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g11" parent="Floor/GrassRow" unique_id=1628386749 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 36, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g11" unique_id=1782733453]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g11/Collider" unique_id=1250471591]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g12" parent="Floor/GrassRow" unique_id=1339869198 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 40, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g12" unique_id=155074536]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g12/Collider" unique_id=1461880477]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g13" parent="Floor/GrassRow" unique_id=1395994464 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 44, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g13" unique_id=918344534]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g13/Collider" unique_id=1725883934]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g14" parent="Floor/GrassRow" unique_id=1605500594 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 48, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g14" unique_id=1404006889]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g14/Collider" unique_id=88931467]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g15" parent="Floor/GrassRow" unique_id=2135377937 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 52, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g15" unique_id=832457116]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g15/Collider" unique_id=458127687]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g16" parent="Floor/GrassRow" unique_id=1851539479 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 56, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g16" unique_id=995659906]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g16/Collider" unique_id=679653420]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g17" parent="Floor/GrassRow" unique_id=1976493421 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 60, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g17" unique_id=441322367]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g17/Collider" unique_id=1635356643]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g18" parent="Floor/GrassRow" unique_id=502293390 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 64, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g18" unique_id=196449744]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g18/Collider" unique_id=1796651002]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g19" parent="Floor/GrassRow" unique_id=400753667 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 68, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g19" unique_id=113743108]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g19/Collider" unique_id=1196868977]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="g20" parent="Floor/GrassRow" unique_id=1384999815 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 72, 0, 0)
-
-[node name="Collider" type="StaticBody3D" parent="Floor/GrassRow/g20" unique_id=644610949]
-collision_layer = 2
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/GrassRow/g20/Collider" unique_id=4547950]
-shape = SubResource("BoxShape3D_plat")
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor/StaticBody3D" unique_id=1555952982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 7.26, -0.02631569, -0.04889679, -0.16935444)
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("GroundMesh")
 
 [node name="Platform1" type="StaticBody3D" parent="Floor" unique_id=1607828209]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 2, 0)
@@ -293,71 +128,254 @@ transform = Transform3D(1.5, 0, 0, 0, 0.3, 0, 0, 0, 1.5, 0, 0, 0)
 [node name="tree_fg2" parent="Trees" unique_id=901301539 instance=ExtResource("15")]
 transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 25, 0, 2)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree_fg2" unique_id=8000001]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree_fg2" unique_id=8000101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="tree_fg3" parent="Trees" unique_id=746850511 instance=ExtResource("15")]
 transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 50, 0, 1.8)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree_fg3" unique_id=8000002]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree_fg3" unique_id=8000102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="tree01" parent="Trees" unique_id=610734476 instance=ExtResource("16")]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 1, -2.9009595, -2)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree01" unique_id=8000003]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree01" unique_id=8000103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="tree02" parent="Trees" unique_id=12298668 instance=ExtResource("15")]
 transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 3.2596335, 0, -7.830928)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree02" unique_id=8000004]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree02" unique_id=8000104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="tree03" parent="Trees" unique_id=1823372131 instance=ExtResource("15")]
 transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, -1.4671342, 0, -5.1913247)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree03" unique_id=8000005]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree03" unique_id=8000105]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="tree04" parent="Trees" unique_id=157406731 instance=ExtResource("16")]
 transform = Transform3D(1.6390486, 0, 0, 0, 1.086207, 0, 0, 0, 1.5, 13.583954, 0.029956102, -2.996552)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree04" unique_id=8000006]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree04" unique_id=8000106]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="tree05" parent="Trees" unique_id=2111498507 instance=ExtResource("15")]
 transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 18, 0, -2.5)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree05" unique_id=8000007]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree05" unique_id=8000107]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="tree06" parent="Trees" unique_id=378042874 instance=ExtResource("15")]
 transform = Transform3D(1.7, 0, 0, 0, 1.7, 0, 0, 0, 1.7, 28, 0, -4)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree06" unique_id=8000008]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree06" unique_id=8000108]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="tree07" parent="Trees" unique_id=1649426810 instance=ExtResource("16")]
 transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 35, 0, -2.8)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree07" unique_id=8000009]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree07" unique_id=8000109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="tree08" parent="Trees" unique_id=1306189127 instance=ExtResource("15")]
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 42, 0, -3.5)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree08" unique_id=8000010]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree08" unique_id=8000110]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="tree09" parent="Trees" unique_id=1347266495 instance=ExtResource("16")]
 transform = Transform3D(1.4, 0, 0, 0, 1.1517223, 0, 0, 0, 1.4, 55, 0, -2.2)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree09" unique_id=8000011]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree09" unique_id=8000111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="tree10" parent="Trees" unique_id=1282240742 instance=ExtResource("15")]
 transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 62, 0, -4.5)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree10" unique_id=8000012]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree10" unique_id=8000112]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="tree11" parent="Trees" unique_id=2131155313 instance=ExtResource("15")]
 transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 70, 0, -3)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/tree11" unique_id=8000013]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/tree11" unique_id=8000113]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="forest01" parent="Trees" unique_id=1671662934 instance=ExtResource("18")]
 transform = Transform3D(1.1241615, 0, 0, 0, 1.1189576, 0, 0, 0, 1.1524289, -5, 0, -8)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/forest01" unique_id=8000014]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/forest01" unique_id=8000114]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="forest02" parent="Trees" unique_id=1881678591 instance=ExtResource("18")]
 transform = Transform3D(1.2987074, 0, 0, 0, 0.8240844, 0, 0, 0, 1.2469529, 8, 0, -10)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/forest02" unique_id=8000015]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/forest02" unique_id=8000115]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="forest03" parent="Trees" unique_id=1230105672 instance=ExtResource("18")]
 transform = Transform3D(2, 0, 0, 0, 1.3329973, 0, 0, 0, 2, 16.409973, -0.9526844, -16.44365)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/forest03" unique_id=8000016]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/forest03" unique_id=8000116]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="forest04" parent="Trees" unique_id=1405543688 instance=ExtResource("18")]
 transform = Transform3D(0.95991755, 0, 0, 0, 0.6776159, 0, 0, 0, 1.28314, 35, 0, -8)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/forest04" unique_id=8000017]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/forest04" unique_id=8000117]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="forest05" parent="Trees" unique_id=383330042 instance=ExtResource("18")]
 transform = Transform3D(1.3142393, 0, 0, 0, 0.81139004, 0, 0, 0, 0.8420205, 50, 0, -10)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/forest05" unique_id=8000018]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/forest05" unique_id=8000118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="forest06" parent="Trees" unique_id=2096314150 instance=ExtResource("18")]
 transform = Transform3D(2, 0, 0, 0, 1.4179173, 0, 0, 0, 1.8652835, 65, 0, -10.013523)
 
+[node name="Ground" type="MeshInstance3D" parent="Trees/forest06" unique_id=8000019]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/forest06" unique_id=8000119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="mountain" parent="Trees" unique_id=4300000 instance=ExtResource("17")]
 transform = Transform3D(1.2348768, 0, -0.8427227, 0, 1.3156016, 0, 0.9338622, 0, 1.1143601, 65.610344, 4.3235846, -20)
 
-[node name="bridge" parent="Trees" unique_id=232865174 instance=ExtResource("10")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 45, 0, -1)
+[node name="Ground" type="MeshInstance3D" parent="Trees/mountain" unique_id=8000020]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
 
-[node name="cabin" parent="Trees" unique_id=1063067382 instance=ExtResource("11")]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 75, 0, -2)
+[node name="Shadow" type="MeshInstance3D" parent="Trees/mountain" unique_id=8000120]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="banana_tree" parent="Trees" unique_id=4200000 instance=ExtResource("15")]
 transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 40, 0, 3)
+
+[node name="Ground" type="MeshInstance3D" parent="Trees/banana_tree" unique_id=8000023]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="Trees/banana_tree" unique_id=8000123]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="Enemies" type="Node3D" parent="." unique_id=209758449]
 
@@ -366,9 +384,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.1, 0)
 
 [node name="SpawnPoint" type="Marker3D" parent="Enemies/Snake1" unique_id=2145730081]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.010169, 0.89279425, 1.7151322)
-
-[node name="tree_fg1" parent="Enemies/Snake1" unique_id=2046930862 instance=ExtResource("4")]
-transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -13.010169, -0.10720575, 3.2151322)
 
 [node name="Snake1" parent="Enemies/Snake1" unique_id=2017264137 instance=ExtResource("7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.010169, -0.007205747, 1.7151322)
@@ -413,11 +428,39 @@ StartDelay = 1.0
 [node name="TreasureChest" parent="." unique_id=614522244 instance=ExtResource("14")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78, 0.1, 0)
 
-[node name="CaveDoor" parent="." unique_id=5000000 instance=ExtResource("19")]
-transform = Transform3D(2.5, 0, 0, 0, 2.6731322, 0, 0, 0, 2.5, 51.455963, -69.640945, -2)
+[node name="Ground" type="MeshInstance3D" parent="TreasureChest" unique_id=8000024]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="TreasureChest" unique_id=8000124]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
 
 [node name="mountain" parent="." unique_id=700636133 instance=ExtResource("17")]
 transform = Transform3D(-0.40758908, 0, 1.4435619, 0, 1.5, 0, -1.4435619, 0, -0.40758908, -1.5527849, 4.816597, -25.736431)
 
+[node name="Ground" type="MeshInstance3D" parent="mountain" unique_id=8000025]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="mountain" unique_id=8000125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
 [node name="mountain2" parent="." unique_id=1498433897 instance=ExtResource("17")]
 transform = Transform3D(-2.086148, 0.1764783, -2.0113943, 0.62063485, 1.171916, -0.0284459, 1.9659437, -0.18269697, -2.1253967, 24.263622, 0.6558361, -30.373024)
+
+[node name="Ground" type="MeshInstance3D" parent="mountain2" unique_id=8000026]
+material_override = SubResource("TreeGroundMaterial")
+mesh = SubResource("TreeGroundMesh")
+
+[node name="Shadow" type="MeshInstance3D" parent="mountain2" unique_id=8000126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0)
+material_override = SubResource("DropShadowMaterial")
+mesh = SubResource("DropShadowMesh")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=759438111]
+transform = Transform3D(0.1644491, 0, 0, 0, 0.1644491, 0, 0, 0, 0.1644491, -0.043811798, -0.086937904, -0.17383051)
+mesh = SubResource("GroundMesh")

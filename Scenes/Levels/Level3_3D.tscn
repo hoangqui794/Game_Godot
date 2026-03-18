@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://level3_3d"]
+[gd_scene load_steps=24 format=3 uid="uid://level3_3d"]
 
 [ext_resource type="Script" path="res://Scripts/Levels/LevelManager3D.cs" id="1"]
 [ext_resource type="PackedScene" uid="uid://player3d" path="res://Scenes/Player/Player3D.tscn" id="2"]
@@ -24,6 +24,13 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(200, 1, 12)
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+albedo_color = Color(0.3, 0.15, 0.1, 1.0)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(200, 0.2, 12)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_plat"]
 size = Vector3(3, 0.4, 1.5)
@@ -124,7 +131,7 @@ MaxY = 20.0
 
 ; === SPAWN ===
 [node name="SpawnPoint" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1.6, 0)
 
 [node name="HUD" parent="." instance=ExtResource("6")]
 
@@ -136,8 +143,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
 collision_layer = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, -0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, 0)
 shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor/StaticBody3D"]
+mesh = SubResource("GroundMesh")
+material = SubResource("GroundMaterial")
 
 ; --- Lớp cỏ nền ---
 [node name="GrassRow" type="Node3D" parent="Floor"]

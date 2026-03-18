@@ -67,6 +67,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 1200, 128)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Ground2" type="StaticBody2D" parent="." unique_id=11111111]
 position = Vector2(2400, 640)
@@ -81,6 +82,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 1200, 128)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Ground3" type="StaticBody2D" parent="." unique_id=22222222]
 position = Vector2(3500, 640)
@@ -95,6 +97,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 1500, 128)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="KillZone" type="Area2D" parent="." unique_id=1031921230 groups=["KillZone"]]
 position = Vector2(1500, 750)
@@ -115,6 +118,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 160, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform2" type="StaticBody2D" parent="." unique_id=2001823482]
 position = Vector2(1500, 400)
@@ -128,6 +132,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 160, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform3" type="StaticBody2D" parent="." unique_id=1967094073]
 position = Vector2(1700, 500)
@@ -141,6 +146,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 160, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Snake1" parent="." unique_id=1290029545 instance=ExtResource("6")]
 position = Vector2(862, 585)
@@ -225,12 +231,12 @@ position = Vector2(3400, 200)
 position = Vector2(4000, 577)
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=121341788]
-position = Vector2(50, 580)
+position = Vector2(50, 570)
 
 [node name="Checkpoint1" type="Marker2D" parent="." unique_id=1494939200]
-position = Vector2(2000, 580)
+position = Vector2(2000, 570)
 
 [node name="Checkpoint2" type="Marker2D" parent="." unique_id=552739414]
-position = Vector2(3000, 580)
+position = Vector2(3000, 570)
 
 [node name="HUD" parent="." unique_id=1867016541 instance=ExtResource("2")]

@@ -597,7 +597,7 @@ offset_left = -325.0
 offset_top = -25.0
 offset_right = 325.0
 offset_bottom = 200.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_Start" unique_id=214052724]
 offset_left = -325.0
@@ -643,7 +643,7 @@ offset_left = -140.0
 offset_top = -25.0
 offset_right = 559.0
 offset_bottom = 200.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_AfterPit1" unique_id=107619778]
 offset_left = -140.0
@@ -666,7 +666,7 @@ offset_left = -160.0
 offset_top = -25.0
 offset_right = 160.0
 offset_bottom = 200.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_RockZone" unique_id=114734806]
 offset_left = -160.0
@@ -689,7 +689,7 @@ offset_left = -55.0
 offset_top = -15.0
 offset_right = 55.0
 offset_bottom = 80.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PlatTop" type="ColorRect" parent="Plat_HopPit2" unique_id=1719047491]
 offset_left = -55.0
@@ -712,7 +712,7 @@ offset_left = -300.0
 offset_top = -25.0
 offset_right = 1008.0
 offset_bottom = 240.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_SpikeZone23" unique_id=1405384079]
 offset_left = -317.0
@@ -735,7 +735,7 @@ offset_left = -200.0
 offset_top = -25.0
 offset_right = 200.0
 offset_bottom = 200.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_SpikeZone3" unique_id=169539169]
 offset_left = -200.0
@@ -758,7 +758,7 @@ offset_left = -950.0
 offset_top = -25.0
 offset_right = 258.0
 offset_bottom = 200.0
-color = Color(0.66, 0.43, 0.22, 1)
+color = Color(0.4, 0.8, 0.3, 1)
 
 [node name="PathStone" type="ColorRect" parent="Ground_End" unique_id=407521773]
 offset_left = -950.0
@@ -956,13 +956,13 @@ SpikeCount = 3
 SpikeSpacing = 20.0
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=132671385]
-position = Vector2(100, 560)
+position = Vector2(100, 550)
 
 [node name="Checkpoint1" type="Marker2D" parent="." unique_id=1774283857]
-position = Vector2(1100, 560)
+position = Vector2(1100, 550)
 
 [node name="Checkpoint2" type="Marker2D" parent="." unique_id=1915406474]
-position = Vector2(2200, 560)
+position = Vector2(2200, 550)
 
 [node name="CaveDoor" parent="." unique_id=49907695 instance=ExtResource("8")]
 position = Vector2(3912, 514)

@@ -65,7 +65,7 @@ public partial class Player3D : CharacterBody3D
     [Signal] public delegate void PlayerDiedEventHandler();
 
     // Skill state (from PlayerSkills.cs logic if applicable)
-    private bool _isSpinning = false; 
+    private bool _isSpinning = false;
 
     public override void _Ready()
     {
@@ -85,10 +85,13 @@ public partial class Player3D : CharacterBody3D
 
         // Sprite setup - shared SpriteFrames usually work
         // Using SpriteHelper if it's compatible
-        try {
+        try
+        {
             _animatedSprite.SpriteFrames = SpriteHelper.CreatePlayerSpriteFrames();
             _animatedSprite.Play("idle");
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             GD.PrintErr("Failed to initialize SpriteFrames: " + e.Message);
         }
 
@@ -317,14 +320,16 @@ public partial class Player3D : CharacterBody3D
         _attackCollision.Disabled = false;
 
         var checkHitTimer = GetTree().CreateTimer(0.05);
-        checkHitTimer.Timeout += () => {
+        checkHitTimer.Timeout += () =>
+        {
             if (!IsInstanceValid(this) || !IsInstanceValid(_attackArea)) return;
             var bodies = _attackArea.GetOverlappingBodies();
             foreach (var body in bodies) OnAttackAreaBodyEntered(body);
         };
 
         var attackDurationTimer = GetTree().CreateTimer(0.3);
-        attackDurationTimer.Timeout += () => {
+        attackDurationTimer.Timeout += () =>
+        {
             if (!IsInstanceValid(this)) return;
             _isAttacking = false;
             _attackCollision.Disabled = true;
@@ -372,7 +377,8 @@ public partial class Player3D : CharacterBody3D
         Engine.TimeScale = 0.4f;
         _animatedSprite.Play("die");
         var timer = GetTree().CreateTimer(1.5, true, false, true);
-        timer.Timeout += () => {
+        timer.Timeout += () =>
+        {
             Engine.TimeScale = 1.0f;
             EmitSignal(SignalName.PlayerDied);
         };

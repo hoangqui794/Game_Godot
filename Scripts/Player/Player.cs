@@ -331,7 +331,7 @@ public partial class Player : CharacterBody2D
             // Original scale is 1.0 at distance 0. Shrink to 0.4 at distance 300.
             float scaleFactor = Mathf.Clamp(1.0f - (distance / 400.0f), 0.3f, 1.0f);
             _shadow.Scale = new Vector2(scaleFactor, scaleFactor);
-            
+
             // Adjust shadow transparency
             _shadow.Modulate = new Color(1, 1, 1, scaleFactor * 0.8f);
             _shadow.Visible = true;
@@ -643,7 +643,7 @@ public partial class Player : CharacterBody2D
         // flash effect (semi-transparent) for the duration
         var tw = CreateTween();
         tw.SetParallel();
-        tw.TweenProperty(_animatedSprite, "modulate", new Color(1,1,1,0.5f), duration * 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        tw.TweenProperty(_animatedSprite, "modulate", new Color(1, 1, 1, 0.5f), duration * 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         tw.Chain().TweenProperty(_animatedSprite, "modulate", Colors.White, duration * 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 
         var timer = GetTree().CreateTimer(duration);
@@ -662,7 +662,7 @@ public partial class Player : CharacterBody2D
     {
         _inCutscene = enabled;
         _cutsceneDirection = direction;
-        
+
         if (enabled && direction == 0)
         {
             // Nếu chỉ muốn đứng yên, xóa hết lực quán tính ngang

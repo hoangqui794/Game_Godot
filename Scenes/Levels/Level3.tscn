@@ -626,6 +626,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite2" type="Sprite2D" parent="Ground/Node2D" unique_id=2036234711]
 texture_repeat = 2
@@ -634,6 +635,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite3" type="Sprite2D" parent="Ground/Node2D" unique_id=1861926600]
 texture_repeat = 2
@@ -642,6 +644,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite4" type="Sprite2D" parent="Ground/Node2D" unique_id=2077128442]
 texture_repeat = 2
@@ -650,6 +653,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite5" type="Sprite2D" parent="Ground/Node2D" unique_id=632524215]
 texture_repeat = 2
@@ -658,6 +662,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite6" type="Sprite2D" parent="Ground/Node2D" unique_id=1080783990]
 texture_repeat = 2
@@ -666,6 +671,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite7" type="Sprite2D" parent="Ground/Node2D" unique_id=1352652405]
 texture_repeat = 2
@@ -674,6 +680,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite8" type="Sprite2D" parent="Ground/Node2D" unique_id=911417586]
 texture_repeat = 2
@@ -682,6 +689,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite9" type="Sprite2D" parent="Ground/Node2D" unique_id=165802066]
 texture_repeat = 2
@@ -690,6 +698,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite10" type="Sprite2D" parent="Ground/Node2D" unique_id=1928717762]
 texture_repeat = 2
@@ -698,6 +707,7 @@ scale = Vector2(0.26137194, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="GroundSprite11" type="Sprite2D" parent="Ground/Node2D" unique_id=1611768820]
 texture_repeat = 2
@@ -706,6 +716,7 @@ scale = Vector2(0.34638667, 0.33440512)
 texture = ExtResource("5_6ggnd")
 region_enabled = true
 region_rect = Rect2(85.14148, 351.68774, 1363.8488, 311.9115)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform1" type="StaticBody2D" parent="." unique_id=566617549]
 position = Vector2(350, 479)
@@ -719,6 +730,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform2" type="StaticBody2D" parent="." unique_id=1836763440]
 position = Vector2(678, 430)
@@ -733,6 +745,7 @@ position = Vector2(-2, -7)
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform3" type="StaticBody2D" parent="." unique_id=1533181801]
 position = Vector2(1029, 376)
@@ -746,6 +759,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 140, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform4" type="StaticBody2D" parent="." unique_id=1636949486]
 position = Vector2(1394, 322)
@@ -759,6 +773,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 110, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform5" type="StaticBody2D" parent="." unique_id=1989856279]
 position = Vector2(1750, 380)
@@ -772,6 +787,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform6" type="StaticBody2D" parent="." unique_id=156103268]
 position = Vector2(2050, 450)
@@ -785,6 +801,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 100, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform7" type="StaticBody2D" parent="." unique_id=107010203]
 position = Vector2(496, 389)
@@ -798,6 +815,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform8" type="StaticBody2D" parent="." unique_id=107010206]
 position = Vector2(838, 347)
@@ -811,6 +829,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform9" type="StaticBody2D" parent="." unique_id=107010209]
 position = Vector2(1190, 265)
@@ -824,6 +843,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform10" type="StaticBody2D" parent="." unique_id=107010212]
 position = Vector2(1600, 250)
@@ -837,6 +857,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="Platform11" type="StaticBody2D" parent="." unique_id=107010215]
 position = Vector2(1900, 300)
@@ -850,6 +871,7 @@ texture_repeat = 2
 texture = ExtResource("9")
 region_enabled = true
 region_rect = Rect2(0, 0, 120, 32)
+modulate = Color(0.4, 0.8, 0.3, 1)
 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=644108766]
 position = Vector2(50, 531)
